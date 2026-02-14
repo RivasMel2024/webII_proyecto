@@ -1,63 +1,44 @@
--- phpMyAdmin SQL Dump
--- version 4.8.4
--- https://www.phpmyadmin.net/
---
--- Servidor: 127.0.0.1
--- Tiempo de generación: 09-02-2026 a las 21:02:36
--- Versión del servidor: 10.1.37-MariaDB
--- Versión de PHP: 7.3.1
-
+-- Base de datos y configuración inicial
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Base de datos: `cuponx`
---
 CREATE DATABASE IF NOT EXISTS `cuponx` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `cuponx`;
 
+-- Cambiar delimitador para procedimientos y triggers
 DELIMITER $$
---
--- Procedimientos
---
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_cupones_vencidos` ()  BEGIN
+
+-- Procedimientos almacenados
+CREATE PROCEDURE `sp_actualizar_cupones_vencidos` ()
+BEGIN
     UPDATE cupones c
     INNER JOIN ofertas o ON c.oferta_id = o.id
     SET c.estado = 'vencido'
     WHERE c.estado = 'disponible'
         AND CURDATE() > o.fecha_limite_uso;
-END$$
+END $$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_canjear_cupon` (IN `p_codigo_cupon` VARCHAR(13), IN `p_dui_presentado` VARCHAR(10), IN `p_empleado_id` INT, OUT `p_valido` BOOLEAN, OUT `p_mensaje` VARCHAR(255))  BEGIN
+CREATE PROCEDURE `sp_canjear_cupon` (
+    IN `p_codigo_cupon` VARCHAR(13), 
+    IN `p_dui_presentado` VARCHAR(10), 
+    IN `p_empleado_id` INT, 
+    OUT `p_valido` BOOLEAN, 
+    OUT `p_mensaje` VARCHAR(255)
+)
+BEGIN
     DECLARE v_estado VARCHAR(20);
     DECLARE v_dui_cliente VARCHAR(10);
     DECLARE v_fecha_limite DATE;
     DECLARE v_cupon_id INT;
-    
-    -- Obtener información del cupón
-    SELECT 
-        c.id,
-        c.estado,
-        c.dui_cliente,
-        o.fecha_limite_uso
-    INTO 
-        v_cupon_id,
-        v_estado,
-        v_dui_cliente,
-        v_fecha_limite
+
+    SELECT c.id, c.estado, c.dui_cliente, o.fecha_limite_uso
+    INTO v_cupon_id, v_estado, v_dui_cliente, v_fecha_limite
     FROM cupones c
     INNER JOIN ofertas o ON c.oferta_id = o.id
     WHERE c.codigo = p_codigo_cupon;
-    
-    -- Validaciones
+
     IF v_cupon_id IS NULL THEN
         SET p_valido = FALSE;
         SET p_mensaje = 'El cupón no existe';
@@ -68,7 +49,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_canjear_cupon` (IN `p_codigo_cup
         SET p_valido = FALSE;
         SET p_mensaje = 'El cupón está vencido';
     ELSEIF CURDATE() > v_fecha_limite THEN
-        -- Marcar como vencido
         UPDATE cupones SET estado = 'vencido' WHERE id = v_cupon_id;
         SET p_valido = FALSE;
         SET p_mensaje = 'El cupón ha expirado';
@@ -76,19 +56,39 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_canjear_cupon` (IN `p_codigo_cup
         SET p_valido = FALSE;
         SET p_mensaje = 'El DUI no coincide con el comprador del cupón';
     ELSE
-        -- Canjear cupón
         UPDATE cupones 
         SET estado = 'canjeado',
             fecha_canje = CURRENT_TIMESTAMP,
             empleado_canje_id = p_empleado_id
         WHERE id = v_cupon_id;
-        
+
         SET p_valido = TRUE;
         SET p_mensaje = 'Cupón canjeado exitosamente';
     END IF;
-END$$
+END $$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_comprar_cupon` (IN `p_oferta_id` INT, IN `p_cliente_id` INT, IN `p_precio_pagado` DECIMAL(10,2), OUT `p_codigo_cupon` VARCHAR(13), OUT `p_mensaje` VARCHAR(255))  BEGIN
+CREATE PROCEDURE `sp_generar_codigo_cupon` (IN `p_codigo_empresa` VARCHAR(6), OUT `p_codigo_cupon` VARCHAR(13))
+BEGIN
+    DECLARE v_codigo_generado VARCHAR(13);
+    DECLARE v_existe INT;
+
+    REPEAT
+        SET v_codigo_generado = CONCAT(p_codigo_empresa, LPAD(FLOOR(RAND() * 10000000), 7, '0'));
+        SELECT COUNT(*) INTO v_existe FROM cupones WHERE codigo = v_codigo_generado;
+    UNTIL v_existe = 0
+    END REPEAT;
+
+    SET p_codigo_cupon = v_codigo_generado;
+END $$
+
+CREATE PROCEDURE `sp_comprar_cupon` (
+    IN `p_oferta_id` INT, 
+    IN `p_cliente_id` INT, 
+    IN `p_precio_pagado` DECIMAL(10,2), 
+    OUT `p_codigo_cupon` VARCHAR(13), 
+    OUT `p_mensaje` VARCHAR(255)
+)
+BEGIN
     DECLARE v_codigo_empresa VARCHAR(6);
     DECLARE v_cantidad_limite INT;
     DECLARE v_cupones_vendidos INT;
@@ -96,30 +96,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_comprar_cupon` (IN `p_oferta_id`
     DECLARE v_fecha_fin DATE;
     DECLARE v_estado VARCHAR(20);
     DECLARE v_dui_cliente VARCHAR(10);
-    
-    -- Obtener información de la oferta
-    SELECT 
-        e.codigo,
-        o.cantidad_limite,
-        o.fecha_inicio_oferta,
-        o.fecha_fin_oferta,
-        o.estado,
-        (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id)
-    INTO 
-        v_codigo_empresa,
-        v_cantidad_limite,
-        v_fecha_inicio,
-        v_fecha_fin,
-        v_estado,
-        v_cupones_vendidos
+
+    SELECT e.codigo, o.cantidad_limite, o.fecha_inicio_oferta, o.fecha_fin_oferta, o.estado,
+           (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id)
+    INTO v_codigo_empresa, v_cantidad_limite, v_fecha_inicio, v_fecha_fin, v_estado, v_cupones_vendidos
     FROM ofertas o
     INNER JOIN empresas e ON o.empresa_id = e.id
     WHERE o.id = p_oferta_id;
-    
-    -- Obtener DUI del cliente
+
     SELECT dui INTO v_dui_cliente FROM clientes WHERE id = p_cliente_id;
-    
-    -- Validaciones
+
     IF v_estado != 'aprobada' THEN
         SET p_mensaje = 'La oferta no está aprobada';
         SET p_codigo_cupon = NULL;
@@ -130,195 +116,29 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_comprar_cupon` (IN `p_oferta_id`
         SET p_mensaje = 'La oferta ha agotado sus cupones disponibles';
         SET p_codigo_cupon = NULL;
     ELSE
-        -- Generar código único
         CALL sp_generar_codigo_cupon(v_codigo_empresa, p_codigo_cupon);
-        
-        -- Insertar cupón
         INSERT INTO cupones (codigo, oferta_id, cliente_id, precio_pagado, dui_cliente)
         VALUES (p_codigo_cupon, p_oferta_id, p_cliente_id, p_precio_pagado, v_dui_cliente);
-        
         SET p_mensaje = 'Cupón generado exitosamente';
     END IF;
-END$$
+END $$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_generar_codigo_cupon` (IN `p_codigo_empresa` VARCHAR(6), OUT `p_codigo_cupon` VARCHAR(13))  BEGIN
-    DECLARE v_codigo_generado VARCHAR(13);
-    DECLARE v_existe INT;
-    
-    REPEAT
-        -- Generar 7 dígitos aleatorios
-        SET v_codigo_generado = CONCAT(
-            p_codigo_empresa,
-            LPAD(FLOOR(RAND() * 10000000), 7, '0')
-        );
-        
-        -- Verificar si el código ya existe
-        SELECT COUNT(*) INTO v_existe FROM cupones WHERE codigo = v_codigo_generado;
-    UNTIL v_existe = 0
-    END REPEAT;
-    
-    SET p_codigo_cupon = v_codigo_generado;
-END$$
-
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `administradores_cuponx`
---
-
-CREATE TABLE `administradores_cuponx` (
-  `id` int(11) NOT NULL,
-  `nombres` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `apellidos` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `correo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `activo` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `administradores_cuponx`
---
-
-INSERT INTO `administradores_cuponx` (`id`, `nombres`, `apellidos`, `correo`, `password_hash`, `activo`, `created_at`, `updated_at`) VALUES
-(1, 'Admin', 'Sistema', 'admin@cuponx.com', '$2a$10$example.hash.for.admin123', 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `administradores_empresas`
---
-
-CREATE TABLE `administradores_empresas` (
-  `id` int(11) NOT NULL,
-  `empresa_id` int(11) NOT NULL,
-  `nombres` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `apellidos` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `correo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `activo` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `administradores_empresas`
---
-
-INSERT INTO `administradores_empresas` (`id`, `empresa_id`, `nombres`, `apellidos`, `correo`, `password_hash`, `activo`, `created_at`, `updated_at`) VALUES
-(1, 1, 'José', 'Ramírez', 'jose.ramirez@buensabor.com', '$2a$10$example.hash', 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34'),
-(2, 2, 'María', 'Flores', 'maria.flores@cineplex.com', '$2a$10$example.hash', 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34'),
-(3, 3, 'Sofía', 'Hernández', 'sofia.hernandez@spacenter.com', '$2a$10$example.hash', 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `clientes`
---
-
-CREATE TABLE `clientes` (
-  `id` int(11) NOT NULL,
-  `nombres` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `apellidos` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `correo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `direccion` varchar(300) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `dui` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `verificado` tinyint(1) DEFAULT '0',
-  `token_verificacion` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `activo` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `clientes`
---
-
-INSERT INTO `clientes` (`id`, `nombres`, `apellidos`, `telefono`, `correo`, `password_hash`, `direccion`, `dui`, `verificado`, `token_verificacion`, `activo`, `created_at`, `updated_at`) VALUES
-(1, 'Juan', 'Pérez', '7777-8888', 'juan.perez@email.com', '$2a$10$example.hash', 'San Salvador, Colonia Escalón', '12345678-9', 1, NULL, 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34'),
-(2, 'María', 'López', '7888-9999', 'maria.lopez@email.com', '$2a$10$example.hash', 'Santa Ana, Residencial Los Naranjos', '98765432-1', 1, NULL, 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34');
-
---
--- Disparadores `clientes`
---
-DELIMITER $$
-CREATE TRIGGER `trg_validar_dui_cliente` BEFORE INSERT ON `clientes` FOR EACH ROW BEGIN
+-- Triggers
+CREATE TRIGGER `trg_validar_dui_cliente` BEFORE INSERT ON `clientes`
+FOR EACH ROW
+BEGIN
     IF NEW.dui NOT REGEXP '^[0-9]{8}-[0-9]$' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El DUI debe tener formato: 12345678-9';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El DUI debe tener formato: 12345678-9';
     END IF;
-END
-$$
-DELIMITER ;
+END $$
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `cupones`
---
-
-CREATE TABLE `cupones` (
-  `id` int(11) NOT NULL,
-  `codigo` varchar(13) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `oferta_id` int(11) NOT NULL,
-  `cliente_id` int(11) NOT NULL,
-  `precio_pagado` decimal(10,2) NOT NULL,
-  `dui_cliente` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `estado` enum('disponible','canjeado','vencido') COLLATE utf8mb4_unicode_ci DEFAULT 'disponible',
-  `fecha_compra` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `fecha_canje` timestamp NULL DEFAULT NULL,
-  `empleado_canje_id` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `empresas`
---
-
-CREATE TABLE `empresas` (
-  `id` int(11) NOT NULL,
-  `codigo` varchar(6) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nombre` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `direccion` varchar(300) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nombre_contacto` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `correo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `rubro_id` int(11) NOT NULL,
-  `porcentaje_comision` decimal(5,2) NOT NULL,
-  `activo` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `empresas`
---
-
-INSERT INTO `empresas` (`id`, `codigo`, `nombre`, `direccion`, `nombre_contacto`, `telefono`, `correo`, `password_hash`, `rubro_id`, `porcentaje_comision`, `activo`, `created_at`, `updated_at`) VALUES
-(1, 'RES001', 'Restaurante El Buen Sabor', 'San Salvador, Centro Comercial Galerías', 'Carlos Méndez', '2222-3333', 'contacto@buensabor.com', '$2a$10$example.hash', 1, '15.00', 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34'),
-(2, 'ENT001', 'Cineplex Entertainment', 'Santa Ana, Plaza Mundo', 'Ana García', '2444-5555', 'info@cineplex.com', '$2a$10$example.hash', 2, '12.00', 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34'),
-(3, 'BEL001', 'Spa & Beauty Center', 'San Miguel, Boulevard del Ejército', 'Laura Martínez', '2666-7777', 'info@spacenter.com', '$2a$10$example.hash', 3, '18.00', 1, '2026-02-09 19:55:34', '2026-02-09 19:55:34');
-
---
--- Disparadores `empresas`
---
-DELIMITER $$
-CREATE TRIGGER `trg_validar_codigo_empresa` BEFORE INSERT ON `empresas` FOR EACH ROW BEGIN
+CREATE TRIGGER `trg_validar_codigo_empresa` BEFORE INSERT ON `empresas`
+FOR EACH ROW
+BEGIN
     IF NEW.codigo NOT REGEXP '^[A-Z]{3}[0-9]{3}$' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El código de empresa debe tener formato: 3 letras mayúsculas + 3 dígitos';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El código de empresa debe tener formato: 3 letras mayúsculas + 3 dígitos';
     END IF;
-END
-$$
+END $$
 DELIMITER ;
 
 -- --------------------------------------------------------

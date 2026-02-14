@@ -1,0 +1,72 @@
+.top-stores-section {
+  padding: 60px 0;
+  background-color: var(--color-background);
+}
+
+.store-card {
+  border: 1px solid rgba(102, 155, 188, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.store-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 48, 73, 0.08) !important;
+}
+
+/* El cuadro que sustituye a la imagen */
+.store-brand-display {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.store-brand-initials {
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.store-name-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge de recompensas */
+.store-reward-badge {
+  font-size: 0.75rem;
+  color: var(--color-secondary);
+  display: flex;
+  align-items: center;
+  background: rgba(102, 155, 188, 0.05);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.reward-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-secondary);
+  border-radius: 50%;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.see-all-link {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}

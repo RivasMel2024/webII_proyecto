@@ -1,0 +1,111 @@
+.coupon-grid-section {
+  background-color: var(--color-background);
+  padding: 80px 0;
+}
+
+/* Cabecera Flex */
+.section-title {
+  color: var(--color-text);
+  font-weight: 800;
+  font-size: 2.2rem;
+  margin: 0;
+}
+
+.section-title .highlight {
+  color: var(--color-primary);
+}
+
+.section-line {
+  width: 50px;
+  height: 4px;
+  background-color: var(--color-primary);
+  margin-top: 10px;
+  border-radius: 2px;
+}
+
+.see-all-link {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+.see-all-link:hover {
+  color: var(--color-primary);
+  transform: translateX(5px);
+}
+
+/* Tarjeta */
+.coupon-card {
+  border: 2px solid rgba(102, 155, 188, 0.15) !important;
+  border-radius: 24px !important;
+  transition: 0.3s ease;
+}
+
+.coupon-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-secondary) !important;
+}
+
+.coupon-brand-tag {
+  color: var(--color-text);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.coupon-category-tag {
+  color: var(--color-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(102, 155, 188, 0.1);
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.coupon-price-value {
+  color: var(--color-primary);
+  font-size: 2.3rem;
+  font-weight: 900;
+  margin: 10px 0 15px 0;
+}
+
+.coupon-description-box {
+  background-color: #fcfcfc;
+  padding: 14px;
+  border-radius: 12px;
+  border-left: 3px solid var(--color-secondary);
+  margin-bottom: 20px;
+}
+
+.coupon-text-desc {
+  font-size: 0.88rem;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.coupon-code-container {
+  background-color: var(--color-background);
+  border: 2px dashed var(--color-secondary);
+  padding: 14px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.code-font {
+  font-family: 'Courier New', monospace;
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.btn-action-full {
+  width: 100%;
+  background-color: var(--color-primary) !important;
+  border: none !important;
+  border-radius: 15px !important;
+  padding: 14px !important;
+  font-weight: 800 !important;
+}

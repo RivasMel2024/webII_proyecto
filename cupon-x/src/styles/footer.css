@@ -1,0 +1,61 @@
+.simple-footer {
+  background-color: #ffffff;
+  /* Aumentamos el margen superior para separarlo de Top Stores */
+  margin-top: 100px; 
+  padding: 60px 0 40px;
+  border-top: 1px solid rgba(0, 48, 73, 0.05);
+  color: var(--color-text);
+}
+
+.footer-logo {
+  font-weight: 800;
+  font-size: 2rem;
+  margin-bottom: 5px;
+  /* Color sólido para todo el nombre */
+  color: var(--color-text); 
+  letter-spacing: -1px;
+}
+
+.footer-tagline {
+  color: var(--color-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Iconos de Redes Sociales */
+.footer-socials {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+}
+
+.social-icon {
+  color: var(--color-text);
+  font-size: 1.3rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  opacity: 0.7;
+}
+
+.social-icon:hover {
+  color: var(--color-primary); /* El rojo solo aparece al pasar el mouse */
+  transform: translateY(-3px);
+  opacity: 1;
+}
+
+/* Línea divisoria minimalista */
+.footer-divider {
+  width: 60px;
+  height: 3px;
+  background-color: var(--color-primary);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+.footer-copyright {
+  font-size: 0.9rem;
+  color: var(--color-secondary);
+  opacity: 0.6;
+}
