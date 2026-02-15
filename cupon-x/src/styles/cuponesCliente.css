@@ -1,0 +1,105 @@
+/* Wrapper */
+.cupones-clientes-wrap {
+  max-width: 1200px;
+}
+
+/* Card principal */
+.coupon-card {
+  border-radius: 18px;
+  border: 2px solid rgba(44, 123, 229, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  background: #fff;
+  transition: transform 150ms ease;
+}
+
+.coupon-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Tags */
+.coupon-brand-tag {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #06283d;
+}
+
+.coupon-category-tag {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(44, 123, 229, 0.08);
+  color: #2c7be5;
+  font-weight: 700;
+}
+
+/* “Precio” grande */
+.coupon-price-value {
+  font-size: 42px;
+  font-weight: 900;
+  color: #c1121f;
+  margin: 0 0 14px 0;
+}
+
+.coupon-off {
+  font-size: 18px;
+  font-weight: 900;
+  margin-left: 8px;
+}
+
+/* Descripción con caja suave */
+.coupon-description-box {
+  border-left: 3px solid rgba(44, 123, 229, 0.65);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(44, 123, 229, 0.05);
+  margin-bottom: 16px;
+}
+
+.coupon-text-desc {
+  margin: 0;
+  color: #0b2f4d;
+  font-size: 14px;
+}
+
+/* Código */
+.coupon-code-container {
+  border: 2px dashed rgba(44, 123, 229, 0.55);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.code-icon-style {
+  color: #06283d;
+}
+
+.code-font {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #06283d;
+}
+
+.coupon-copy-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Vencimiento */
+.expiry-footer {
+  display: flex;
+  align-items: center;
+  color: #0b2f4d;
+  font-weight: 600;
+}
+
+/* Botón full */
+.btn-action-full {
+  width: 100%;
+  border-radius: 14px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  padding: 12px 14px;
+}

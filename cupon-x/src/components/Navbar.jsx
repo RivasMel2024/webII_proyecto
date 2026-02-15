@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
 import "../styles/variables.css";
 import { FaUser } from "react-icons/fa";
@@ -11,7 +11,7 @@ const NavBar = () => {
       <Container fluid>
         {/* Nombre del sitio */}
         <Navbar.Brand className="fw-bold">Cupón X</Navbar.Brand>
-
+    
         {/* Botón Sign In */}
         <Nav className="align-items-center ms-auto">
           <Button as={Link} to="/login" className="btn-signin d-flex align-items-center">

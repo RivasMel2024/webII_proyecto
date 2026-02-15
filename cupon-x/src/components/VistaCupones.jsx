@@ -5,14 +5,11 @@ import CuponesCliente from "./CuponesCliente";
 export default function VistaCupones() {
   const [clientes, setClientes] = useState([]);
   const [clienteId, setClienteId] = useState("");
-  
 
   useEffect(() => {
     const load = async () => {
       const res = await getClientes();
-      if (res.success) {
-        setClientes(res.data);
-      }
+      if (res.success) setClientes(res.data);
     };
     load();
   }, []);

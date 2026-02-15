@@ -7,29 +7,39 @@ import CouponGrid from './components/CouponGrid';
 import StoreGrid from './components/StoreGrid';
 import Footer from './components/Footer';
 import Login from './components/Login';
+import CuponCliente from './pages/CuponCliente';
 
 function App() {
   return (
-    <div className="App">
-      {/* ConexionTest es útil para verificar que el backend responda */}
-      <ConexionTest /> 
-      
-      <Navbar />
-      
-      <Routes>
-        {/* Página Principal */}
-        <Route path="/" element={
-          <>
-            <Hero />
-            <CouponGrid />
-            <StoreGrid />
-          </>
-        } />
+    <div className="App app-layout">
+      {/* Esto lo dejás si querés ver el backend arriba */}
+      <ConexionTest />
 
-        {/* Página de Login */}
-        <Route path="/login" element={<Login />} />
-      </Routes>
-      
+      <Navbar />
+
+      {/* 👇 ESTE es el truco */}
+      <main className="main-content">
+        <Routes>
+          {/* Página Principal */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Hero />
+                <CouponGrid />
+                <StoreGrid />
+              </>
+            }
+          />
+
+          {/* Página de Login */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Página cupones-clientes */}
+          <Route path="/cupones-clientes" element={<CuponCliente />} />
+        </Routes>
+      </main>
+
       <Footer />
     </div>
   );
