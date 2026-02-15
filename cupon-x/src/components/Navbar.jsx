@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
 import "../styles/variables.css";
 import { FaUser } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const NavBar = () => {
   return (
