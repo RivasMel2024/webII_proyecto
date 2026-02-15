@@ -3,6 +3,8 @@ import { getHealth, getStatus } from '../controllers/healthController.js';
 import { testConnection } from '../controllers/testController.js';
 import cuponsRoutes from './cupons.js';
 // import rubrosRoutes from './rubros.js'; 
+import clientesRoutes from './clientes.js';
+
 
 const router = express.Router();
 
@@ -14,6 +16,9 @@ router.get('/status', getStatus);
 router.get('/test-connection', testConnection);
 
 // Rutas de cupones
-router.use('/cupons', cuponsRoutes);
+router.use('/cupones', cuponsRoutes);
+
+// Rutas de clientes
+router.use('/clientes', clientesRoutes);
 
 export default router;

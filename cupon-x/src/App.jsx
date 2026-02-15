@@ -1,4 +1,8 @@
 import ConexionTest from './components/ConexionTest';
+import CuponesCliente from './components/CuponesCliente';
+import VistaCupones from "./components/VistaCupones";
+
+
 import './App.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -16,6 +20,9 @@ function App() {
       <CouponGrid/>
       <StoreGrid/>
       <Footer/>
+
+      <h1>CuponX - Prueba de Conexión</h1>
+      <VistaCupones />
     </div>
   );
 }
