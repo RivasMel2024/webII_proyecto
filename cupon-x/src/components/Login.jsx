@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
-import '../styles/Login.css';
+// import '../styles/Login.css';
 
 const Login = () => {
   return (

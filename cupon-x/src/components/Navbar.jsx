@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
-import "../styles/variables.css";
 import { FaUser } from "react-icons/fa";
+import "../styles/variables.css";
 
 const NavBar = () => {
   return (
