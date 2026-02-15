@@ -1,17 +1,36 @@
+import { Routes, Route } from 'react-router-dom';
 import ConexionTest from './components/ConexionTest';
-import CuponesCliente from './components/CuponesCliente';
-import VistaCupones from "./components/VistaCupones";
-
-
 import './App.css';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import CouponGrid from './components/CouponGrid';
+import StoreGrid from './components/StoreGrid';
+import Footer from './components/Footer';
+import Login from './components/Login';
 
 function App() {
   return (
     <div className="App">
-      <h1>CuponX - Prueba de Conexión</h1>
+      {/* ConexionTest es útil para verificar que el backend responda */}
+      <ConexionTest /> 
+      
+      <Navbar />
+      
+      <Routes>
+        {/* Página Principal */}
+        <Route path="/" element={
+          <>
+            <Hero />
+            <CouponGrid />
+            <StoreGrid />
+          </>
+        } />
 
-      <ConexionTest />
-      <VistaCupones />
+        {/* Página de Login */}
+        <Route path="/login" element={<Login />} />
+      </Routes>
+      
+      <Footer />
     </div>
   );
 }

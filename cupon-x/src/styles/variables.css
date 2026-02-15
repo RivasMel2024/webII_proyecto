@@ -1,0 +1,55 @@
+:root {
+  /* Colores principales */
+  --color-primary-dark: #780000;   /* Rojo oscuro - acentos y hover */
+  --color-primary: #C1121F;        /* Rojo vivo - navbar y botones */
+  --color-background: #FFFDF7;     /* Fondo más claro y limpio */
+  --color-text: #003049;           /* Texto principal */
+  --color-secondary: #669BBC;      /* Detalles y bordes */
+}
+
+/* Tipografía global */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* Navbar full width */
+.navbar-custom {
+  background-color: var(--color-primary);
+  width: 100%;
+  padding: 0.8rem 2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  margin: 0;
+}
+
+/* Brand */
+.navbar-custom .navbar-brand {
+  color: var(--color-background);
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+/* Botón Sign In */
+.btn-signin {
+  background-color: var(--color-primary-dark);
+  color: var(--color-background);
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  font-weight: 500;
+  transition: 0.2s;
+  outline: none !important; 
+  box-shadow: none !important; 
+  border: none !important;
+}
+
+.btn-signin:hover, .btn-signin:focus-visible {
+  background-color: var(--color-text) !important;
+  color: var(--color-background) !important;
+}
+
+.btn-signin:hover {
+  background-color: var(--color-text);
+  color: var(--color-background);
+}
