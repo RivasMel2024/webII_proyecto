@@ -13,7 +13,7 @@ const NavBar = () => {
 
         {/* Botón Sign In */}
         <Nav className="align-items-center ms-auto">
-          <Button className="btn-signin d-flex align-items-center">
+          <Button as={Link} to="/login" className="btn-signin d-flex align-items-center">
             <FaUser className="me-2" />
             <span className="d-none d-lg-inline">Sign In</span>
           </Button>

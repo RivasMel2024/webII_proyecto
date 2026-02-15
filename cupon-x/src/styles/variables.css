@@ -44,6 +44,11 @@ body {
   border: none !important;
 }
 
+.btn-signin:hover, .btn-signin:focus-visible {
+  background-color: var(--color-text) !important;
+  color: var(--color-background) !important;
+}
+
 .btn-signin:hover {
   background-color: var(--color-text);
   color: var(--color-background);

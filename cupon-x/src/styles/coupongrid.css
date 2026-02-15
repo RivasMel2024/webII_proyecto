@@ -33,7 +33,6 @@
 
 .see-all-link:hover {
   color: var(--color-primary);
-  transform: translateX(5px);
 }
 
 /* Tarjeta */

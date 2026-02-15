@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import CouponCard from './CouponCard';
-import '../styles/CouponGrid.css';
+import '../styles/coupongrid.css';
 
 const CouponGrid = () => {
   // Datos simulados (luego vendrán de tu Base de Datos)
