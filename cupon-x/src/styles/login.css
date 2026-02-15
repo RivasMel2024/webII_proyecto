@@ -1,19 +1,17 @@
 .login-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 80vh;
-    margin-top: 50px;
+  display: flex;
+  align-items: center;    
+  justify-content: center;  
+  min-height: calc(100vh - 80px); 
+  padding: 40px 20px;      
 }
 
 .login-card {
-    width: 100%;
-    max-width: 420px;
-    border-radius: 24px !important;
-    border: 2px solid rgba(102, 155, 188, 0.1) !important;
-    padding: 20px;
-    box-shadow: 0 15px 35px rgba(0, 48, 73, 0.05) !important;
-    background-color: #ffffff !important;
+  width: 100%;
+  max-width: 500px;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);  
 }
 
 .login-title {
@@ -73,9 +71,13 @@
     color: var(--color-secondary);
 }
 
+.login-footer-text span {
+    color: #000000 !important;
+}
+
 .login-footer-text a {
     color: var(--color-primary);
-    text-decoration: none;
+    text-decoration: underline;
     font-weight: 700;
     margin-left: 5px;
 }
