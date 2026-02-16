@@ -1,17 +1,23 @@
+/* ==========================================================================
+   Estilos Compartidos: Login, Registro y Olvido de Contraseña
+   ========================================================================== */
+
 .login-container {
   display: flex;
   align-items: center;    
   justify-content: center;  
-  min-height: calc(100vh - 80px); 
-  padding: 40px 20px;      
+  min-height: 100vh; 
+  padding: 60px 20px;      
+  background-color: var(--color-background);
 }
 
 .login-card {
   width: 100%;
   max-width: 500px;
-  border: none;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);  
+  border: none !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  background-color: #ffffff;
 }
 
 .login-title {
@@ -36,6 +42,7 @@
     padding: 12px 15px !important;
     border: 2px solid #f1f3f5 !important;
     font-size: 0.95rem !important;
+    color: #000000 !important; 
     transition: all 0.3s ease !important;
 }
 
@@ -53,15 +60,27 @@
     padding: 14px !important;
     font-weight: 800 !important;
     font-size: 1rem !important;
+    color: #ffffff !important;
     letter-spacing: 1px !important;
     margin-top: 10px;
     transition: all 0.3s ease !important;
+    cursor: pointer;
 }
 
 .btn-login-submit:hover {
     background-color: var(--color-primary-dark) !important;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(193, 18, 31, 0.3) !important;
+}
+
+.forgot-password-link {
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.forgot-password-link:hover {
+    text-decoration: underline !important;
+    opacity: 0.8;
 }
 
 .login-footer-text {
@@ -72,16 +91,22 @@
 }
 
 .login-footer-text span {
-    color: #000000 !important;
+    color: #000000 !important; 
 }
 
 .login-footer-text a {
-    color: var(--color-primary);
-    text-decoration: underline;
+    color: var(--color-primary) !important;
+    text-decoration: underline !important; 
     font-weight: 700;
     margin-left: 5px;
 }
 
 .login-footer-text a:hover {
-    text-decoration: underline;
+    color: var(--color-primary-dark) !important;
+    text-decoration: underline !important;
+}
+
+.login-card p {
+    color: #4a5568;
+    line-height: 1.6;
 }

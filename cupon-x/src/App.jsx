@@ -8,22 +8,25 @@ import StoreGrid from './components/StoreGrid';
 import Footer from './components/Footer';
 import Login from './components/Login';
 import Registration from './components/Registration'; 
+import ForgotPassword from './components/ForgotPassword'; 
 
 function App() {
   const location = useLocation(); 
 
-  // rutas que no deben mostrar el Footer ni el Sign In
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  // Agregamos '/forgot-password' a la lista negra del Footer y Navbar
+  const isAuthPage = 
+    location.pathname === '/login' || 
+    location.pathname === '/register' || 
+    location.pathname === '/forgot-password';
 
   return (
     <div className="App">
       <ConexionTest /> 
       
-      {/* El Navbar ahora puede saber internamente si ocultar el botón */}
-      <Navbar />
+      {/* Pasamos la variable para que el Navbar oculte el botón Sign In */}
+      <Navbar isAuthPage={isAuthPage} />
       
       <Routes>
-        {/* Página Principal */}
         <Route path="/" element={
           <>
             <Hero />
@@ -32,12 +35,12 @@ function App() {
           </>
         } />
 
-        {/* Páginas de Autenticación */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registration />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
       
-      {/* El Footer solo se muestra si NO es una página de auth */}
+      {/* El Footer NO se mostrará si isAuthPage es true */}
       {!isAuthPage && <Footer />}
     </div>
   );
