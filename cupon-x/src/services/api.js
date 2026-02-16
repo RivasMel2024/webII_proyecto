@@ -48,4 +48,27 @@ export async function deleteCupon(id) {
   }
 
   return await res.json();
-}
+};
+
+
+export const getTopOffers = async (limit = 6) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/ofertas/top?limit=${limit}`);
+    if (!res.ok) throw new Error("Error al obtener ofertas");
+    return await res.json(); // { success, data }
+  } catch (error) {
+    console.error("getTopOffers error:", error);
+    return { success: false, message: error.message, data: [] };
+  }
+};
+
+export const getAllOffers = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/ofertas`);
+    if (!res.ok) throw new Error("Error al obtener ofertas");
+    return await res.json(); // { success, data }
+  } catch (error) {
+    console.error("getAllOffers error:", error);
+    return { success: false, message: error.message, data: [] };
+  }
+};

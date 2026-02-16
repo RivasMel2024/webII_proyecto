@@ -8,6 +8,7 @@ import StoreGrid from './components/StoreGrid';
 import Footer from './components/Footer';
 import Login from './components/Login';
 import CuponCliente from './pages/CuponCliente';
+import CouponsPage from "./pages/CouponsPage";
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
 
           {/* Página cupones-clientes */}
           <Route path="/cupones-clientes" element={<CuponCliente />} />
+          {/* Página de todos los cupones */}
+          <Route path="/coupons" element={<CouponsPage />} />
         </Routes>
       </main>
 
