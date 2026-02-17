@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation } from 'react-router-dom'; 
+import { Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import ConexionTest from './components/ConexionTest';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -7,41 +8,66 @@ import CouponGrid from './components/CouponGrid';
 import StoreGrid from './components/StoreGrid';
 import Footer from './components/Footer';
 import Login from './components/Login';
-import Registration from './components/Registration'; 
-import ForgotPassword from './components/ForgotPassword'; 
+import CuponCliente from './pages/CuponCliente';
+import CouponsPage from "./pages/CouponsPage";
+import OfertasPage from "./pages/OfertasPage";
+import { getRubros } from './services/api';
 
 function App() {
-  const location = useLocation(); 
+  const [rubros, setRubros] = useState([]);
 
-  // Agregamos '/forgot-password' a la lista negra del Footer y Navbar
-  const isAuthPage = 
-    location.pathname === '/login' || 
-    location.pathname === '/register' || 
-    location.pathname === '/forgot-password';
+  // Cargar rubros al inicio
+  useEffect(() => {
+    const cargarRubros = async () => {
+      try {
+        const response = await getRubros();
+        if (response.success) {
+          setRubros(response.data);
+        }
+      } catch (error) {
+        console.error('Error al cargar rubros:', error);
+      }
+    };
+    cargarRubros();
+  }, []);
 
   return (
-    <div className="App">
-      <ConexionTest /> 
-      
-      {/* Pasamos la variable para que el Navbar oculte el botón Sign In */}
-      <Navbar isAuthPage={isAuthPage} />
-      
-      <Routes>
-        <Route path="/" element={
-          <>
-            <Hero />
-            <CouponGrid />
-            <StoreGrid />
-          </>
-        } />
+    <div className="App app-layout">
+      {/* Esto lo dejás si querés ver el backend arriba */}
+      <ConexionTest />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Registration />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-      </Routes>
-      
-      {/* El Footer NO se mostrará si isAuthPage es true */}
-      {!isAuthPage && <Footer />}
+      <Navbar />
+
+      {/* 👇 ESTE es el truco */}
+      <main className="main-content">
+        <Routes>
+          {/* Página Principal */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Hero rubros={rubros} redirectToOfertas={true} />
+                <CouponGrid />
+                <StoreGrid />
+              </>
+            }
+          />
+
+          {/* Página de Login */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Página cupones-clientes */}
+          <Route path="/cupones-clientes" element={<CuponCliente />} />
+          
+          {/* Página de todos los cupones */}
+          <Route path="/coupons" element={<CouponsPage />} />
+          
+          {/* Página de ofertas vigentes con filtros */}
+          <Route path="/ofertas" element={<OfertasPage />} />
+        </Routes>
+      </main>
+
+      <Footer />
     </div>
   );
 }

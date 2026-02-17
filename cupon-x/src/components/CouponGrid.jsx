@@ -1,62 +1,114 @@
-import React, { useState } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
-import CouponCard from './CouponCard';
-import '../styles/coupongrid.css';
+import React, { useEffect, useMemo, useState } from "react";
+import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import CouponCard from "./CouponCard";
+import "../styles/CouponGrid.css";
+import { getTopOffers } from "../services/api";
+
+const formatDateOnly = (d) => {
+  if (!d) return "—";
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString();
+};
 
 const CouponGrid = () => {
-  // Datos simulados (luego vendrán de tu Base de Datos)
-  const [coupons] = useState([
-    { 
-      id: 1, 
-      brand: 'MICROSOFT', 
-      category: 'TECH', 
-      price: '$20.00 OFF', 
-      description: 'Válido en licencias de Office 365 y laptops Surface.',
-      expiry: '31/12/2026',
-      code: 'MSFT2026'
-    },
-    { 
-      id: 2, 
-      brand: 'AMAZON', 
-      category: 'TECH', 
-      price: '15% OFF', 
-      description: 'Aplica para dispositivos Echo y accesorios de tecnología.',
-      expiry: '30/11/2026',
-      code: 'AMZTECH'
-    },
-    { 
-      id: 3, 
-      brand: 'APPLE', 
-      category: 'DEVICES', 
-      price: '$50.00 OFF', 
-      description: 'Descuento en iPad Air y accesorios originales.',
-      expiry: '15/05/2026',
-      code: 'APPLE50'
-    }
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [offers, setOffers] = useState([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const res = await getTopOffers(3);
+        const payload = Array.isArray(res?.data) ? res.data : [];
+
+        setOffers(payload);
+      } catch (e) {
+        setError(e?.message || "Error cargando ofertas");
+        setOffers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  // Adaptar ofertas al formato de tu CouponCard
+const adapted = useMemo(() => {
+  return (offers || []).map((o) => ({
+    id: o.oferta_id ?? o.id,
+    brand: o.titulo || "Oferta",
+    category: "Disponible",
+    price: `$${Number(o.precio_oferta ?? 0).toFixed(2)}`,
+    description: o.descripcion || "Sin descripción",
+    code: "Oferta disponible",
+
+    expiry: formatDateOnly(o.fecha_limite_uso),
+  }));
+}, [offers]);
+
+
+  if (loading) {
+    return (
+      <section className="coupon-grid-section">
+        <Container className="py-4">
+          <Spinner animation="border" size="sm" />
+          <span className="ms-2">Cargando ofertas...</span>
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="coupon-grid-section">
+        <Container className="py-4">
+          <Alert variant="danger">{error}</Alert>
+        </Container>
+      </section>
+    );
+  }
 
   return (
-    <section className="coupon-grid-section">
+    <section className="coupon-grid-section py-5">
       <Container>
-        {/* Cabecera con Título y Botón alineado a la derecha */}
-        <div className="d-flex justify-content-between align-items-end mb-5">
-          <div className="section-header-box">
-            <h2 className="section-title">Top <span className="highlight">Coupons</span></h2>
-            <div className="section-line"></div>
-          </div>
-          
-          <a href="#all" className="see-all-link">
-            See All Coupons <span className="ms-1"></span>
-          </a>
+
+        {/* Header Top Coupons */}
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="fw-bold mb-0">
+            Top <span style={{ color: "#c1121f" }}>Coupons</span>
+          </h2>
+
+          <Link
+            to="/coupons"
+            className="text-decoration-none fw-semibold"
+            style={{ color: "#1f4e79" }}
+          >
+            See All Coupons
+          </Link>
         </div>
 
         <Row className="g-4">
-          {coupons.map((item) => (
-            <Col key={item.id} lg={4} md={6}>
-              <CouponCard data={item} />
+          {adapted.length === 0 ? (
+            <Col>
+              <Alert variant="info" className="mb-0">
+                No hay ofertas disponibles.
+              </Alert>
             </Col>
-          ))}
+          ) : (
+            adapted.map((item) => (
+              <Col key={item.id} xs={12} sm={6} md={4} lg={4}>
+                <CouponCard data={item} />
+              </Col>
+            ))
+          )}
         </Row>
+
       </Container>
     </section>
   );

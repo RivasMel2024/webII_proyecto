@@ -11,4 +11,127 @@ export const testConnection = async () => {
     console.error('Error:', error);
     throw error;
   }
+
+};
+
+export const getCuponesByCliente = async (clienteId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/cupones/clientes/${clienteId}/cupones`
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al obtener cupones del cliente");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+};
+
+
+export const getClientes = async () => {
+  const res = await fetch(`${API_BASE_URL}/clientes`);
+  if (!res.ok) throw new Error("Error al obtener clientes");
+  return await res.json(); // { success, data }
+};
+
+export async function deleteCupon(id) {
+  const res = await fetch(`${API_BASE_URL}/cupones/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    throw new Error("Error al eliminar cupón");
+  }
+
+  return await res.json();
+};
+
+
+export const getTopOffers = async (limit = 6) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/ofertas/top?limit=${limit}`);
+    if (!res.ok) throw new Error("Error al obtener ofertas");
+    return await res.json(); // { success, data }
+  } catch (error) {
+    console.error("getTopOffers error:", error);
+    return { success: false, message: error.message, data: [] };
+  }
+};
+
+export const getAllOffers = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/ofertas`);
+    if (!res.ok) throw new Error("Error al obtener ofertas");
+    return await res.json(); // { success, data }
+  } catch (error) {
+    console.error("getAllOffers error:", error);
+    return { success: false, message: error.message, data: [] };
+  }
+};
+
+// ============================================================
+// NUEVAS FUNCIONES PARA FILTRADO DE OFERTAS
+// ============================================================
+
+/**
+ * Obtiene ofertas vigentes con filtros opcionales
+ * @param {Object} params - Parámetros de filtrado
+ * @param {number} params.rubro_id - ID del rubro para filtrar (opcional)
+ * @param {string} params.search - Palabra clave para buscar (opcional)
+ * @returns {Promise<{success: boolean, data: Array, message?: string}>}
+ */
+export const getOfertasVigentes = async (params = {}) => {
+  try {
+    // Construir query string con los parámetros
+    const queryParams = new URLSearchParams();
+    
+    if (params.rubro_id) {
+      queryParams.append('rubro_id', params.rubro_id);
+    }
+    
+    if (params.search && params.search.trim() !== '') {
+      queryParams.append('search', params.search.trim());
+    }
+    
+    const queryString = queryParams.toString();
+    const url = `${API_BASE_URL}/ofertas/vigentes${queryString ? `?${queryString}` : ''}`;
+    
+    const res = await fetch(url);
+    
+    if (!res.ok) {
+      throw new Error("Error al obtener ofertas vigentes");
+    }
+    
+    return await res.json(); // { success, data, message }
+  } catch (error) {
+    console.error("getOfertasVigentes error:", error);
+    return { success: false, message: error.message, data: [] };
+  }
+};
+
+/**
+ * Obtiene todos los rubros (categorías) activos
+ * Para mostrar en el dropdown de filtros y botones de categoría
+ * @returns {Promise<{success: boolean, data: Array, message?: string}>}
+ * 
+ * Estructura de respuesta:
+ * data: [{ id: 1, nombre: "Restaurantes", activo: 1 }, ...]
+ */
+export const getRubros = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/rubros`);
+    
+    if (!res.ok) {
+      throw new Error("Error al obtener rubros");
+    }
+    
+    return await res.json(); // { success, data, message }
+  } catch (error) {
+    console.error("getRubros error:", error);
+    return { success: false, message: error.message, data: [] };
+  }
 };
