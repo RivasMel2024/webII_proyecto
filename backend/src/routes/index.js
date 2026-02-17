@@ -2,9 +2,6 @@ import express from 'express';
 import { getHealth, getStatus } from '../controllers/healthController.js';
 import { testConnection } from '../controllers/testController.js';
 import cuponsRoutes from './cupons.js';
-// import rubrosRoutes from './rubros.js'; 
-import clientesRoutes from './clientes.js';
-
 
 const router = express.Router();
 

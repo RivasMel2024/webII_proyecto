@@ -1,6 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
-import { FaChevronDown } from 'react-icons/fa';
+import { Container, Row, Col } from 'react-bootstrap';
 import '../styles/hero.css';
 
 const Hero = () => {
@@ -17,25 +16,10 @@ const Hero = () => {
               Ofertas para que puedas comprar las cosas que quieras de forma económica.
             </p>
 
-            <div className="search-container">
-              <div className="search-box">
-                <div className="category-select">
-                  Categoría <FaChevronDown className="ms-1 icon-sm" />
-                </div>
-                <div className="divider"></div>
-                <input 
-                  type="text" 
-                  placeholder="Nombre del cupón o tienda..." 
-                  className="search-input"
-                />
-                <Button className="btn-hero-search">
-                  Buscar
-                </Button>
-              </div>
-            </div>
+            {/* Hemos eliminado el search-container de aquí */}
 
             <div className="hero-tags">
-              {['Restaurante', 'Turismo', 'Entretenimiento', 'Educación', 'Otros'].map((tag, i) => (
+              {['Restaurantes', 'Turismo', 'Entretenimiento', 'Educación', 'Salud', 'Salones de belleza', 'Gimnasio', 'Otros'].map((tag, i) => (
                 <span key={i} className="tag-pill">{tag}</span>
               ))}
             </div>
