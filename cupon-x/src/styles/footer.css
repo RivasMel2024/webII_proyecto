@@ -40,7 +40,7 @@
 }
 
 .social-icon:hover {
-  color: var(--color-primary); /* El rojo solo aparece al pasar el mouse */
+  color: var(--color-primary); 
   transform: translateY(-3px);
   opacity: 1;
 }
