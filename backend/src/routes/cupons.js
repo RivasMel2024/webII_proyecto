@@ -2,23 +2,38 @@ import express from 'express';
 import {
   getAllCoupons,
   getCouponById,
-  createCoupon,
-  updateCoupon,
-  deleteCoupon,
   getCuponesByCliente,
-  deleteCupon
+  deleteCupon,
+  comprarCupon,
+  canjearCupon
 } from '../controllers/cuponsController.js';
+import { verifyJwt } from '../middleware/authJwt.js';
+import { requireRole, requireSelfClienteOrRole } from '../middleware/rbac.js';
+import { ROLES } from '../utils/roles.js';
 
 const router = express.Router();
 
-// Rutas CRUD para cupones
-router.get('/', getAllCoupons);
-router.get('/clientes/:clienteId/cupones', getCuponesByCliente);
-router.get('/:id', getCouponById);
-router.delete("/:id", deleteCupon);
+// Listado general (solo Admin Cuponera)
+router.get('/', verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), getAllCoupons);
 
-router.post('/', createCoupon);
-router.put('/:id', updateCoupon);
-router.delete('/:id', deleteCoupon);
+// Cupones por cliente: CLIENTE (self) o ADMIN_CUPONERA
+router.get(
+  '/clientes/:clienteId/cupones',
+  verifyJwt,
+  requireSelfClienteOrRole({ param: 'clienteId', rolesAllowed: [ROLES.ADMIN_CUPONERA] }),
+  getCuponesByCliente
+);
+
+// Detalle cupón (Admin Cuponera)
+router.get('/:id', verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), getCouponById);
+
+// Eliminar cupón (Admin Cuponera)
+router.delete('/:id', verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), deleteCupon);
+
+// Compra de cupón (CLIENTE)
+router.post('/comprar', verifyJwt, requireRole(ROLES.CLIENTE), comprarCupon);
+
+// Canje de cupón (solo EMPLEADO: administradores_empresas)
+router.post('/canjear', verifyJwt, requireRole(ROLES.EMPLEADO), canjearCupon);
 
 export default router;

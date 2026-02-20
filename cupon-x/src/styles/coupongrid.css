@@ -108,3 +108,24 @@
   padding: 14px !important;
   font-weight: 800 !important;
 }
+
+.coupon-card {
+  border-radius: 16px;
+}
+
+.coupon-card h5,
+.coupon-card h3 {
+  min-height: 48px;
+}
+
+.coupon-description-box {
+  min-height: 70px;
+}
+
+.coupon-code-container {
+  min-height: 50px;
+}
+
+.expiry-footer {
+  min-height: 40px;
+}

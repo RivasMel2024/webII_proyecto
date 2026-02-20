@@ -1,16 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../styles/login.css'; 
+import { login as loginApi, setAuthSession } from '../services/api';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const result = await loginApi({ email, password });
+      setAuthSession({ token: result.token, user: result.user });
+      // Redirección simple: Admin Cuponera → cupones-clientes; otros → home
+      if (result.user?.role === 'ADMIN_CUPONERA') navigate('/cupones-clientes');
+      else navigate('/');
+    } catch (err) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container className="login-container">
       <Card className="login-card">
         <Card.Body className="p-4">
           <h2 className="login-title">Ingresar</h2>
           
-          <Form>
+          <Form onSubmit={onSubmit}>
             <Form.Group className="mb-3">
               <Form.Label className="login-label">Correo Electrónico</Form.Label>
               <Form.Control 
@@ -18,6 +42,8 @@ const Login = () => {
                 placeholder="ejemplo@correo.com" 
                 className="login-input" 
                 required 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Group>
 
@@ -28,8 +54,16 @@ const Login = () => {
                 placeholder="********" 
                 className="login-input" 
                 required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </Form.Group>
+
+            {error ? (
+              <div className="text-danger mb-3" style={{ fontSize: '0.9rem' }}>
+                {error}
+              </div>
+            ) : null}
 
             {/* Link de recuperación alineado a la derecha */}
             <div className="text-end mb-4">
@@ -47,8 +81,8 @@ const Login = () => {
               </Link>
             </div>
 
-            <Button className="btn-login-submit" type="submit">
-              ENTRAR
+            <Button className="btn-login-submit" type="submit" disabled={loading}>
+              {loading ? 'ENTRANDO...' : 'ENTRAR'}
             </Button>
           </Form>
 

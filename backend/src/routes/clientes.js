@@ -1,9 +1,12 @@
 import express from "express";
 import db from "../config/database.js"; 
+import { verifyJwt } from "../middleware/authJwt.js";
+import { requireRole } from "../middleware/rbac.js";
+import { ROLES } from "../utils/roles.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 

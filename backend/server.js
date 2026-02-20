@@ -16,7 +16,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Rutas
+// Rutas principales
 app.use('/api', routes);
 
 // Ruta raíz
@@ -24,12 +24,12 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to CuponX Backend API' });
 });
 
-// Manejo de errores 404
+// 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
-// Middleware de manejo de errores (debe ser el último)
+// Error handler
 app.use(errorHandler);
 
 // Iniciar servidor

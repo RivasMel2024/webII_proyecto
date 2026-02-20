@@ -1,21 +1,31 @@
-import express from 'express';
-import { getHealth, getStatus } from '../controllers/healthController.js';
-import { testConnection } from '../controllers/testController.js';
-import cuponsRoutes from './cupons.js';
+import express from "express";
+import { getHealth, getStatus } from "../controllers/healthController.js";
+import { testConnection } from "../controllers/testController.js";
+
+import cuponsRoutes from "./cupons.js";
+import clientesRoutes from "./clientes.js";
+import ofertasRoutes from "./ofertasRoutes.js";
+import authRoutes from "./auth.js";
 
 const router = express.Router();
 
 // Rutas de salud
-router.get('/health', getHealth);
-router.get('/status', getStatus);
+router.get("/health", getHealth);
+router.get("/status", getStatus);
 
 // Ruta de prueba de conexión
-router.get('/test-connection', testConnection);
+router.get("/test-connection", testConnection);
+
+// Auth (JWT)
+router.use('/auth', authRoutes);
 
 // Rutas de cupones
-router.use('/cupones', cuponsRoutes);
+router.use("/cupones", cuponsRoutes);
 
 // Rutas de clientes
-router.use('/clientes', clientesRoutes);
+router.use("/clientes", clientesRoutes);
+
+// Rutas de ofertas 
+router.use("/ofertas", ofertasRoutes);
 
 export default router;

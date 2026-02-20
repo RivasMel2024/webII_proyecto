@@ -1,0 +1,8 @@
+export const ROLES = {
+  ADMIN_CUPONERA: 'ADMIN_CUPONERA',
+  ADMIN_EMPRESA: 'ADMIN_EMPRESA',
+  EMPLEADO: 'EMPLEADO',
+  CLIENTE: 'CLIENTE',
+};
+
+export const ALL_ROLES = Object.values(ROLES);

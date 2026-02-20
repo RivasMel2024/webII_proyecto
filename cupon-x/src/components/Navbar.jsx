@@ -1,5 +1,5 @@
 import React from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
 import { FaUser } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
@@ -14,6 +14,7 @@ const NavBar = () => { // Ya no necesita recibir props
             CuponX
         </Navbar.Brand>
 
+        {/* Botón Sign In */}
         <Nav className="align-items-center ms-auto">
           {/* Si el path es distinto a /login, muestra el botón */}
           {location.pathname !== "/login" && location.pathname !== "/register" && (

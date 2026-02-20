@@ -1,9 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import '../styles/login.css';
+import { forgotPassword } from '../services/api';
 
 const ForgotPassword = () => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setLoading(true);
+    try {
+      const result = await forgotPassword({ email });
+      setMessage(result.message || 'Solicitud enviada.');
+    } catch (err) {
+      setError(err.message || 'Error al solicitar recuperación');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container className="login-container">
       <Card className="login-card">
@@ -13,7 +34,7 @@ const ForgotPassword = () => {
             Ingresa tu correo electrónico y te enviaremos información para restablecer tu contraseña.
           </p>
           
-          <Form>
+          <Form onSubmit={onSubmit}>
             <Form.Group className="mb-4">
               <Form.Label className="login-label">Correo Electrónico</Form.Label>
               <Form.Control 
@@ -21,11 +42,24 @@ const ForgotPassword = () => {
                 placeholder="ejemplo@correo.com" 
                 className="login-input" 
                 required 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Group>
 
-            <Button className="btn-login-submit" type="submit">
-              ENVIAR
+            {error ? (
+              <div className="text-danger mb-3" style={{ fontSize: '0.9rem', whiteSpace: 'pre-line' }}>
+                {error}
+              </div>
+            ) : null}
+            {message ? (
+              <div className="text-success mb-3" style={{ fontSize: '0.9rem', whiteSpace: 'pre-line' }}>
+                {message}
+              </div>
+            ) : null}
+
+            <Button className="btn-login-submit" type="submit" disabled={loading}>
+              {loading ? 'ENVIANDO...' : 'ENVIAR'}
             </Button>
           </Form>
           
