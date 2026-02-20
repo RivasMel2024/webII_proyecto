@@ -3,7 +3,7 @@
   --color-primary-dark: #780000;   /* Rojo oscuro - acentos y hover */
   --color-primary: #C1121F;        /* Rojo vivo - navbar y botones */
   --color-background: #FFFDF7;     /* Fondo más claro y limpio */
-  --color-text: #003049;           /* Texto principal */
+  --color-text: #003049;           /* Texto principal (Azul Profundo) */
   --color-secondary: #669BBC;      /* Detalles y bordes */
 }
 
@@ -15,7 +15,7 @@ body {
   margin: 0;
 }
 
-/* Navbar full width */
+/* --- NAVBAR --- */
 .navbar-custom {
   background-color: var(--color-primary);
   width: 100%;
@@ -24,32 +24,84 @@ body {
   margin: 0;
 }
 
-/* Brand */
 .navbar-custom .navbar-brand {
-  color: var(--color-background);
+  color: var(--color-background) !important; 
   font-size: 1.5rem;
   letter-spacing: 1px;
 }
 
-/* Botón Sign In */
+/* --- BOTONES (Sign In / Mi Perfil) --- */
 .btn-signin {
-  background-color: var(--color-primary-dark);
-  color: var(--color-background);
+  background-color: var(--color-primary-dark) !important;
+  color: var(--color-background) !important;
   border-radius: 6px;
   padding: 0.4rem 1rem;
   font-weight: 500;
-  transition: 0.2s;
+  transition: 0.3s ease;
+  border: none !important;
   outline: none !important; 
   box-shadow: none !important; 
-  border: none !important;
 }
 
 .btn-signin:hover, .btn-signin:focus-visible {
-  background-color: var(--color-text) !important;
+  background-color: var(--color-text) !important; 
   color: var(--color-background) !important;
+  transform: translateY(-1px);
 }
 
-.btn-signin:hover {
-  background-color: var(--color-text);
+/* --- ICONOS (Carrito e Historial) --- */
+.nav-icon-link {
   color: var(--color-background);
+  transition: 0.3s;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon-link:hover {
+  color: var(--color-text); 
+}
+
+/* --- COMPONENTES DEL CARRITO --- */
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  font-size: 0.65rem;
+  background-color: var(--color-text) !important; 
+  color: var(--color-background);
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--color-primary);
+}
+
+/* --- INTERFAZ (Carrito) --- */
+.bg-secondary-light {
+  background-color: #e9ecef;
+  border: 1px dashed var(--color-secondary);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.summary-card {
+  border-top: 5px solid var(--color-primary) !important;
+  background-color: #fff;
+}
+
+.table hover tbody tr:hover {
+  background-color: rgba(102, 155, 188, 0.05); 
+}
+
+.modal-content {
+  border-radius: 15px;
+  border: none;
+}
+
+.modal-header {
+  border-bottom: 1px solid #eee;
+  background-color: var(--color-background);
+  border-radius: 15px 15px 0 0;
+}
+
+.form-control:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 0.2rem rgba(102, 155, 188, 0.25);
 }
