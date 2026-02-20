@@ -1,23 +1,25 @@
-import React from 'react';
-import { Card } from 'react-bootstrap';
+import { Link } from "react-router-dom";
+import "../styles/StoredCard.css";
 
-const StoreCard = ({ store }) => {
+export default function StoreCard({ data }) {
   return (
-    <Card className="store-card h-100">
-      {/* Representación visual de la marca con CSS puro */}
-      <div className="store-brand-display" style={{ backgroundColor: store.bgColor }}>
-        <span className="store-brand-initials">{store.name}</span>
-      </div>
-      
-      <Card.Body className="p-3">
-        <Card.Title className="store-name-text">{store.name}</Card.Title>
-        <div className="store-reward-badge">
-          <span className="reward-dot"></span>
-          Upto {store.reward} Voucher Rewards
+    <Link to={`/stores/${data.id}`} className="store-card-link">
+      <div className="store-card">
+        <div className="store-card-top" style={{ backgroundColor: data.color }}>
+          <span className="store-card-toptext">{data.nombre.toUpperCase()}</span>
         </div>
-      </Card.Body>
-    </Card>
-  );
-};
 
-export default StoreCard;
+        <div className="store-card-body">
+          <div className="store-card-name">{data.nombre}</div>
+          <div className="store-card-rubro">{data.rubro}</div>
+          <div className="store-card-desc">{data.descripcion}</div>
+
+          <div className="store-card-reward">
+            <span className="dot" />
+            Upto {data.reward}% Voucher Rewards
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}

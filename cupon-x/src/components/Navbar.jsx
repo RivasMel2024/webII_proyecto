@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
 import { FaUser } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
+import "../styles/variables.css";
 
 const NavBar = () => { // Ya no necesita recibir props
   const location = useLocation(); // Detecta la ruta actual
