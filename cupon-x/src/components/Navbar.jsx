@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
 import "../styles/variables.css";
 import { FaUser } from "react-icons/fa";
@@ -15,6 +16,10 @@ const NavBar = () => { // Ya no necesita recibir props
             CuponX
         </Navbar.Brand>
 
+        {/* Nombre del sitio */}
+        <Navbar.Brand className="fw-bold">Cupón X</Navbar.Brand>
+    
+        {/* Botón Sign In */}
         <Nav className="align-items-center ms-auto">
           {/* Si el path es distinto a /login, muestra el botón */}
           {location.pathname !== "/login" && location.pathname !== "/register" && (

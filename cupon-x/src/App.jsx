@@ -9,6 +9,8 @@ import Footer from './components/Footer';
 import Login from './components/Login';
 import Registration from './components/Registration'; 
 import ForgotPassword from './components/ForgotPassword'; 
+import CuponCliente from './pages/CuponCliente';
+import CouponsPage from "./pages/CouponsPage";
 
 function App() {
   const location = useLocation(); 
@@ -20,27 +22,29 @@ function App() {
     location.pathname === '/forgot-password';
 
   return (
-    <div className="App">
-      <ConexionTest /> 
-      
-      {/* Pasamos la variable para que el Navbar oculte el botón Sign In */}
-      <Navbar isAuthPage={isAuthPage} />
-      
-      <Routes>
-        <Route path="/" element={
-          <>
-            <Hero />
-            <CouponGrid />
-            <StoreGrid />
-          </>
-        } />
+    <div className="App app-layout">
+      <ConexionTest />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Registration />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-      </Routes>
-      
-      {/* El Footer NO se mostrará si isAuthPage es true */}
+      <Navbar isAuthPage={isAuthPage} />
+
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={
+            <>
+              <Hero />
+              <CouponGrid />
+              <StoreGrid />
+            </>
+          } />
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Registration />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/cupones-clientes" element={<CuponCliente />} />
+          <Route path="/coupons" element={<CouponsPage />} />
+        </Routes>
+      </main>
+
       {!isAuthPage && <Footer />}
     </div>
   );

@@ -106,3 +106,75 @@ export const deleteCoupon = async (req, res) => {
     errorResponse(res, 'Error al eliminar cupón', 500, error.message);
   }
 };
+
+/**
+ * Obtener cupones de un cliente (por cliente_id)
+ * 
+ */
+export const getCuponesByCliente = async (req, res) => {
+  try {
+    const { clienteId } = req.params;
+
+    const connection = await pool.getConnection();
+
+    const [rows] = await connection.query(
+      `SELECT 
+          id, codigo, estado, precio_pagado, fecha_compra, fecha_canje,
+          oferta_titulo, oferta_descripcion, fecha_limite_uso,
+          empresa_nombre, empresa_direccion, empresa_telefono
+       FROM v_cupones_clientes
+       WHERE cliente_id = ?
+       ORDER BY fecha_compra DESC`,
+      [clienteId]
+    );
+
+    connection.release();
+
+    return successResponse(res, rows, 'Cupones del cliente obtenidos correctamente');
+  } catch (error) {
+    return errorResponse(res, 'Error al obtener cupones del cliente', 500, error.message);
+  }
+};
+
+// Eliminar cupón por ID (para uso interno, no expuesto en rutas públicas)
+export const deleteCupon = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cuponId = Number(id);
+
+    if (!cuponId) {
+      return res.status(400).json({
+        success: false,
+        message: "ID de cupón inválido",
+      });
+    }
+
+    const connection = await pool.getConnection();
+
+    const [result] = await connection.query(
+      "DELETE FROM cupones WHERE id = ?",
+      [cuponId]
+    );
+
+    connection.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Cupón no encontrado",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Cupón eliminado correctamente",
+    });
+
+  } catch (error) {
+    console.error("deleteCupon error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error al eliminar cupón",
+    });
+  }
+};

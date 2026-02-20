@@ -5,3 +5,20 @@
   padding: 2rem;
   text-align: center;
 }
+
+/* Layout sticky footer */
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Esto hace que el contenido “estire” y empuje el footer abajo */
+.main-content {
+  flex: 1;
+}
+
+/* Extra opcional: que el footer no se pegue al contenido */
+footer {
+  margin-top: auto;
+}
