@@ -33,12 +33,12 @@ function App() {
 
   return (
     <div className="App app-layout">
-      {/* Esto lo dejás si querés ver el backend arriba */}
+      {}
       <ConexionTest />
 
       <Navbar />
 
-      {/* 👇 ESTE es el truco */}
+      {/* esto es lo importante*/}
       <main className="main-content">
         <Routes>
           {/* Página Principal */}
@@ -46,7 +46,7 @@ function App() {
             path="/"
             element={
               <>
-                <Hero rubros={rubros} redirectToOfertas={true} />
+                <Hero rubros={rubros} redirectToOfertas={true} /> 
                 <CouponGrid />
                 <StoreGrid />
               </>

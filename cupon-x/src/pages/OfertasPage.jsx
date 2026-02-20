@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Container } from 'react-bootstrap';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Container, Spinner, Alert } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
+import { Row, Col } from 'react-bootstrap';
 import Hero from '../components/Hero';
-import OfertasGrid from '../components/OfertasGrid';
+import CouponCard from '../components/CouponCard';
 import { getOfertasVigentes, getRubros } from '../services/api';
+import '../styles/coupongrid.css';
 
 /**
- * Página OfertasPage - Vista principal de ofertas vigentes con filtros
+ * Página OfertasPage - Vista principal de cupones vigentes con filtros
  * 
- * Esta página muestra todas las ofertas vigentes aprobadas con:
+ * Esta página muestra todos los cupones vigentes aprobados con:
  * - Filtrado por rubro (categoría)
  * - Búsqueda por palabra clave (título de oferta o nombre de empresa)
- * - Grid responsivo de tarjetas de ofertas
+ * - Grid responsivo de tarjetas de cupones
  */
 const OfertasPage = () => {
   const [searchParams] = useSearchParams();
@@ -117,6 +119,34 @@ const OfertasPage = () => {
     return texto;
   };
 
+  /**
+   *formato CouponCard
+   */
+  const cuponesAdaptados = useMemo(() => {
+    return (ofertas || []).map((oferta) => {
+      let fechaIgual = '—';
+      if (oferta.fecha_limite_uso) {
+        const date = new Date(oferta.fecha_limite_uso);
+        if (!isNaN(date.getTime())) {
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          const year = date.getFullYear().toString().slice(-2);
+          fechaIgual = `${month}/${day}/${year}`;
+        }
+      }
+
+      return {
+        id: oferta.oferta_id,
+        brand: oferta.titulo,
+        category: oferta.rubro_nombre,
+        price: `$${Number(oferta.precio_oferta ?? 0).toFixed(2)}`,
+        description: oferta.descripcion || 'Sin descripción',
+        code: 'Oferta disponible',
+        expiry: fechaIgual
+      };
+    });
+  }, [ofertas]);
+
   return (
     <div className="ofertas-page">
       {/* Hero con filtros integrados */}
@@ -127,24 +157,68 @@ const OfertasPage = () => {
         mostrarImagen={true}
       />
 
-      {/* Grid de Ofertas */}
+      {/* Grid de Cupones */}
       <Container className="py-4">
-        <OfertasGrid
-          ofertas={ofertas}
-          loading={loading}
-          error={error}
-          filtroActivo={getFiltroActivo()}
-        />
-
-        {/* Información adicional */}
-        {!loading && !error && ofertas.length > 0 && (
-          <div className="text-center mt-5 text-muted">
-            <small>
-              Las ofertas mostradas son válidas dentro del período indicado.
-              <br />
-              Los cupones se generan al momento de la compra y son personales e intransferibles.
-            </small>
+        {/* Estado de carga */}
+        {loading && (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-3 text-muted">Cargando cupones vigentes...</p>
           </div>
+        )}
+
+        {/* Estado de error */}
+        {!loading && error && (
+          <Alert variant="danger" className="text-center">
+            <Alert.Heading>Error al cargar cupones</Alert.Heading>
+            <p>{error}</p>
+          </Alert>
+        )}
+
+        {/* Sin resultados */}
+        {!loading && !error && cuponesAdaptados.length === 0 && (
+          <div className="text-center py-5">
+            <h4 className="text-muted">No se encontraron cupones</h4>
+            <p className="text-muted">
+              {getFiltroActivo() 
+                ? `No hay cupones disponibles para: ${getFiltroActivo()}` 
+                : 'No hay cupones vigentes en este momento'}
+            </p>
+            <p className="text-muted small">
+              Intenta cambiar los filtros o buscar con otras palabras clave
+            </p>
+          </div>
+        )}
+
+        {/* Grid de cupones */}
+        {!loading && !error && cuponesAdaptados.length > 0 && (
+          <>
+            {/* Contador de resultados */}
+            <div className="mb-3">
+              <p className="text-muted">
+                {cuponesAdaptados.length} {cuponesAdaptados.length === 1 ? 'cupón encontrado' : 'cupones encontrados'}
+                {getFiltroActivo() && ` en ${getFiltroActivo()}`}
+              </p>
+            </div>
+
+            {/* Grid responsivo - mismo layout que Top Coupons */}
+            <Row xs={1} sm={2} md={3} lg={3} className="g-4">
+              {cuponesAdaptados.map((cupon) => (
+                <Col key={cupon.id}>
+                  <CouponCard data={cupon} />
+                </Col>
+              ))}
+            </Row>
+
+            {/* Información adicional */}
+            <div className="text-center mt-5 text-muted">
+              <small>
+                Los cupones mostrados son válidos dentro del período indicado.
+                <br />
+                Son personales e intransferibles.
+              </small>
+            </div>
+          </>
         )}
       </Container>
     </div>

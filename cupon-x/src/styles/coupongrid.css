@@ -93,6 +93,10 @@
   justify-content: center;
 }
 
+.code-icon-style {
+  color: #06283d;
+}
+
 .code-font {
   font-family: 'Courier New', monospace;
   font-weight: 800;
