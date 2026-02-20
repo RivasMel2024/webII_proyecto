@@ -11,6 +11,7 @@ import Registration from './components/Registration';
 import ForgotPassword from './components/ForgotPassword'; 
 import CuponCliente from './pages/CuponCliente';
 import CouponsPage from "./pages/CouponsPage";
+import StoresPage from "./pages/StoresPage";
 
 function App() {
   const location = useLocation(); 
@@ -42,6 +43,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/cupones-clientes" element={<CuponCliente />} />
           <Route path="/coupons" element={<CouponsPage />} />
+          <Route path="/stores" element={<StoresPage />} />
         </Routes>
       </main>
 

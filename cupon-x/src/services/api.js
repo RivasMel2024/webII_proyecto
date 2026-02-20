@@ -72,3 +72,27 @@ export const getAllOffers = async () => {
     return { success: false, message: error.message, data: [] };
   }
 };
+
+export const getTopEmpresas = async (limit = 6) => {
+  const res = await fetch(`${API_BASE_URL}/empresas/top?limit=${limit}`);
+  if (!res.ok) throw new Error("Error al obtener top empresas");
+  return await res.json(); // { success, data }
+};
+
+export const getAllEmpresas = async () => {
+  const res = await fetch(`${API_BASE_URL}/empresas`);
+  if (!res.ok) throw new Error("Error al obtener empresas");
+  return await res.json();
+};
+
+export const getEmpresaById = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/empresas/${id}`);
+  if (!res.ok) throw new Error("Error al obtener empresa");
+  return await res.json();
+};
+
+export const getOfertasByEmpresa = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/empresas/${id}/ofertas`);
+  if (!res.ok) throw new Error("Error al obtener ofertas de la empresa");
+  return await res.json();
+};
