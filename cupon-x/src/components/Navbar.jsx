@@ -16,9 +16,6 @@ const NavBar = () => { // Ya no necesita recibir props
             CuponX
         </Navbar.Brand>
 
-        {/* Nombre del sitio */}
-        <Navbar.Brand className="fw-bold">Cupón X</Navbar.Brand>
-    
         {/* Botón Sign In */}
         <Nav className="align-items-center ms-auto">
           {/* Si el path es distinto a /login, muestra el botón */}
