@@ -6,6 +6,7 @@ import cuponsRoutes from "./cupons.js";
 import clientesRoutes from "./clientes.js";
 import ofertasRoutes from "./ofertasRoutes.js";
 import rubrosRoutes from "./rubros.js";
+import empresasRoutes from "./empresas.js";
 
 const router = express.Router();
 
@@ -16,16 +17,15 @@ router.get("/status", getStatus);
 // Ruta de prueba de conexión
 router.get("/test-connection", testConnection);
 
-// Rutas de cupones
+// Rutas de cupones y clientes
 router.use("/cupones", cuponsRoutes);
-
-// Rutas de clientes
 router.use("/clientes", clientesRoutes);
 
-// Rutas de ofertas
+// Rutas de ofertas y rubros
 router.use("/ofertas", ofertasRoutes);
-
-// Rutas de rubros (categorías)
 router.use("/rubros", rubrosRoutes);
+
+// Rutas de empresas
+router.use("/empresas", empresasRoutes);
 
 export default router;

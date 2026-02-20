@@ -11,7 +11,6 @@ export const testConnection = async () => {
     console.error('Error:', error);
     throw error;
   }
-
 };
 
 export const getCuponesByCliente = async (clienteId) => {
@@ -31,7 +30,6 @@ export const getCuponesByCliente = async (clienteId) => {
   }
 };
 
-
 export const getClientes = async () => {
   const res = await fetch(`${API_BASE_URL}/clientes`);
   if (!res.ok) throw new Error("Error al obtener clientes");
@@ -48,8 +46,7 @@ export async function deleteCupon(id) {
   }
 
   return await res.json();
-};
-
+}
 
 export const getTopOffers = async (limit = 6) => {
   try {
@@ -74,7 +71,7 @@ export const getAllOffers = async () => {
 };
 
 // ============================================================
-// NUEVAS FUNCIONES PARA FILTRADO DE OFERTAS
+// FUNCIONES PARA FILTRADO DE OFERTAS POR RUBRO
 // ============================================================
 
 /**
@@ -134,4 +131,32 @@ export const getRubros = async () => {
     console.error("getRubros error:", error);
     return { success: false, message: error.message, data: [] };
   }
+};
+
+// ============================================================
+// FUNCIONES PARA EMPRESAS/TIENDAS
+// ============================================================
+
+export const getTopEmpresas = async (limit = 6) => {
+  const res = await fetch(`${API_BASE_URL}/empresas/top?limit=${limit}`);
+  if (!res.ok) throw new Error("Error al obtener top empresas");
+  return await res.json(); // { success, data }
+};
+
+export const getAllEmpresas = async () => {
+  const res = await fetch(`${API_BASE_URL}/empresas`);
+  if (!res.ok) throw new Error("Error al obtener empresas");
+  return await res.json();
+};
+
+export const getEmpresaById = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/empresas/${id}`);
+  if (!res.ok) throw new Error("Error al obtener empresa");
+  return await res.json();
+};
+
+export const getOfertasByEmpresa = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/empresas/${id}/ofertas`);
+  if (!res.ok) throw new Error("Error al obtener ofertas de la empresa");
+  return await res.json();
 };

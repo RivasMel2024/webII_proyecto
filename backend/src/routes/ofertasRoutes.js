@@ -8,7 +8,7 @@ import {
 const router = Router();
 
 // ============================================================
-// rutas de ofertas
+// Rutas de ofertas
 // ============================================================
 
 /**
@@ -20,7 +20,7 @@ router.get("/top", getTopOffers);
 
 /**
  * GET /api/ofertas
- * Obtiene todas las ofertas aprobadas (sin filtro de vigencia estricto)
+ * Obtiene todas las ofertas aprobadas
  */
 router.get("/", getAllOffers);
 

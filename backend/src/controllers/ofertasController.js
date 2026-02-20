@@ -65,7 +65,7 @@ export const getAllOffers = async (req, res) => {
 };
 
 // ============================================================
-// funciones para buscar por rubro o palabra clave 
+// Funciones para buscar por rubro o palabra clave 
 // ============================================================
 
 /**
