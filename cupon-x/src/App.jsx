@@ -26,6 +26,7 @@ function App() {
   const location = useLocation();
 
   // CONTROL DE ESTADO: true para ver iconos de carrito e historial
+  // Página para chequear funcionalidad de GitHub
   const [isLoggedIn, setIsLoggedIn] = useState(true);  
 
   const cartItems = [
