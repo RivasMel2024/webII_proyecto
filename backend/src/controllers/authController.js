@@ -72,7 +72,7 @@ const findAccountsByEmail = async (email) => {
     if (empleados.length) results.push({ role: ROLES.EMPLEADO, row: empleados[0] });
 
     const [clientes] = await connection.query(
-      'SELECT id, correo, password_hash, activo, verificado, nombres, apellidos, dui FROM clientes WHERE correo = ? LIMIT 1',
+      'SELECT id, correo, password_hash, activo, verificado, nombres, apellidos, dui, telefono, direccion FROM clientes WHERE correo = ? LIMIT 1',
       [correo]
     );
     if (clientes.length) results.push({ role: ROLES.CLIENTE, row: clientes[0] });
@@ -147,20 +147,41 @@ export const login = async (req, res) => {
             : null,
     });
 
+    // Construir objeto de usuario con todos los datos disponibles
+    const userData = {
+      id: row.id,
+      role,
+      email: row.correo,
+      empresaId:
+        role === ROLES.EMPLEADO
+          ? row.empresa_id
+          : role === ROLES.ADMIN_EMPRESA
+            ? row.id
+            : null,
+    };
+
+    // Agregar campos específicos según el tipo de usuario
+    if (role === ROLES.CLIENTE) {
+      userData.nombres = row.nombres;
+      userData.apellidos = row.apellidos;
+      userData.dui = row.dui;
+      userData.telefono = row.telefono;
+      userData.direccion = row.direccion;
+      userData.verificado = row.verificado;
+    } else if (role === ROLES.ADMIN_CUPONERA || role === ROLES.EMPLEADO) {
+      userData.nombres = row.nombres;
+      userData.apellidos = row.apellidos;
+    } else if (role === ROLES.ADMIN_EMPRESA) {
+      userData.nombre = row.nombre;
+      userData.codigo = row.codigo;
+      userData.rubro_id = row.rubro_id;
+      userData.porcentaje_comision = row.porcentaje_comision;
+    }
+
     return res.json({
       success: true,
       token,
-      user: {
-        id: row.id,
-        role,
-        email: row.correo,
-        empresaId:
-          role === ROLES.EMPLEADO
-            ? row.empresa_id
-            : role === ROLES.ADMIN_EMPRESA
-              ? row.id
-              : null,
-      },
+      user: userData,
     });
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, message: error.message || 'Error al iniciar sesión' });

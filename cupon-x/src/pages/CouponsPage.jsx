@@ -45,6 +45,11 @@ export default function CouponsPage() {
       description: o.descripcion || "Sin descripción",
       code: "Oferta disponible",
       expiry: formatDateOnly(o.fecha_limite_uso),
+      // Agregar datos completos para el carrito
+      titulo: o.titulo || "Oferta",
+      descripcion: o.descripcion || "Sin descripción",
+      precio_oferta: Number(o.precio_oferta ?? 0),
+      fecha_limite_uso: formatDateOnly(o.fecha_limite_uso),
     }));
   }, [offers]);
 

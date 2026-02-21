@@ -1,22 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navbar, Nav, Button, Container, Badge, Dropdown } from "react-bootstrap";
-import { FaUser, FaShoppingCart, FaHistory } from "react-icons/fa";
+import { FaUser, FaShoppingCart, FaHistory, FaUserCircle } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../services/api";
+import { getAuthUser, isAuthenticated, logout } from "../services/api";
+import { useCart } from "../context/CartContext";
 import "../styles/variables.css";
 
-const NavBar = ({ isLoggedIn, isAuthPage, userRole }) => {
+const NavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { getCartCount } = useCart();
+  const [user, setUser] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const isAuth = isAuthenticated();
+      setAuthenticated(isAuth);
+      if (isAuth) {
+        setUser(getAuthUser());
+      } else {
+        setUser(null);
+      }
+    };
+
+    checkAuth();
+    // Verificar autenticación cada vez que cambie la ruta
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, [location]);
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    setAuthenticated(false);
+    setUser(null);
+    navigate('/login');
   };
 
   // Verificar si el usuario es admin
-  const isAdmin = userRole === 'ADMIN_CUPONERA';
+  const isAdmin = user?.role === 'ADMIN_CUPONERA';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/verify';
+  const cartCount = getCartCount();
 
   return (
     <Navbar expand="lg" className="navbar-custom" sticky="top">
@@ -27,7 +55,7 @@ const NavBar = ({ isLoggedIn, isAuthPage, userRole }) => {
 
         <Nav className="align-items-center ms-auto">
           {/* CASO: USUARIO LOGUEADO */}
-          {isLoggedIn ? (
+          {authenticated && user ? (
             <div className="d-flex align-items-center">
               {/* Solo mostrar iconos de carrito e historial si NO es admin */}
               {!isAdmin && (
@@ -38,27 +66,38 @@ const NavBar = ({ isLoggedIn, isAuthPage, userRole }) => {
 
                   <Link to="/cart" className="nav-icon-link me-3 position-relative" title="Carrito">
                     <FaShoppingCart size={22} />
-                    <Badge pill className="cart-badge">3</Badge>
+                    {cartCount > 0 && (
+                      <Badge pill className="cart-badge">{cartCount}</Badge>
+                    )}
                   </Link>
                 </>
               )}
 
               <Dropdown align="end">
                 <Dropdown.Toggle 
-                  as={Button} 
-                  className="btn-signin d-flex align-items-center"
-                  style={{ background: 'transparent', border: 'none' }}
+                  id="dropdown-user"
+                  className="btn-user-menu d-flex align-items-center"
                 >
-                  <FaUser className="me-2" />
-                  <span className="d-none d-lg-inline">Mi Perfil</span>
+                  <FaUserCircle className="me-2" size={20} />
+                  <span className="d-none d-lg-inline">{user.nombres || user.email}</span>
                 </Dropdown.Toggle>
 
-                <Dropdown.Menu>
-                  <Dropdown.Item as={Link} to="/profile">
-                    Ver Perfil
+                <Dropdown.Menu className="dropdown-menu-custom">
+                  <Dropdown.Item as={Link} to="/profile" className="dropdown-item-custom">
+                    Mi Perfil
                   </Dropdown.Item>
+                  {user.role === 'CLIENTE' && (
+                    <Dropdown.Item as={Link} to="/mis-cupones" className="dropdown-item-custom">
+                      Mis Cupones
+                    </Dropdown.Item>
+                  )}
+                  {user.role === 'ADMIN_CUPONERA' && (
+                    <Dropdown.Item as={Link} to="/cupones-clientes" className="dropdown-item-custom">
+                      Cupones Clientes
+                    </Dropdown.Item>
+                  )}
                   <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout}>
+                  <Dropdown.Item onClick={handleLogout} className="dropdown-item-custom">
                     Cerrar Sesión
                   </Dropdown.Item>
                 </Dropdown.Menu>

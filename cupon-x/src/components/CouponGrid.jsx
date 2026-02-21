@@ -47,8 +47,12 @@ const adapted = useMemo(() => {
     price: `$${Number(o.precio_oferta ?? 0).toFixed(2)}`,
     description: o.descripcion || "Sin descripción",
     code: "Oferta disponible",
-
     expiry: formatDateOnly(o.fecha_limite_uso),
+    // Agregar datos completos para el carrito
+    titulo: o.titulo || "Oferta",
+    descripcion: o.descripcion || "Sin descripción",
+    precio_oferta: Number(o.precio_oferta ?? 0),
+    fecha_limite_uso: formatDateOnly(o.fecha_limite_uso),
   }));
 }, [offers]);
 

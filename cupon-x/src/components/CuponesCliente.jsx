@@ -94,24 +94,24 @@ export default function CuponesCliente({ clienteId }) {
     }
   };
 
-  const onDelete = async (id) => {
-    const ok = window.confirm(`¿Seguro que querés eliminar el cupón #${id}?`);
-    if (!ok) return;
+  // const onDelete = async (id) => {
+  //   const ok = window.confirm(`¿Seguro que querés eliminar el cupón #${id}?`);
+  //   if (!ok) return;
 
-    try {
-      setDeletingId(id);
-      setError("");
+  //   try {
+  //     setDeletingId(id);
+  //     setError("");
 
-      const res = await deleteCupon(id);
-      if (!res?.success) throw new Error(res?.message || "No se pudo eliminar");
+  //     const res = await deleteCupon(id);
+  //     if (!res?.success) throw new Error(res?.message || "No se pudo eliminar");
 
-      setCupones((prev) => prev.filter((c) => c.id !== id));
-    } catch (e) {
-      setError(e?.message || "Error eliminando el cupón");
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  //     setCupones((prev) => prev.filter((c) => c.id !== id));
+  //   } catch (e) {
+  //     setError(e?.message || "Error eliminando el cupón");
+  //   } finally {
+  //     setDeletingId(null);
+  //   }
+  // };
 
   return (
     <div className="container my-4 cupones-clientes-wrap">
@@ -208,7 +208,7 @@ export default function CuponesCliente({ clienteId }) {
                   </div>
 
                   {/* Acciones al fondo */}
-                  <div className="mt-auto pt-3 d-flex gap-2">
+                  {/* <div className="mt-auto pt-3 d-flex gap-2">
                     <Button
                       className="btn-action-full"
                       variant="danger"
@@ -228,7 +228,7 @@ export default function CuponesCliente({ clienteId }) {
                         </>
                       )}
                     </Button>
-                  </div>
+                  </div> */}
 
                   <div className="small text-muted mt-3">
                     <strong>ID:</strong> {c.id} &nbsp;•&nbsp; <strong>Cliente:</strong> {c.cliente_id}

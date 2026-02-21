@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css'; 
 
+// Context
+import { CartProvider } from './context/CartContext';
+
 // Componentes de Interfaz
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -17,6 +20,7 @@ import Login from './components/Login';
 import Registration from './components/Registration'; 
 import ForgotPassword from './components/ForgotPassword'; 
 import VerifyAccount from './components/VerifyAccount';
+import Profile from './components/Profile';
 import CuponCliente from './pages/CuponCliente';
 import MisCupones from './pages/MisCupones';
 import CouponsPage from "./pages/CouponsPage";
@@ -58,11 +62,6 @@ function App() {
     };
   }, [location.pathname]);
 
-  const cartItems = [
-    { id: 1, brand: "Pizza Hut", price: 15.99 },
-    { id: 2, brand: "Adidas", price: 5.00 },
-  ];
-
   const isAuthPage = 
     location.pathname === '/login' || 
     location.pathname === '/register' || 
@@ -72,69 +71,70 @@ function App() {
     location.pathname === '/history'; 
 
   return (
-    <div className="app-layout">
-      {/* <ConexionTest /> */}
+    <CartProvider>
+      <div className="app-layout">
+        {/* <ConexionTest /> */}
 
-      {/* Navbar con el contador dinámico cartCount */}
-      <Navbar 
-        isLoggedIn={isLoggedIn} 
-        isAuthPage={isAuthPage}
-        userRole={userRole}
-        cartCount={cartItems.length} 
-      />
+        {/* Navbar con detección automática de autenticación */}
+        <Navbar />
 
-      <main className="main-content">
-        <Routes>
-          {/* Vista Principal */}
-          <Route path="/" element={
-            <>
-              <Hero />
-              <CouponGrid />
-              <StoreGrid />
-            </>
-          } />
+        <main className="main-content">
+          <Routes>
+            {/* Vista Principal */}
+            <Route path="/" element={
+              <>
+                <Hero />
+                <CouponGrid />
+                <StoreGrid />
+              </>
+            } />
 
-          {/* Rutas de Autenticación */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Registration />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/verify" element={<VerifyAccount />} />
-          
-          {/* Ruta para clientes: Ver sus propios cupones */}
-          <Route 
-            path="/mis-cupones" 
-            element={
+            {/* Rutas de Autenticación */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Registration />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify" element={<VerifyAccount />} />
+            
+            {/* Ruta para clientes: Ver sus propios cupones */}
+            <Route 
+              path="/mis-cupones" 
+              element={
+                <RequireAuth>
+                  <MisCupones />
+                </RequireAuth>
+              } 
+            />
+
+            {/* Ruta para admins: Ver todos los cupones con dropdown */}
+            <Route 
+              path="/cupones-clientes" 
+              element={
+                <RequireRole allowedRoles={['ADMIN_CUPONERA']}>
+                  <CuponCliente />
+                </RequireRole>
+              } 
+            />
+
+            
+            {/* Rutas de Funcionalidad Post-Login */}
+            <Route path="/cart" element={<CartPage />} /> 
+            <Route path="/history" element={<HistorialPage />} />
+            <Route path="/profile" element={
               <RequireAuth>
-                <MisCupones />
+                <Profile />
               </RequireAuth>
-            } 
-          />
+            } />
 
-          {/* Ruta para admins: Ver todos los cupones con dropdown */}
-          <Route 
-            path="/cupones-clientes" 
-            element={
-              <RequireRole allowedRoles={['ADMIN_CUPONERA']}>
-                <CuponCliente />
-              </RequireRole>
-            } 
-          />
+            {/* Otras Vistas */}
+            <Route path="/coupons" element={<CouponsPage />} />
+            <Route path="/stores" element={<StoresPage />} />
+          </Routes>
+        </main>
 
-          
-          {/* Rutas de Funcionalidad Post-Login */}
-          <Route path="/cart" element={<CartPage items={cartItems} />} /> 
-          <Route path="/history" element={<HistorialPage />} /> {/* <-- Componente real de historial */}
-          <Route path="/profile" element={<div className="container mt-5"><h1>Perfil de Usuario</h1></div>} />
-
-          {/* Otras Vistas */}
-          <Route path="/coupons" element={<CouponsPage />} />
-          <Route path="/stores" element={<StoresPage />} />
-        </Routes>
-      </main>
-
-      {/* El footer se oculta en login, registro, carrito e historial */}
-      {!isAuthPage && <Footer />}
-    </div>
+        {/* El footer se oculta en login, registro, carrito e historial */}
+        {!isAuthPage && <Footer />}
+      </div>
+    </CartProvider>
   );
 }
 

@@ -214,3 +214,14 @@ export const getOfertasByEmpresa = async (id) => {
   if (!res.ok) throw new Error("Error al obtener ofertas de la empresa");
   return await res.json();
 };
+
+// Comprar cupón(es)
+export const comprarCupon = async ({ ofertaId, cantidad = 1, tarjeta }) => {
+  const res = await authFetch(`${API_BASE_URL}/cupones/comprar`, {
+    method: 'POST',
+    body: JSON.stringify({ ofertaId, cantidad, tarjeta }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al comprar cupón');
+  return data;
+};
