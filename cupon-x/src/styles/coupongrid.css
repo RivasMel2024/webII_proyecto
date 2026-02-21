@@ -133,3 +133,39 @@
 .expiry-footer {
   min-height: 40px;
 }
+
+/* ========== RESPONSIVE - iPad ========== */
+/* @media (max-width: 1024px) and (min-width: 768px) {
+  .coupon-category-tag {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .coupon-top-info {
+    gap: 0.5rem !important;
+  }
+
+  .coupon-brand-tag {
+    font-size: 0.9rem;
+  }
+
+  .coupon-price-value {
+    font-size: 2rem;
+  }
+} */
+
+/* ========== RESPONSIVE - Móvil ========== */
+@media (max-width: 767px) {
+  .coupon-category-tag {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+  }
+
+  .coupon-price-value {
+    font-size: 1.8rem;
+  }
+}

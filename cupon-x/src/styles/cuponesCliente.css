@@ -104,3 +104,39 @@
   padding: 12px 14px;
 }
 
+/* ========== RESPONSIVE - iPad ========== */
+/* @media (max-width: 1024px) and (min-width: 768px) {
+  .coupon-category-tag {
+    font-size: 10px;
+    padding: 4px 8px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .coupon-brand-tag {
+    font-size: 0.9rem;
+  }
+
+  .coupon-price-value {
+    font-size: 36px;
+  }
+
+  .coupon-text-desc {
+    font-size: 13px;
+  }
+} */
+
+/* ========== RESPONSIVE - Móvil ========== */
+@media (max-width: 767px) {
+  .coupon-category-tag {
+    font-size: 11px;
+    padding: 4px 9px;
+  }
+
+  .coupon-price-value {
+    font-size: 32px;
+  }
+}
+
