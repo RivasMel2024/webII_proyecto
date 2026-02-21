@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import "../styles/storedCard.css";
+import "../styles/storedcard.css";
 
 export default function StoreCard({ data }) {
   return (

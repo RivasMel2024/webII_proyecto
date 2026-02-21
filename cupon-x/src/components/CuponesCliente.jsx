@@ -8,7 +8,7 @@ import {
   FaCopy,
 } from "react-icons/fa";
 import { getCuponesByCliente, deleteCupon } from "../services/api";
-import "../styles/cuponesCliente.css";
+import "../styles/cuponescliente.css";
 
 export default function CuponesCliente({ clienteId }) {
   const [loading, setLoading] = useState(true);
