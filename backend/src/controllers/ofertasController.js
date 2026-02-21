@@ -37,7 +37,6 @@ export const getTopOffers = async (req, res) => {
   }
 };
 
-
 export const getAllOffers = async (req, res) => {
   try {
     const connection = await pool.getConnection();
@@ -65,17 +64,17 @@ export const getAllOffers = async (req, res) => {
 };
 
 // ============================================================
-// Funciones para buscar por rubro o palabra clave 
+// Funciones para buscar por rubro o palabra clave
 // ============================================================
 
 /**
  * Obtiene ofertas vigentes con filtros opcionales
  * - ver la oferta esté aprobada
  * - ver que este en fechas validas
- * - valida que NO se haya agotado 
- * - filtrar por rubro 
- * - busca por palabra clave 
- * 
+ * - valida que NO se haya agotado
+ * - filtrar por rubro
+ * - busca por palabra clave
+ *
  * Query params:
  *   - rubro_id: ID del rubro (opcional)
  *   - search: Palabra clave para buscar (opcional)
@@ -83,7 +82,7 @@ export const getAllOffers = async (req, res) => {
 export const getOfertasVigentes = async (req, res) => {
   try {
     const { rubro_id, search } = req.query;
-    
+
     const connection = await pool.getConnection();
 
     // Construir query dinámicamente
@@ -104,13 +103,16 @@ export const getOfertasVigentes = async (req, res) => {
         r.id AS rubro_id,
         r.nombre AS rubro_nombre,
         COUNT(c.id) AS cupones_vendidos,
-        CASE 
+        CASE
           WHEN o.cantidad_limite IS NULL THEN NULL
           ELSE (o.cantidad_limite - COUNT(c.id))
         END AS cupones_disponibles
       FROM ofertas o
       INNER JOIN empresas e ON o.empresa_id = e.id
-      INNER JOIN rubros r ON e.rubro_id = r.id
+
+      -- ✅ CAMBIO CLAVE: usa rubro de la OFERTA si existe, si no usa rubro de la EMPRESA
+      INNER JOIN rubros r ON r.id = COALESCE(o.rubro_id, e.rubro_id)
+
       LEFT JOIN cupones c ON c.oferta_id = o.id
       WHERE o.estado = 'aprobada'
         AND CURDATE() BETWEEN o.fecha_inicio_oferta AND o.fecha_fin_oferta
@@ -133,7 +135,7 @@ export const getOfertasVigentes = async (req, res) => {
 
     query += `
       GROUP BY
-        o.id, o.titulo, o.descripcion, o.precio_regular, o.precio_oferta, 
+        o.id, o.titulo, o.descripcion, o.precio_regular, o.precio_oferta,
         o.fecha_limite_uso, o.cantidad_limite, o.imagen_url,
         e.id, e.nombre, e.codigo, r.id, r.nombre
       HAVING
