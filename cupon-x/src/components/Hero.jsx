@@ -122,7 +122,7 @@ const Hero = ({
             </div> */}
 
             <div className="hero-tags">
-              {rubros.slice(0, 5).map((r) => (
+              {rubros.filter(r => ['Restaurantes', 'Turismo', 'Entretenimiento', 'Educación', 'Belleza'].includes(r.nombre)).map((r) => (
                 <div
                   key={r.id}
                   className={`tag-pill ${
