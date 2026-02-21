@@ -29,16 +29,27 @@ import RequireAuth from './components/RequireAuth';
 import RequireRole from './components/RequireRole';
 import CartPage from "./pages/CartPage"; 
 import HistorialPage from "./pages/HistorialPage"; 
+import OfertasPage from "./pages/OfertasPage";
 
 // Importar función de autenticación
-import { isAuthenticated, getAuthUser } from './services/api';
+import { isAuthenticated, getAuthUser, getRubros } from './services/api';
 
 function App() {
   const location = useLocation();
 
-  // CONTROL DE ESTADO: Verificar si el usuario está autenticado
+  // CONTROL DE ESTADO
   const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated());
   const [userRole, setUserRole] = useState(getAuthUser()?.role || null);
+  const [rubros, setRubros] = useState([]);
+
+  // Detectar páginas de autenticación
+  const isAuthPage = 
+    location.pathname === '/login' || 
+    location.pathname === '/register' || 
+    location.pathname === '/forgot-password' ||
+    location.pathname === '/cart' ||
+    location.pathname === '/verify' ||
+    location.pathname === '/history'; 
 
   // Escuchar cambios en la autenticación
   useEffect(() => {
@@ -62,13 +73,20 @@ function App() {
     };
   }, [location.pathname]);
 
-  const isAuthPage = 
-    location.pathname === '/login' || 
-    location.pathname === '/register' || 
-    location.pathname === '/forgot-password' ||
-    location.pathname === '/cart' ||
-    location.pathname === '/verify' ||
-    location.pathname === '/history'; 
+  // Cargar rubros al inicio
+  useEffect(() => {
+    const cargarRubros = async () => {
+      try {
+        const response = await getRubros();
+        if (response.success) {
+          setRubros(response.data);
+        }
+      } catch (error) {
+        console.error('Error al cargar rubros:', error);
+      }
+    };
+    cargarRubros();
+  }, []);
 
   return (
     <CartProvider>
@@ -83,7 +101,7 @@ function App() {
             {/* Vista Principal */}
             <Route path="/" element={
               <>
-                <Hero />
+                <Hero rubros={rubros} redirectToOfertas={true} />
                 <CouponGrid />
                 <StoreGrid />
               </>
@@ -115,7 +133,6 @@ function App() {
               } 
             />
 
-            
             {/* Rutas de Funcionalidad Post-Login */}
             <Route path="/cart" element={<CartPage />} /> 
             <Route path="/history" element={<HistorialPage />} />
@@ -127,6 +144,7 @@ function App() {
 
             {/* Otras Vistas */}
             <Route path="/coupons" element={<CouponsPage />} />
+            <Route path="/ofertas" element={<OfertasPage />} />
             <Route path="/stores" element={<StoresPage />} />
           </Routes>
         </main>

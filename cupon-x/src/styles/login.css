@@ -1,23 +1,19 @@
-/* ==========================================================================
-   Estilos Compartidos: Login, Registro y Olvido de Contraseña
-   ========================================================================== */
-
 .login-container {
-  display: flex;
-  align-items: center;    
-  justify-content: center;  
-  min-height: 100vh; 
-  padding: 60px 20px;      
-  background-color: var(--color-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    margin-top: 50px;
 }
 
 .login-card {
-  width: 100%;
-  max-width: 500px;
-  border: none !important;
-  border-radius: 20px !important;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-  background-color: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px !important;
+    border: 2px solid rgba(102, 155, 188, 0.1) !important;
+    padding: 20px;
+    box-shadow: 0 15px 35px rgba(0, 48, 73, 0.05) !important;
+    background-color: #ffffff !important;
 }
 
 .login-title {
@@ -42,7 +38,6 @@
     padding: 12px 15px !important;
     border: 2px solid #f1f3f5 !important;
     font-size: 0.95rem !important;
-    color: #000000 !important; 
     transition: all 0.3s ease !important;
 }
 
@@ -60,27 +55,15 @@
     padding: 14px !important;
     font-weight: 800 !important;
     font-size: 1rem !important;
-    color: #ffffff !important;
     letter-spacing: 1px !important;
     margin-top: 10px;
     transition: all 0.3s ease !important;
-    cursor: pointer;
 }
 
 .btn-login-submit:hover {
     background-color: var(--color-primary-dark) !important;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(193, 18, 31, 0.3) !important;
-}
-
-.forgot-password-link {
-    transition: all 0.2s ease;
-    display: inline-block;
-}
-
-.forgot-password-link:hover {
-    text-decoration: underline !important;
-    opacity: 0.8;
 }
 
 .login-footer-text {
@@ -90,23 +73,13 @@
     color: var(--color-secondary);
 }
 
-.login-footer-text span {
-    color: #000000 !important; 
-}
-
 .login-footer-text a {
-    color: var(--color-primary) !important;
-    text-decoration: underline !important; 
+    color: var(--color-primary);
+    text-decoration: none;
     font-weight: 700;
     margin-left: 5px;
 }
 
 .login-footer-text a:hover {
-    color: var(--color-primary-dark) !important;
-    text-decoration: underline !important;
-}
-
-.login-card p {
-    color: #4a5568;
-    line-height: 1.6;
+    text-decoration: underline;
 }

@@ -6,6 +6,7 @@ import cuponsRoutes from "./cupons.js";
 import clientesRoutes from "./clientes.js";
 import ofertasRoutes from "./ofertasRoutes.js";
 import authRoutes from "./auth.js";
+import rubrosRoutes from "./rubros.js";
 import empresasRoutes from "./empresas.js";
 
 const router = express.Router();
@@ -24,8 +25,12 @@ router.use('/auth', authRoutes);
 router.use("/cupones", cuponsRoutes);
 router.use("/clientes", clientesRoutes);
 
-// Rutas de ofertas 
+
+// Rutas de ofertas y rubros
 router.use("/ofertas", ofertasRoutes);
+router.use("/rubros", rubrosRoutes);
+
+// Rutas de empresas
 router.use("/empresas", empresasRoutes);
 
 export default router;
