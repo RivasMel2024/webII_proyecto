@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import CouponCard from "./CouponCard";
-import "../styles/CouponGrid.css";
+import "../styles/couponGrid.css";
 import { getTopOffers } from "../services/api";
 
 const formatDateOnly = (d) => {
