@@ -392,3 +392,49 @@ export const changePassword = async (req, res) => {
     return res.status(error.status || 500).json({ success: false, message: error.message || 'Error al cambiar contraseña' });
   }
 };
+
+// Endpoint temporal para crear administradores desde Postman
+export const registerAdmin = async (req, res) => {
+  try {
+    const nombres = String(req.body.nombres || '').trim();
+    const apellidos = String(req.body.apellidos || '').trim();
+    const correo = normalizeEmail(req.body.correo || req.body.email);
+    const password = String(req.body.password || '').trim();
+
+    if (!nombres || !apellidos || !correo || !password) {
+      return res.status(400).json({ success: false, message: 'Todos los campos son requeridos' });
+    }
+
+    assertPassword(password);
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const connection = await pool.getConnection();
+    try {
+      const [exists] = await connection.query('SELECT id FROM administradores_cuponx WHERE correo = ? LIMIT 1', [correo]);
+      if (exists.length) {
+        return res.status(409).json({ success: false, message: 'El correo ya está registrado' });
+      }
+
+      const [result] = await connection.query(
+        `INSERT INTO administradores_cuponx (nombres, apellidos, correo, password_hash, activo)
+         VALUES (?, ?, ?, ?, 1)`,
+        [nombres, apellidos, correo, passwordHash]
+      );
+
+      // Asegurar que se confirme la transacción
+      await connection.commit();
+
+      return res.status(201).json({
+        success: true,
+        message: 'Administrador creado exitosamente',
+        adminId: result.insertId,
+        credentials: { email: correo, password }
+      });
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    return res.status(error.status || 500).json({ success: false, message: error.message || 'Error al crear administrador' });
+  }
+};

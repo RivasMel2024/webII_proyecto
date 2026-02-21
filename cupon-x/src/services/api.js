@@ -20,6 +20,26 @@ export const clearAuthSession = () => {
   localStorage.removeItem(AUTH_STORAGE_KEY);
 };
 
+// Funciones de utilidad para autenticación
+export const getAuthUser = () => {
+  const session = getAuthSession();
+  return session?.user || null;
+};
+
+export const isAuthenticated = () => {
+  const session = getAuthSession();
+  return !!(session?.token && session?.user);
+};
+
+export const hasRole = (role) => {
+  const user = getAuthUser();
+  return user?.role === role;
+};
+
+export const logout = () => {
+  clearAuthSession();
+};
+
 const authFetch = async (url, options = {}) => {
   const session = getAuthSession();
   const token = session?.token;

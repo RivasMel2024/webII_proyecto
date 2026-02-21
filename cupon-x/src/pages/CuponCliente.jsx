@@ -1,18 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import VistaCupones from "../components/VistaCupones";
-import { getAuthSession } from '../services/api';
 
-export default function CuponeCliente() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const session = getAuthSession();
-    if (!session?.token) navigate('/login');
-  }, [navigate]);
-
+export default function CuponCliente() {
   return (
     <div className="container my-4">
+      <h2 className="mb-4">Gestión de Cupones - Admin</h2>
       <VistaCupones />
     </div>
   );

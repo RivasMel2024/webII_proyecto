@@ -1,8 +1,4 @@
 import { Routes, Route, useLocation } from 'react-router-dom'; 
-import ConexionTest from './components/ConexionTest';
-import CuponesCliente from './components/CuponesCliente';
-import VistaCupones from "./components/VistaCupones";
-
 import './App.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -14,13 +10,15 @@ import Registration from './components/Registration';
 import ForgotPassword from './components/ForgotPassword'; 
 import VerifyAccount from './components/VerifyAccount';
 import CuponCliente from './pages/CuponCliente';
+import MisCupones from './pages/MisCupones';
 import CouponsPage from "./pages/CouponsPage";
 import StoresPage from "./pages/StoresPage";
+import RequireAuth from './components/RequireAuth';
+import RequireRole from './components/RequireRole';
 
 function App() {
   const location = useLocation(); 
 
-  // Agregamos '/forgot-password' a la lista negra del Footer y Navbar
   const isAuthPage = 
     location.pathname === '/login' || 
     location.pathname === '/register' || 
@@ -47,7 +45,27 @@ function App() {
           <Route path="/register" element={<Registration />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/verify" element={<VerifyAccount />} />
-          <Route path="/cupones-clientes" element={<CuponCliente />} />
+          
+          {/* Ruta para clientes: Ver sus propios cupones */}
+          <Route 
+            path="/mis-cupones" 
+            element={
+              <RequireAuth>
+                <MisCupones />
+              </RequireAuth>
+            } 
+          />
+
+          {/* Ruta para admins: Ver todos los cupones con dropdown */}
+          <Route 
+            path="/cupones-clientes" 
+            element={
+              <RequireRole allowedRoles={['ADMIN_CUPONERA']}>
+                <CuponCliente />
+              </RequireRole>
+            } 
+          />
+
           <Route path="/coupons" element={<CouponsPage />} />
           <Route path="/stores" element={<StoresPage />} />
         </Routes>
