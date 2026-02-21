@@ -37,8 +37,10 @@ const CouponCard = ({ data }) => {
         
         {/* Botón de Acción a pantalla completa */}
         <div className="mt-auto pt-3">
-           <Button className="btn-action-full">
-              CANJEAR CUPÓN
+           <Button className="btn-action-full"
+           onClick={() => alert(`Añadido al carrito: ${data.brand}`)}
+           >
+              COMPRAR CUPÓN
            </Button>
         </div>
       </Card.Body>

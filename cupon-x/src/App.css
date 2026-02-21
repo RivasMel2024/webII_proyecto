@@ -22,3 +22,13 @@
 footer {
   margin-top: auto;
 }
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Asegura que la app ocupe toda la pantalla */
+}
+
+.main-content {
+  flex: 1; /* Empuja el footer hacia abajo si hay poco contenido */
+}

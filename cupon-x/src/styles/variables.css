@@ -3,7 +3,7 @@
   --color-primary-dark: #780000;   /* Rojo oscuro - acentos y hover */
   --color-primary: #C1121F;        /* Rojo vivo - navbar y botones */
   --color-background: #FFFDF7;     /* Fondo más claro y limpio */
-  --color-text: #003049;           /* Texto principal */
+  --color-text: #003049;           /* Texto principal (Azul Profundo) */
   --color-secondary: #669BBC;      /* Detalles y bordes */
 }
 
@@ -15,7 +15,7 @@ body {
   margin: 0;
 }
 
-/* Navbar full width */
+/* --- NAVBAR --- */
 .navbar-custom {
   background-color: var(--color-primary);
   width: 100%;
@@ -24,27 +24,167 @@ body {
   margin: 0;
 }
 
-/* Brand */
 .navbar-custom .navbar-brand {
-  color: var(--color-background);
+  color: var(--color-background) !important; 
   font-size: 1.5rem;
   letter-spacing: 1px;
 }
 
-/* Botón Sign In */
+/* --- BOTONES (Sign In / Mi Perfil) --- */
 .btn-signin {
-  background-color: var(--color-primary-dark);
-  color: var(--color-background);
+  background-color: var(--color-primary-dark) !important;
+  color: var(--color-background) !important;
   border-radius: 6px;
   padding: 0.4rem 1rem;
   font-weight: 500;
-  transition: 0.2s;
+  transition: 0.3s ease;
+  border: none !important;
   outline: none !important; 
   box-shadow: none !important; 
-  border: none !important;
 }
 
 .btn-signin:hover, .btn-signin:focus-visible {
-  background-color: var(--color-text) !important;
+  background-color: var(--color-text) !important; 
   color: var(--color-background) !important;
+  transform: translateY(-1px);
+}
+
+/* --- DROPDOWN DEL NAVBAR --- */
+.dropdown-toggle::after {
+  margin-left: 0.5em;
+}
+
+.dropdown-menu {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  margin-top: 0.5rem;
+}
+
+.dropdown-item {
+  color: var(--color-text);
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+}
+
+.dropdown-divider {
+  margin: 0.3rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* --- ICONOS (Carrito e Historial) --- */
+.nav-icon-link {
+  color: var(--color-background);
+  transition: 0.3s;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon-link:hover {
+  color: var(--color-text); 
+}
+
+/* --- COMPONENTES DEL CARRITO --- */
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  font-size: 0.65rem;
+  background-color: var(--color-text) !important; 
+  color: var(--color-background);
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--color-primary);
+}
+
+/* --- INTERFAZ (Carrito) --- */
+.bg-secondary-light {
+  background-color: #e9ecef;
+  border: 1px dashed var(--color-secondary);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.summary-card {
+  border-top: 5px solid var(--color-primary) !important;
+  background-color: #fff;
+}
+
+.table hover tbody tr:hover {
+  background-color: rgba(102, 155, 188, 0.05); 
+}
+
+.modal-content {
+  border-radius: 15px;
+  border: none;
+}
+
+.modal-header {
+  border-bottom: 1px solid #eee;
+  background-color: var(--color-background);
+  border-radius: 15px 15px 0 0;
+}
+
+.form-control:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 0.2rem rgba(102, 155, 188, 0.25);
+}
+
+/* --- INTERFAZ (Historial) --- */
+/* Estilo de Ticket */
+.history-ticket {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background-color: white;
+  transition: transform 0.2s;
+}
+
+.history-ticket:hover {
+  transform: translateY(-5px);
+}
+
+.ticket-used {
+  opacity: 0.7;
+  filter: grayscale(0.5);
+}
+
+.ticket-top {
+  background-color: #fff;
+  border-bottom: none;
+}
+
+/* El divisor con círculos laterales (Notches) */
+.ticket-divider {
+  position: relative;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticket-divider .dots {
+  border-bottom: 2px dashed #eee;
+  width: 80%;
+}
+
+.ticket-divider .notch {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-background); /* Color del fondo de la app */
+  border-radius: 50%;
+  top: 0;
+}
+
+.ticket-divider .left { left: -10px; }
+.ticket-divider .right { right: -10px; }
+
+.ticket-bottom {
+  background-color: #fcfcfc;
 }

@@ -14,10 +14,14 @@ export const getAuthSession = () => {
 
 export const setAuthSession = ({ token, user }) => {
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token, user }));
+  // Disparar evento personalizado para notificar cambio de autenticación
+  window.dispatchEvent(new Event('authChange'));
 };
 
 export const clearAuthSession = () => {
   localStorage.removeItem(AUTH_STORAGE_KEY);
+  // Disparar evento personalizado para notificar cambio de autenticación
+  window.dispatchEvent(new Event('authChange'));
 };
 
 // Funciones de utilidad para autenticación
