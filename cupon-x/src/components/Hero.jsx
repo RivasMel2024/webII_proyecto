@@ -78,7 +78,7 @@ const Hero = ({
               Ofertas para que puedas comprar las cosas que quieras de forma económica.
             </p>
 
-            <div className="search-container">
+            {/* <div className="search-container">
               <div className="search-box">
 
                 <Dropdown onSelect={handleRubroDropdown}>
@@ -119,7 +119,7 @@ const Hero = ({
                 </Button>
 
               </div>
-            </div>
+            </div> */}
 
             <div className="hero-tags">
               {rubros.slice(0, 5).map((r) => (
