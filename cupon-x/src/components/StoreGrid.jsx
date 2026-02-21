@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import StoreCard from "./StoreCard";
-import "../styles/storeGrid.css";
+import "../styles/storegrid.css";
 import { getTopEmpresas } from "../services/api";
 
 const StoreGrid = () => {
