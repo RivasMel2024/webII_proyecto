@@ -29,7 +29,7 @@
   background: #ffffff;
   padding: 8px;
   border-radius: 50px;
-  box-shadow: 0 15px 35px rgba(0, 48, 73, 0.1); 
+  box-shadow: 0 15px 35px rgba(0, 48, 73, 0.1);
   max-width: 620px;
   border: 1px solid rgba(102, 155, 188, 0.3);
 }
@@ -37,15 +37,32 @@
 .search-box {
   display: flex;
   align-items: center;
+  gap: 10px;
   padding: 5px 10px;
 }
 
+/* ✅ Dropdown toggle arreglado (sin azul, sin borde raro) */
 .category-select {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-text) !important;
   padding-left: 15px;
   cursor: pointer;
   white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.category-select:focus,
+.category-select:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ajuste flechita */
+.category-select::after {
+  margin-left: 6px;
 }
 
 .divider {
@@ -54,12 +71,16 @@
   background-color: var(--color-secondary);
   margin: 0 20px;
   opacity: 0.4;
+  flex: 0 0 auto;
 }
 
+/* ✅ INPUT FIX (esto evita que se “rompa” en flex y que quede raro) */
 .search-input {
   border: none;
   outline: none;
-  width: 100%;
+  flex: 1;
+  min-width: 0;   /* CLAVE */
+  width: auto;    /* quitamos 100% */
   font-size: 1rem;
   color: var(--color-text);
   background: transparent;
@@ -73,6 +94,7 @@
   font-weight: 700 !important;
   color: #ffffff !important;
   transition: all 0.3s ease !important;
+  flex: 0 0 auto;
 }
 
 .btn-hero-search:hover {
@@ -105,6 +127,7 @@
   color: white;
   border-color: var(--color-secondary);
 }
+
 /* efecto para resaltar el rubro seleccionado */
 .tag-pill.active {
   background-color: var(--color-primary);
@@ -113,18 +136,18 @@
   font-weight: 600;
 }
 
-/* Imagen lateral */
+/* Imagen lateral (si la usas) */
 .hero-image-wrapper {
   position: relative;
   width: 100%;
   max-width: 350px;
-  margin: 0 auto;  
+  margin: 0 auto;
 }
 
 .hero-main-img {
   width: 100%;
   height: auto;
-  border-radius: 20px; 
+  border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.15);
   object-fit: cover;
   display: block;

@@ -1,182 +1,156 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Dropdown } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { FaChevronDown } from 'react-icons/fa';
-import '../styles/hero.css';
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Button, Dropdown } from "react-bootstrap";
+import { useNavigate, useLocation } from "react-router-dom";
+import "../styles/hero.css";
 
-/**
- * Componente Hero - Banner principal con búsqueda y filtros
- * @param {Array} rubros - Lista de rubros/categorías disponibles
- * @param {Object} filtrosActuales - Filtros aplicados actualmente { rubro_id, search }
- * @param {Function} onFiltroChange - Callback para cambiar filtros
- * @param {Boolean} mostrarImagen - Mostrar imagen decorativa (default: true)
- * @param {Boolean} redirectToOfertas - Si true, redirige a /ofertas 
- */
-const Hero = ({ rubros = [], filtrosActuales = {}, onFiltroChange, mostrarImagen = true, redirectToOfertas = false }) => {
+const Hero = ({
+  rubros = [],
+  filtrosActuales = { rubro_id: null, search: "" },
+  onFiltroChange,
+  mostrarImagen = true,
+}) => {
   const navigate = useNavigate();
-  const [searchInput, setSearchInput] = useState(filtrosActuales.search || '');
-  const [rubroSeleccionado, setRubroSeleccionado] = useState(filtrosActuales.rubro_id || null);
+  const location = useLocation();
+  const redirectToOfertas = location.pathname !== "/ofertas";
 
-  // Rubros destacados 
-  const rubrosDestacados = ['Restaurantes', 'Turismo', 'Entretenimiento', 'Educación', 'Otros'];
+  const [rubroSeleccionado, setRubroSeleccionado] = useState(
+    filtrosActuales?.rubro_id ?? null
+  );
+  const [searchInput, setSearchInput] = useState(
+    filtrosActuales?.search ?? ""
+  );
 
-  /**
-   * Sincronizar estado local si los filtros externos cambian
-   */
   useEffect(() => {
-    setSearchInput(filtrosActuales.search || '');
-    setRubroSeleccionado(filtrosActuales.rubro_id || null);
-  }, [filtrosActuales]);
+    setRubroSeleccionado(filtrosActuales?.rubro_id ?? null);
+    setSearchInput(filtrosActuales?.search ?? "");
+  }, [filtrosActuales?.rubro_id, filtrosActuales?.search]);
 
-  /**
-   * Manejar búsqueda - debounce implementado en el componente padre
-   */
-  const handleBuscar = () => {
+  const aplicarFiltros = (nuevoRubro, nuevoSearch) => {
+    const rubro_id = nuevoRubro ?? null;
+    const search = nuevoSearch ?? "";
+
     if (redirectToOfertas) {
-      // Construir URL con parámetros
       const params = new URLSearchParams();
-      if (rubroSeleccionado) params.append('rubro_id', rubroSeleccionado);
-      if (searchInput.trim()) params.append('search', searchInput.trim());
+      if (rubro_id) params.append("rubro_id", String(rubro_id));
+      if (search.trim()) params.append("search", search.trim());
       navigate(`/ofertas?${params.toString()}`);
-    } else if (onFiltroChange) {
-      onFiltroChange({rubro_id: rubroSeleccionado, search: searchInput});
+      return;
     }
+
+    onFiltroChange?.({ rubro_id, search });
   };
 
-  /**
-   * Manejar Enter en el input de búsqueda
-   */
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleBuscar();
-    }
-  };
-
-  /**
-   * Manejar clic en pill de categoría
-   */
-  const handleCategoriaClick = (nombreRubro) => {
-    const rubro = rubros.find(r => r.nombre === nombreRubro);
-    const nuevoRubroId = rubro ? rubro.id : null;
-    
-    // Toggle: si ya está seleccionado, deseleccionar
-    const rubroFinal = nuevoRubroId === rubroSeleccionado ? null : nuevoRubroId;
-    
-    setRubroSeleccionado(rubroFinal);
-    
-    if (redirectToOfertas) {
-      // Redirigir a /ofertas con el filtro
-      const params = new URLSearchParams();
-      if (rubroFinal) params.append('rubro_id', rubroFinal);
-      if (searchInput.trim()) params.append('search', searchInput.trim());
-      navigate(`/ofertas?${params.toString()}`);
-    } else if (onFiltroChange) {
-      onFiltroChange({rubro_id: rubroFinal, search: searchInput});
-    }
-  };
-
-  /**
-   * Manejar selección de rubro desde dropdown
-   */
-  const handleRubroDropdown = (rubroId) => {
+  const handleRubroDropdown = (eventKey) => {
+    const rubroId = eventKey ? Number(eventKey) : null;
     setRubroSeleccionado(rubroId);
-    
-    if (redirectToOfertas) {
-      // Redirigir a /ofertas con el filtro
-      const params = new URLSearchParams();
-      if (rubroId) params.append('rubro_id', rubroId);
-      if (searchInput.trim()) params.append('search', searchInput.trim());
-      navigate(`/ofertas?${params.toString()}`);
-    } else if (onFiltroChange) {
-      onFiltroChange({
-        rubro_id: rubroId,
-        search: searchInput
-      });
+    aplicarFiltros(rubroId, searchInput);
+  };
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchInput(val);
+
+    if (!redirectToOfertas) {
+      onFiltroChange?.({ rubro_id: rubroSeleccionado, search: val });
     }
   };
 
-  /**
-   * Obtener el nombre del rubro seleccionado
-   */
-  const getNombreRubroSeleccionado = () => {
-    if (!rubroSeleccionado) return 'Categoría';
-    const rubro = rubros.find(r => r.id === rubroSeleccionado);
-    return rubro ? rubro.nombre : 'Categoría';
+  const handleBuscar = () => {
+    aplicarFiltros(rubroSeleccionado, searchInput);
   };
+
+  const nombreRubro = rubroSeleccionado
+    ? rubros.find((r) => r.id === rubroSeleccionado)?.nombre || "Categoría"
+    : "Categoría";
 
   return (
     <section className="hero-section">
       <Container>
         <Row className="align-items-center">
-          <Col lg={mostrarImagen ? 7 : 12} className="hero-content">
+
+          {/* IZQUIERDA */}
+          <Col lg={6}>
             <h1 className="hero-title">
-              Descubre los mejores <br />
-              <span className="highlight">Cupones</span>
+              Descubre los mejores <span className="highlight">Cupones</span>
             </h1>
+
             <p className="hero-description">
               Ofertas para que puedas comprar las cosas que quieras de forma económica.
             </p>
 
             <div className="search-container">
               <div className="search-box">
+
                 <Dropdown onSelect={handleRubroDropdown}>
-                  <Dropdown.Toggle variant="link" className="category-select" style={{textDecoration: 'none', color: 'inherit', border: 'none', background: 'none', padding: 0}}>
-                    {getNombreRubroSeleccionado()} <FaChevronDown className="ms-1 icon-sm" />
+                  <Dropdown.Toggle
+                    className="category-select"
+                    variant="light"
+                  >
+                    {nombreRubro}
                   </Dropdown.Toggle>
+
                   <Dropdown.Menu>
-                    <Dropdown.Item eventKey={null}>Todas las categorías</Dropdown.Item>
-                    {rubros.map(rubro => (
-                      <Dropdown.Item key={rubro.id} eventKey={rubro.id}>
-                        {rubro.nombre}
+                    <Dropdown.Item eventKey="">
+                      Todas las categorías
+                    </Dropdown.Item>
+                    {rubros.map((r) => (
+                      <Dropdown.Item key={r.id} eventKey={String(r.id)}>
+                        {r.nombre}
                       </Dropdown.Item>
                     ))}
                   </Dropdown.Menu>
                 </Dropdown>
-                <div className="divider"></div>
-                <input 
-                  type="text" 
-                  placeholder="Nombre del cupón o tienda..." 
+
+                <div className="divider" />
+
+                <input
                   className="search-input"
+                  type="text"
+                  placeholder="Nombre del cupón o tienda..."
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onChange={handleSearchChange}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleBuscar();
+                  }}
                 />
+
                 <Button className="btn-hero-search" onClick={handleBuscar}>
                   Buscar
                 </Button>
+
               </div>
             </div>
 
             <div className="hero-tags">
-              {rubrosDestacados.map((nombreRubro, i) => {
-                const rubro = rubros.find(r => r.nombre === nombreRubro);
-                const isActive = rubro && rubro.id === rubroSeleccionado;
-                return (
-                  <span 
-                    key={i} 
-                    className={`tag-pill ${isActive ? 'active' : ''}`}
-                    onClick={() => handleCategoriaClick(nombreRubro)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {nombreRubro}
-                  </span>
-                );
-              })}
+              {rubros.slice(0, 5).map((r) => (
+                <div
+                  key={r.id}
+                  className={`tag-pill ${
+                    rubroSeleccionado === r.id ? "active" : ""
+                  }`}
+                  onClick={() => aplicarFiltros(r.id, searchInput)}
+                >
+                  {r.nombre}
+                </div>
+              ))}
             </div>
+
           </Col>
-          
+
+          {/* DERECHA - FOTO */}
           {mostrarImagen && (
-            <Col lg={5} className="d-none d-lg-block">
+            <Col lg={6} className="text-center">
               <div className="hero-image-wrapper">
-                <img 
-                  src="/images/shopping.jpg" 
-                  alt="Hero Cupones" 
-                  className="hero-main-img" 
-                />
                 <div className="image-blob-bg"></div>
+                <img
+                  src="/images/shopping.jpg"
+                  alt="Shopping"
+                  className="hero-main-img"
+                />
               </div>
             </Col>
           )}
+
         </Row>
       </Container>
     </section>
