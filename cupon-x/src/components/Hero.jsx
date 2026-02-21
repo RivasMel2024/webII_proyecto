@@ -117,36 +117,6 @@ const Hero = ({ rubros = [], filtrosActuales = {}, onFiltroChange, mostrarImagen
               Ofertas para que puedas comprar las cosas que quieras de forma económica.
             </p>
 
-            <div className="search-container">
-              <div className="search-box">
-                <Dropdown onSelect={handleRubroDropdown}>
-                  <Dropdown.Toggle variant="link" className="category-select" style={{textDecoration: 'none', color: 'inherit', border: 'none', background: 'none', padding: 0}}>
-                    {getNombreRubroSeleccionado()} <FaChevronDown className="ms-1 icon-sm" />
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item eventKey={null}>Todas las categorías</Dropdown.Item>
-                    {rubros.map(rubro => (
-                      <Dropdown.Item key={rubro.id} eventKey={rubro.id}>
-                        {rubro.nombre}
-                      </Dropdown.Item>
-                    ))}
-                  </Dropdown.Menu>
-                </Dropdown>
-                <div className="divider"></div>
-                <input 
-                  type="text" 
-                  placeholder="Nombre del cupón o tienda..." 
-                  className="search-input"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                />
-                <Button className="btn-hero-search" onClick={handleBuscar}>
-                  Buscar
-                </Button>
-              </div>
-            </div>
-
             <div className="hero-tags">
               {rubrosDestacados.map((nombreRubro, i) => {
                 const rubro = rubros.find(r => r.nombre === nombreRubro);
