@@ -1,4 +1,11 @@
 {
+  "name": "cuponx-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd cupon-x && npm install"
+  },
   "dependencies": {
     "bootstrap": "^5.3.8",
     "pg": "^8.20.0",
