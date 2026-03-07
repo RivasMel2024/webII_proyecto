@@ -6,8 +6,7 @@ export const getTopOffers = async (req, res) => {
   try {
     const limit = Number(req.query.limit || 6);
 
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query(
+    const result = await pool.query(
       `
       SELECT
         o.id AS oferta_id,
@@ -21,17 +20,16 @@ export const getTopOffers = async (req, res) => {
       FROM ofertas o
       LEFT JOIN cupones c ON c.oferta_id = o.id
       WHERE o.estado = 'aprobada'
-        AND CURDATE() BETWEEN o.fecha_inicio_oferta AND o.fecha_fin_oferta
+        AND CURRENT_DATE BETWEEN o.fecha_inicio_oferta AND o.fecha_fin_oferta
       GROUP BY
         o.id, o.titulo, o.descripcion, o.precio_regular, o.precio_oferta, o.fecha_limite_uso
       ORDER BY vendidos DESC, descuento_pct DESC
-      LIMIT ?
+      LIMIT $1
       `,
       [limit]
     );
 
-    connection.release();
-    return successResponse(res, rows, "Top ofertas obtenidas correctamente");
+    return successResponse(res, result.rows, "Top ofertas obtenidas correctamente");
   } catch (error) {
     return errorResponse(res, "Error al obtener top ofertas", 500, error.message);
   }
@@ -39,9 +37,7 @@ export const getTopOffers = async (req, res) => {
 
 export const getAllOffers = async (req, res) => {
   try {
-    const connection = await pool.getConnection();
-
-    const [rows] = await connection.query(`
+    const result = await pool.query(`
       SELECT
         o.id AS oferta_id,
         o.titulo,
@@ -56,8 +52,7 @@ export const getAllOffers = async (req, res) => {
       ORDER BY o.id DESC
     `);
 
-    connection.release();
-    return successResponse(res, rows, "Ofertas obtenidas correctamente");
+    return successResponse(res, result.rows, "Ofertas obtenidas correctamente");
   } catch (error) {
     return errorResponse(res, "Error al obtener ofertas", 500, error.message);
   }
@@ -82,8 +77,6 @@ export const getAllOffers = async (req, res) => {
 export const getOfertasVigentes = async (req, res) => {
   try {
     const { rubro_id, search } = req.query;
-
-    const connection = await pool.getConnection();
 
     // Construir query dinámicamente
     let query = `
@@ -115,22 +108,25 @@ export const getOfertasVigentes = async (req, res) => {
 
       LEFT JOIN cupones c ON c.oferta_id = o.id
       WHERE o.estado = 'aprobada'
-        AND CURDATE() BETWEEN o.fecha_inicio_oferta AND o.fecha_fin_oferta
+        AND CURRENT_DATE BETWEEN o.fecha_inicio_oferta AND o.fecha_fin_oferta
     `;
 
     const params = [];
+    let paramIndex = 1;
 
     // Filtro por rubro
     if (rubro_id) {
-      query += ` AND r.id = ?`;
+      query += ` AND r.id = $${paramIndex}`;
       params.push(rubro_id);
+      paramIndex++;
     }
 
     // Filtro por búsqueda (título de oferta o nombre de empresa)
     if (search) {
-      query += ` AND (o.titulo LIKE ? OR e.nombre LIKE ?)`;
+      query += ` AND (o.titulo ILIKE $${paramIndex} OR e.nombre ILIKE $${paramIndex + 1})`;
       const searchTerm = `%${search}%`;
       params.push(searchTerm, searchTerm);
+      paramIndex += 2;
     }
 
     query += `
@@ -143,10 +139,9 @@ export const getOfertasVigentes = async (req, res) => {
       ORDER BY cupones_vendidos DESC, descuento_pct DESC
     `;
 
-    const [rows] = await connection.query(query, params);
-    connection.release();
+    const result = await pool.query(query, params);
 
-    return successResponse(res, rows, "Ofertas vigentes obtenidas correctamente");
+    return successResponse(res, result.rows, "Ofertas vigentes obtenidas correctamente");
   } catch (error) {
     return errorResponse(res, "Error al obtener ofertas vigentes", 500, error.message);
   }

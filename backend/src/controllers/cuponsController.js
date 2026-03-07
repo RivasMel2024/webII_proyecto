@@ -7,11 +7,9 @@ import { sendEmail } from '../services/mailer.js';
  */
 export const getAllCoupons = async (req, res) => {
   try {
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT * FROM cupones');
-    connection.release();
+    const result = await pool.query('SELECT * FROM cupones');
     
-    successResponse(res, rows, 'Cupones obtenidos correctamente');
+    successResponse(res, result.rows, 'Cupones obtenidos correctamente');
   } catch (error) {
     errorResponse(res, 'Error al obtener cupones', 500, error.message);
   }
@@ -23,15 +21,13 @@ export const getAllCoupons = async (req, res) => {
 export const getCouponById = async (req, res) => {
   try {
     const { id } = req.params;
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT * FROM cupones WHERE id = ?', [id]);
-    connection.release();
+    const result = await pool.query('SELECT * FROM cupones WHERE id = $1', [id]);
     
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return errorResponse(res, 'Cupón no encontrado', 404);
     }
     
-    successResponse(res, rows[0], 'Cupón obtenido correctamente');
+    successResponse(res, result.rows[0], 'Cupón obtenido correctamente');
   } catch (error) {
     errorResponse(res, 'Error al obtener cupón', 500, error.message);
   }
@@ -82,22 +78,18 @@ export const getCuponesByCliente = async (req, res) => {
   try {
     const { clienteId } = req.params;
 
-    const connection = await pool.getConnection();
-
-    const [rows] = await connection.query(
+    const result = await pool.query(
       `SELECT 
           id, codigo, estado, precio_pagado, fecha_compra, fecha_canje,
           oferta_titulo, oferta_descripcion, fecha_limite_uso,
           empresa_nombre, empresa_direccion, empresa_telefono
        FROM v_cupones_clientes
-       WHERE cliente_id = ?
+       WHERE cliente_id = $1
        ORDER BY fecha_compra DESC`,
       [clienteId]
     );
 
-    connection.release();
-
-    return successResponse(res, rows, 'Cupones del cliente obtenidos correctamente');
+    return successResponse(res, result.rows, 'Cupones del cliente obtenidos correctamente');
   } catch (error) {
     return errorResponse(res, 'Error al obtener cupones del cliente', 500, error.message);
   }
@@ -116,16 +108,12 @@ export const deleteCupon = async (req, res) => {
       });
     }
 
-    const connection = await pool.getConnection();
-
-    const [result] = await connection.query(
-      "DELETE FROM cupones WHERE id = ?",
+    const result = await pool.query(
+      "DELETE FROM cupones WHERE id = $1",
       [cuponId]
     );
 
-    connection.release();
-
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({
         success: false,
         message: "Cupón no encontrado",
@@ -171,30 +159,30 @@ export const comprarCupon = async (req, res) => {
       if (cvv.length < 3 || cvv.length > 4) return errorResponse(res, 'CVV inválido', 400);
     }
 
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
-      const [ofertaRows] = await connection.query('SELECT id, precio_oferta, titulo FROM ofertas WHERE id = ? LIMIT 1', [ofertaId]);
-      if (!ofertaRows.length) return errorResponse(res, 'Oferta no encontrada', 404);
+      const ofertaRows = await client.query('SELECT id, precio_oferta, titulo FROM ofertas WHERE id = $1 LIMIT 1', [ofertaId]);
+      if (!ofertaRows.rows.length) return errorResponse(res, 'Oferta no encontrada', 404);
 
-      const precioPagado = ofertaRows[0].precio_oferta;
+      const precioPagado = ofertaRows.rows[0].precio_oferta;
       const codigos = [];
 
       for (let i = 0; i < cantidad; i += 1) {
-        await connection.query('CALL sp_comprar_cupon(?, ?, ?, @codigo, @mensaje)', [ofertaId, clienteId, precioPagado]);
-        const [outRows] = await connection.query('SELECT @codigo AS codigo, @mensaje AS mensaje');
-        const out = outRows?.[0];
+        // PostgreSQL: llamar función que retorna JSON
+        const outRows = await client.query('SELECT sp_comprar_cupon($1, $2, $3) AS resultado', [ofertaId, clienteId, precioPagado]);
+        const resultado = outRows.rows[0]?.resultado;
 
-        if (!out?.codigo) {
-          return errorResponse(res, out?.mensaje || 'No fue posible completar la compra', 400);
+        if (!resultado?.codigo_cupon) {
+          return errorResponse(res, resultado?.mensaje || 'No fue posible completar la compra', 400);
         }
-        codigos.push(out.codigo);
+        codigos.push(resultado.codigo_cupon);
       }
 
-      const [clienteRows] = await connection.query('SELECT correo FROM clientes WHERE id = ? LIMIT 1', [clienteId]);
-      const correo = clienteRows?.[0]?.correo;
+      const clienteRows = await client.query('SELECT correo FROM clientes WHERE id = $1 LIMIT 1', [clienteId]);
+      const correo = clienteRows.rows[0]?.correo;
 
       if (correo) {
-        const texto = `Compra confirmada. Oferta: ${ofertaRows[0].titulo}. Códigos: ${codigos.join(', ')}`;
+        const texto = `Compra confirmada. Oferta: ${ofertaRows.rows[0].titulo}. Códigos: ${codigos.join(', ')}`;
         await sendEmail({
           to: correo,
           subject: 'Confirmación de compra - CuponX',
@@ -205,7 +193,7 @@ export const comprarCupon = async (req, res) => {
 
       return successResponse(res, { codigos }, 'Compra realizada correctamente', 201);
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (error) {
     return errorResponse(res, 'Error al comprar cupón', 500, error.message);
@@ -228,37 +216,37 @@ export const canjearCupon = async (req, res) => {
       return errorResponse(res, 'codigoCupon y duiPresentado son requeridos', 400);
     }
 
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
       // Verificar que el cupón pertenezca a la empresa del empleado
-      const [scopeRows] = await connection.query(
+      const scopeRows = await client.query(
         `SELECT o.empresa_id
          FROM cupones c
          INNER JOIN ofertas o ON c.oferta_id = o.id
-         WHERE c.codigo = ?
+         WHERE c.codigo = $1
          LIMIT 1`,
         [codigoCupon]
       );
 
-      if (!scopeRows.length) return errorResponse(res, 'El cupón no existe', 404);
-      if (Number(scopeRows[0].empresa_id) !== Number(empresaId)) {
+      if (!scopeRows.rows.length) return errorResponse(res, 'El cupón no existe', 404);
+      if (Number(scopeRows.rows[0].empresa_id) !== Number(empresaId)) {
         return errorResponse(res, 'Cupón no pertenece a tu empresa', 403);
       }
 
-      await connection.query(
-        'CALL sp_canjear_cupon(?, ?, ?, @valido, @mensaje)',
+      // PostgreSQL: llamar función que retorna JSON
+      const outRows = await client.query(
+        'SELECT sp_canjear_cupon($1, $2, $3) AS resultado',
         [codigoCupon, duiPresentado, empleadoId]
       );
-      const [outRows] = await connection.query('SELECT @valido AS valido, @mensaje AS mensaje');
-      const out = outRows?.[0];
+      const resultado = outRows.rows[0]?.resultado;
 
-      if (!out?.valido) {
-        return errorResponse(res, out?.mensaje || 'No se pudo canjear', 400);
+      if (!resultado?.valido) {
+        return errorResponse(res, resultado?.mensaje || 'No se pudo canjear', 400);
       }
 
-      return successResponse(res, { codigo: codigoCupon }, out.mensaje || 'Cupón canjeado', 200);
+      return successResponse(res, { codigo: codigoCupon }, resultado.mensaje || 'Cupón canjeado', 200);
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (error) {
     return errorResponse(res, 'Error al canjear cupón', 500, error.message);

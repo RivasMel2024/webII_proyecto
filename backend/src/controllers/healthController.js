@@ -6,9 +6,7 @@ export const getHealth = (req, res) => {
 
 export const getStatus = async (req, res) => {
   try {
-    const connection = await pool.getConnection();
-    await connection.ping();
-    connection.release();
+    await pool.query('SELECT 1');
     
     res.json({
       status: 'OK',

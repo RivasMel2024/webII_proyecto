@@ -2,12 +2,8 @@ import pool from '../config/database.js';
 
 export const testConnection = async (req, res) => {
   try {
-    const connection = await pool.getConnection();
-    
     // Hacer una consulta simple para verificar la conexión
-    await connection.execute('SELECT 1');
-    
-    connection.release();
+    await pool.query('SELECT 1');
     
     res.json({
       success: true,

@@ -12,6 +12,7 @@ const Registration = () => {
     telefono: '',
     dui: '',
     direccion: '',
+    pais: '',
     correo: '',
     password: '',
   });
@@ -20,6 +21,15 @@ const Registration = () => {
   const [message, setMessage] = useState('');
 
   const onChange = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  // Formatear DUI automáticamente
+  const onChangeDui = (e) => {
+    let value = e.target.value.replace(/[^0-9]/g, ''); // Solo números
+    if (value.length > 8) {
+      value = value.slice(0, 8) + '-' + value.slice(8, 9); // Formato: 12345678-9
+    }
+    setForm((prev) => ({ ...prev, dui: value }));
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +76,7 @@ const Registration = () => {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label className="login-label">País</Form.Label>
-                  <Form.Select className="login-input" required>
+                  <Form.Select className="login-input" required value={form.pais} onChange={onChange('pais')}>
                     <option value="">Seleccionar...</option>
                     {paises.map(pais => (
                       <option key={pais} value={pais}>{pais}</option>
@@ -79,11 +89,14 @@ const Registration = () => {
                   <Form.Label className="login-label">DUI / ID</Form.Label>
                   <Form.Control 
                     type="text" 
-                    placeholder="00000000-0" 
+                    placeholder="12345678-9" 
                     className="login-input" 
                     required 
                     value={form.dui}
-                    onChange={onChange('dui')}
+                    onChange={onChangeDui}
+                    maxLength={10}
+                    pattern="[0-9]{8}-[0-9]"
+                    title="Formato: 12345678-9 (8 números, guión, 1 número)"
                   />
                 </Form.Group>
               </Col>

@@ -37,49 +37,49 @@ const assertPassword = (password) => {
 };
 
 const queryOne = async (sql, params) => {
-  const connection = await pool.getConnection();
+  const client = await pool.connect();
   try {
-    const [rows] = await connection.query(sql, params);
-    return rows?.[0] || null;
+    const result = await client.query(sql, params);
+    return result.rows[0] || null;
   } finally {
-    connection.release();
+    client.release();
   }
 };
 
 const findAccountsByEmail = async (email) => {
   const correo = normalizeEmail(email);
 
-  const connection = await pool.getConnection();
+  const client = await pool.connect();
   try {
     const results = [];
 
-    const [adminsCuponera] = await connection.query(
-      'SELECT id, correo, password_hash, activo, nombres, apellidos FROM administradores_cuponx WHERE correo = ? LIMIT 1',
+    const adminsCuponera = await client.query(
+      'SELECT id, correo, password_hash, activo, nombres, apellidos FROM administradores_cuponx WHERE correo = $1 LIMIT 1',
       [correo]
     );
-    if (adminsCuponera.length) results.push({ role: ROLES.ADMIN_CUPONERA, row: adminsCuponera[0] });
+    if (adminsCuponera.rows.length) results.push({ role: ROLES.ADMIN_CUPONERA, row: adminsCuponera.rows[0] });
 
-    const [empresas] = await connection.query(
-      'SELECT id, correo, password_hash, activo, nombre, codigo, rubro_id, porcentaje_comision FROM empresas WHERE correo = ? LIMIT 1',
+    const empresas = await client.query(
+      'SELECT id, correo, password_hash, activo, nombre, codigo, rubro_id, porcentaje_comision FROM empresas WHERE correo = $1 LIMIT 1',
       [correo]
     );
-    if (empresas.length) results.push({ role: ROLES.ADMIN_EMPRESA, row: empresas[0] });
+    if (empresas.rows.length) results.push({ role: ROLES.ADMIN_EMPRESA, row: empresas.rows[0] });
 
-    const [empleados] = await connection.query(
-      'SELECT id, empresa_id, correo, password_hash, activo, nombres, apellidos FROM administradores_empresas WHERE correo = ? LIMIT 1',
+    const empleados = await client.query(
+      'SELECT id, empresa_id, correo, password_hash, activo, nombres, apellidos FROM administradores_empresas WHERE correo = $1 LIMIT 1',
       [correo]
     );
-    if (empleados.length) results.push({ role: ROLES.EMPLEADO, row: empleados[0] });
+    if (empleados.rows.length) results.push({ role: ROLES.EMPLEADO, row: empleados.rows[0] });
 
-    const [clientes] = await connection.query(
-      'SELECT id, correo, password_hash, activo, verificado, nombres, apellidos, dui, telefono, direccion FROM clientes WHERE correo = ? LIMIT 1',
+    const clientes = await client.query(
+      'SELECT id, correo, password_hash, activo, verificado, nombres, apellidos, dui, telefono, direccion FROM clientes WHERE correo = $1 LIMIT 1',
       [correo]
     );
-    if (clientes.length) results.push({ role: ROLES.CLIENTE, row: clientes[0] });
+    if (clientes.rows.length) results.push({ role: ROLES.CLIENTE, row: clientes.rows[0] });
 
     return results;
   } finally {
-    connection.release();
+    client.release();
   }
 };
 
@@ -122,11 +122,11 @@ export const login = async (req, res) => {
 
     const { role, row } = accounts[0];
 
-    if (row.activo === 0) {
+    if (row.activo === false) {
       return res.status(403).json({ success: false, message: 'Cuenta inactiva' });
     }
 
-    if (role === ROLES.CLIENTE && row.verificado === 0) {
+    if (role === ROLES.CLIENTE && row.verificado === false) {
       return res.status(403).json({ success: false, message: 'Cuenta no verificada' });
     }
 
@@ -195,6 +195,7 @@ export const registerCliente = async (req, res) => {
     const telefono = String(req.body.telefono || '').trim();
     const correo = normalizeEmail(req.body.correo || req.body.email);
     const direccion = String(req.body.direccion || '').trim();
+    const pais = String(req.body.pais || '').trim();
     const dui = String(req.body.dui || '').trim();
     const password = String(req.body.password || '').trim();
 
@@ -210,17 +211,17 @@ export const registerCliente = async (req, res) => {
     // Generación de token de verificación para ser enviado al cliente y pueda verificar su cuenta
     const tokenVerificacion = crypto.randomBytes(32).toString('hex');
 
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
-      const [exists] = await connection.query('SELECT id FROM clientes WHERE correo = ? LIMIT 1', [correo]);
-      if (exists.length) {
+      const exists = await client.query('SELECT id FROM clientes WHERE correo = $1 LIMIT 1', [correo]);
+      if (exists.rows.length) {
         return res.status(409).json({ success: false, message: 'El correo ya está registrado' });
       }
 
-      const [result] = await connection.query(
-        `INSERT INTO clientes (nombres, apellidos, telefono, correo, password_hash, direccion, dui, verificado, token_verificacion, activo)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 1)`,
-        [nombres, apellidos, telefono, correo, passwordHash, direccion, dui, tokenVerificacion]
+      const result = await client.query(
+        `INSERT INTO clientes (nombres, apellidos, telefono, correo, password_hash, direccion, pais, dui, verificado, token_verificacion, activo)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9, TRUE) RETURNING id`,
+        [nombres, apellidos, telefono, correo, passwordHash, direccion, pais, dui, tokenVerificacion]
       );
 
       const verifyUrl = `${process.env.APP_PUBLIC_URL || 'http://localhost:5173'}/verify?token=${tokenVerificacion}`;
@@ -240,10 +241,10 @@ export const registerCliente = async (req, res) => {
       return res.status(201).json({
         success: true,
         message: 'Cliente registrado. Revisa tu correo para verificar la cuenta.',
-        clienteId: result.insertId,
+        clienteId: result.rows[0].id,
       });
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, message: error.message || 'Error al registrar cliente' });
@@ -255,22 +256,22 @@ export const verifyCliente = async (req, res) => {
     const token = String(req.query.token || '').trim();
     if (!token) return res.status(400).json({ success: false, message: 'Token requerido' });
 
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
       // Buscar cliente por token
-      const [rows] = await connection.query(
-        'SELECT id, verificado FROM clientes WHERE token_verificacion = ? LIMIT 1',
+      const rows = await client.query(
+        'SELECT id, verificado FROM clientes WHERE token_verificacion = $1 LIMIT 1',
         [token]
       );
       
-      if (!rows.length) {
+      if (!rows.rows.length) {
         return res.status(400).json({ success: false, message: 'Token inválido o ya utilizado' });
       }
 
-      const cliente = rows[0];
+      const cliente = rows.rows[0];
 
       // Si ya está verificado, informar pero no fallar
-      if (cliente.verificado === 1) {
+      if (cliente.verificado === true) {
         return res.json({ 
           success: true, 
           message: 'Tu cuenta ya estaba verificada. Puedes iniciar sesión.',
@@ -279,14 +280,14 @@ export const verifyCliente = async (req, res) => {
       }
 
       // Verificar cuenta
-      await connection.query(
-        'UPDATE clientes SET verificado = 1, token_verificacion = NULL WHERE id = ?',
+      await client.query(
+        'UPDATE clientes SET verificado = TRUE, token_verificacion = NULL WHERE id = $1',
         [cliente.id]
       );
       
       return res.json({ success: true, message: 'Cuenta verificada correctamente' });
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (error) {
     console.error('Error en verifyCliente:', error);
@@ -359,15 +360,15 @@ export const resetPassword = async (req, res) => {
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
-      const [result] = await connection.query(`UPDATE ${tableInfo.table} SET password_hash = ? WHERE ${tableInfo.idCol} = ?`, [passwordHash, uid]);
-      if (result.affectedRows === 0) {
+      const result = await client.query(`UPDATE ${tableInfo.table} SET password_hash = $1 WHERE ${tableInfo.idCol} = $2`, [passwordHash, uid]);
+      if (result.rowCount === 0) {
         return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
       }
       return res.json({ success: true, message: 'Contraseña actualizada' });
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, message: error.message || 'Error al restablecer contraseña' });
@@ -391,7 +392,7 @@ export const changePassword = async (req, res) => {
     if (!tableInfo) return res.status(400).json({ success: false, message: 'Rol inválido' });
 
     const row = await queryOne(
-      `SELECT ${tableInfo.idCol} AS id, password_hash FROM ${tableInfo.table} WHERE ${tableInfo.idCol} = ? LIMIT 1`,
+      `SELECT ${tableInfo.idCol} AS id, password_hash FROM ${tableInfo.table} WHERE ${tableInfo.idCol} = $1 LIMIT 1`,
       [id]
     );
 
@@ -402,12 +403,12 @@ export const changePassword = async (req, res) => {
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
-      await connection.query(`UPDATE ${tableInfo.table} SET password_hash = ? WHERE ${tableInfo.idCol} = ?`, [passwordHash, id]);
+      await client.query(`UPDATE ${tableInfo.table} SET password_hash = $1 WHERE ${tableInfo.idCol} = $2`, [passwordHash, id]);
       return res.json({ success: true, message: 'Contraseña actualizada' });
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, message: error.message || 'Error al cambiar contraseña' });
@@ -430,30 +431,27 @@ export const registerAdmin = async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const connection = await pool.getConnection();
+    const client = await pool.connect();
     try {
-      const [exists] = await connection.query('SELECT id FROM administradores_cuponx WHERE correo = ? LIMIT 1', [correo]);
-      if (exists.length) {
+      const exists = await client.query('SELECT id FROM administradores_cuponx WHERE correo = $1 LIMIT 1', [correo]);
+      if (exists.rows.length) {
         return res.status(409).json({ success: false, message: 'El correo ya está registrado' });
       }
 
-      const [result] = await connection.query(
+      const result = await client.query(
         `INSERT INTO administradores_cuponx (nombres, apellidos, correo, password_hash, activo)
-         VALUES (?, ?, ?, ?, 1)`,
+         VALUES ($1, $2, $3, $4, TRUE) RETURNING id`,
         [nombres, apellidos, correo, passwordHash]
       );
-
-      // Asegurar que se confirme la transacción
-      await connection.commit();
 
       return res.status(201).json({
         success: true,
         message: 'Administrador creado exitosamente',
-        adminId: result.insertId,
+        adminId: result.rows[0].id,
         credentials: { email: correo, password }
       });
     } finally {
-      connection.release();
+      client.release();
     }
   } catch (error) {
     return res.status(error.status || 500).json({ success: false, message: error.message || 'Error al crear administrador' });
