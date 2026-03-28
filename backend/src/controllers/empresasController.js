@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import pool from "../config/database.js";
 import { successResponse, errorResponse } from "../utils/responses.js";
 
@@ -122,5 +123,80 @@ export const getOfertasByEmpresa = async (req, res) => {
     return successResponse(res, result.rows, "Ofertas de la empresa obtenidas correctamente");
   } catch (error) {
     return errorResponse(res, "Error al obtener ofertas de la empresa", 500, error.message);
+  }
+};
+
+export const createEmpresa = async (req, res) => {
+  try {
+    const { nombre, codigo, color_hex, descripcion, reward_pct, rubro_id, direccion, telefono, correo, password } = req.body;
+
+    if (!nombre || !codigo || !rubro_id || !correo || !password) {
+      return errorResponse(res, "nombre, codigo, rubro_id, correo y password son obligatorios", 400);
+    }
+
+    const existe = await pool.query("SELECT id FROM empresas WHERE codigo = $1 OR correo = $2", [codigo, correo]);
+    if (existe.rows.length) {
+      return errorResponse(res, "Ya existe una empresa con ese código o correo", 409);
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+
+    const result = await pool.query(
+      `INSERT INTO empresas (nombre, codigo, color_hex, descripcion, reward_pct, rubro_id, direccion, telefono, correo, password_hash, activo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE)
+       RETURNING id, nombre, codigo, color_hex, descripcion, reward_pct, rubro_id, direccion, telefono, correo, activo`,
+      [nombre, codigo, color_hex || null, descripcion || null, reward_pct || 0, rubro_id, direccion || null, telefono || null, correo, password_hash]
+    );
+
+    return successResponse(res, result.rows[0], "Empresa creada correctamente", 201);
+  } catch (error) {
+    return errorResponse(res, "Error al crear empresa", 500, error.message);
+  }
+};
+
+export const updateEmpresa = async (req, res) => {
+  try {
+    const empresaId = Number(req.params.id);
+    const { nombre, codigo, color_hex, descripcion, reward_pct, rubro_id, direccion, telefono, correo, activo } = req.body;
+
+    const existe = await pool.query("SELECT id FROM empresas WHERE id = $1", [empresaId]);
+    if (!existe.rows.length) return errorResponse(res, "Empresa no encontrada", 404);
+
+    const result = await pool.query(
+      `UPDATE empresas SET
+        nombre      = COALESCE($1, nombre),
+        codigo      = COALESCE($2, codigo),
+        color_hex   = COALESCE($3, color_hex),
+        descripcion = COALESCE($4, descripcion),
+        reward_pct  = COALESCE($5, reward_pct),
+        rubro_id    = COALESCE($6, rubro_id),
+        direccion   = COALESCE($7, direccion),
+        telefono    = COALESCE($8, telefono),
+        correo      = COALESCE($9, correo),
+        activo      = COALESCE($10, activo)
+       WHERE id = $11
+       RETURNING id, nombre, codigo, color_hex, descripcion, reward_pct, rubro_id, direccion, telefono, correo, activo`,
+      [nombre, codigo, color_hex, descripcion, reward_pct, rubro_id, direccion, telefono, correo, activo, empresaId]
+    );
+
+    return successResponse(res, result.rows[0], "Empresa actualizada correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al actualizar empresa", 500, error.message);
+  }
+};
+
+export const deleteEmpresa = async (req, res) => {
+  try {
+    const empresaId = Number(req.params.id);
+
+    const existe = await pool.query("SELECT id FROM empresas WHERE id = $1", [empresaId]);
+    if (!existe.rows.length) return errorResponse(res, "Empresa no encontrada", 404);
+
+    // Soft delete: desactivar en lugar de eliminar para no romper FKs
+    await pool.query("UPDATE empresas SET activo = FALSE WHERE id = $1", [empresaId]);
+
+    return successResponse(res, null, "Empresa desactivada correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al eliminar empresa", 500, error.message);
   }
 };

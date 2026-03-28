@@ -8,6 +8,7 @@ import ofertasRoutes from "./ofertasRoutes.js";
 import authRoutes from "./auth.js";
 import rubrosRoutes from "./rubros.js";
 import empresasRoutes from "./empresas.js";
+import empleadosRoutes from "./empleados.js";
 
 const router = express.Router();
 
@@ -32,5 +33,8 @@ router.use("/rubros", rubrosRoutes);
 
 // Rutas de empresas
 router.use("/empresas", empresasRoutes);
+
+// Rutas de empleados
+router.use("/empleados", empleadosRoutes);
 
 export default router;
