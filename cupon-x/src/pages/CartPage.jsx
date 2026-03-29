@@ -14,6 +14,7 @@ const CartPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [purchaseSuccess, setpurchaseSuccess] = useState(false);
+  const [generatedCodes, setGeneratedCodes] = useState([]);
 
   // Estado del formulario de tarjeta
   const [cardData, setCardData] = useState({
@@ -45,6 +46,7 @@ const CartPage = () => {
 
       // Procesar cada item del carrito
       const compras = [];
+      const codigosGenerados = [];
       for (const item of cartItems) {
         const resultado = await comprarCupon({
           ofertaId: item.id,
@@ -57,8 +59,12 @@ const CartPage = () => {
           },
         });
         compras.push(resultado);
+        if (Array.isArray(resultado?.data?.codigos)) {
+          codigosGenerados.push(...resultado.data.codigos);
+        }
       }
 
+      setGeneratedCodes(codigosGenerados);
       setpurchaseSuccess(true);
       clearCart();
       
@@ -220,6 +226,19 @@ const CartPage = () => {
               <p className="text-muted">
                 Recibirás un correo de confirmación con tus cupones.
               </p>
+              {generatedCodes.length > 0 && (
+                <div className="alert alert-success text-start mt-3">
+                  <strong>Códigos generados:</strong>
+                  <ul className="mb-0 mt-2">
+                    {generatedCodes.map((code) => (
+                      <li key={code}>
+                        <FaTicketAlt className="me-2" />
+                        {code}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <p className="text-muted">Redirigiendo a tus cupones...</p>
             </div>
           ) : (

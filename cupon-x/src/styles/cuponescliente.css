@@ -68,6 +68,20 @@
   padding: 12px 14px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.coupon-code-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.coupon-code-line {
+  display: flex;
+  align-items: center;
   gap: 10px;
 }
 
@@ -80,11 +94,56 @@
   font-weight: 800;
   letter-spacing: 1px;
   color: #06283d;
+  white-space: nowrap;
+}
+
+.coupon-toggle-btn {
+  padding: 0;
+  text-decoration: none;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.coupon-qr-box {
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  border: 1px solid rgba(44, 123, 229, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.coupon-qr-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.coupon-qr-loading {
+  font-size: 10px;
+  text-align: center;
+  color: #4b5563;
+  line-height: 1.2;
+}
+
+.coupon-actions-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .coupon-copy-btn {
   border-radius: 999px;
   border: 1px solid rgba(0,0,0,0.1);
+}
+
+.coupon-pdf-btn {
+  border-radius: 999px;
+  font-weight: 700;
 }
 
 /* Vencimiento */
@@ -130,6 +189,21 @@
 
 /* ========== RESPONSIVE - Móvil ========== */
 @media (max-width: 767px) {
+  .coupon-code-container {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .coupon-code-main {
+    width: 100%;
+  }
+
+  .coupon-actions-inline {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
   .coupon-category-tag {
     font-size: 11px;
     padding: 4px 9px;
