@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
+import { canjearCupon } from '../services/api';
 import '../styles/canjearcupon.css';
 
 const DUI_REGEX = /^\d{8}-\d$/;
@@ -16,6 +17,7 @@ export default function CanjearCupon() {
   const [dui, setDui] = useState('');
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const isFormReady = useMemo(() => {
     return CODIGO_REGEX.test(codigo.trim()) && DUI_REGEX.test(dui);
@@ -41,14 +43,22 @@ export default function CanjearCupon() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(false);
+    setErrors({});
 
     if (!validate()) return;
 
-    // UI only: se muestra feedback visual de canje exitoso sin invocar backend.
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      await canjearCupon({ codigo: codigo.trim(), dui });
+      setSubmitted(true);
+    } catch (err) {
+      setErrors({ submit: err.message || 'Error al canjear cupón' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
@@ -70,7 +80,13 @@ export default function CanjearCupon() {
 
         {submitted && (
           <Alert variant="success" className="mb-4 canje-alert-success">
-            Canje registrado en UI para el cupon <strong>{codigo.trim()}</strong> del DUI <strong>{dui}</strong>.
+            Canje registrado exitosamente para el cupon <strong>{codigo.trim()}</strong> del DUI <strong>{dui}</strong>.
+          </Alert>
+        )}
+
+        {errors.submit && (
+          <Alert variant="danger" className="mb-4">
+            {errors.submit}
           </Alert>
         )}
 
@@ -113,7 +129,7 @@ export default function CanjearCupon() {
           </Row>
 
           <div className="d-flex gap-2 mt-4 flex-wrap">
-            <Button type="submit" className="btn-canje-primary" disabled={!isFormReady}>
+            <Button type="submit" className="btn-canje-primary" disabled={!isFormReady || loading}>
               Confirmar canje
             </Button>
             <Button type="button" variant="outline-secondary" onClick={handleReset} className="btn-canje-secondary">

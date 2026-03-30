@@ -137,7 +137,7 @@ function App() {
             <Route
               path="/canjear-cupon"
               element={
-                <RequireRole allowedRoles={['ADMIN_CUPONERA']}>
+                <RequireRole allowedRoles={['ADMIN_CUPONERA', 'EMPLEADO']}>
                   <CanjePage />
                 </RequireRole>
               }

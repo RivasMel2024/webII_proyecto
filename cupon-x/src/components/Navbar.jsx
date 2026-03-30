@@ -91,15 +91,15 @@ const NavBar = () => {
                       Mis Cupones
                     </Dropdown.Item>
                   )}
+                  {(user.role === 'ADMIN_CUPONERA' || user.role === 'EMPLEADO') && (
+                    <Dropdown.Item as={Link} to="/canjear-cupon" className="dropdown-item-custom">
+                      Canjear Cupon
+                    </Dropdown.Item>
+                  )}
                   {user.role === 'ADMIN_CUPONERA' && (
-                    <>
-                      <Dropdown.Item as={Link} to="/canjear-cupon" className="dropdown-item-custom">
-                        Canjear Cupon
-                      </Dropdown.Item>
-                      <Dropdown.Item as={Link} to="/cupones-clientes" className="dropdown-item-custom">
-                        Cupones Clientes
-                      </Dropdown.Item>
-                    </>
+                    <Dropdown.Item as={Link} to="/cupones-clientes" className="dropdown-item-custom">
+                      Cupones Clientes
+                    </Dropdown.Item>
                   )}
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout} className="dropdown-item-custom">

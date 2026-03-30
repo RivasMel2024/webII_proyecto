@@ -9,7 +9,7 @@ export default function MisCupones() {
     <div className="container my-4">
       <h2 className="mb-4">Mis Cupones</h2>
       {user?.id ? (
-        <CuponesCliente clienteId={user.id} />
+        <CuponesCliente clienteId={user.id} clienteNombre={user.nombres || user.email} />
       ) : (
         <div className="alert alert-warning">
           No se pudo identificar tu usuario. Por favor, inicia sesión nuevamente.

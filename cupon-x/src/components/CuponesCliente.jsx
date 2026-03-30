@@ -13,7 +13,7 @@ import QRCode from "qrcode";
 import { getCuponesByCliente, deleteCupon } from "../services/api";
 import "../styles/cuponescliente.css";
 
-export default function CuponesCliente({ clienteId }) {
+export default function CuponesCliente({ clienteId, clienteNombre }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cupones, setCupones] = useState([]);
@@ -258,7 +258,7 @@ export default function CuponesCliente({ clienteId }) {
         <div className="coupon-header-copy">
           <div className="coupon-header-kicker">Wallet de cupones</div>
           <h2 className="m-0 cupones-title">
-            Cupones del Cliente <span className="coupon-client-id">#{clienteId ?? "—"}</span>
+            {clienteNombre ? `Cupones de ${clienteNombre}` : <>Cupones del Cliente <span className="coupon-client-id">#{clienteId ?? "—"}</span></>}
           </h2>
           <div className="coupon-header-subtitle">{subtitle}</div>
         </div>

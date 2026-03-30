@@ -279,6 +279,17 @@ export const getOfertasByEmpresa = async (id) => {
   return await res.json();
 };
 
+// Canjear cupón (empleado)
+export const canjearCupon = async ({ codigo, dui }) => {
+  const res = await authFetch(`${API_BASE_URL}/cupones/canjear`, {
+    method: 'POST',
+    body: JSON.stringify({ codigoCupon: codigo, duiPresentado: dui }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al canjear cupón');
+  return data;
+};
+
 // Comprar cupón(es)
 export const comprarCupon = async ({ ofertaId, cantidad = 1, tarjeta }) => {
   const res = await authFetch(`${API_BASE_URL}/cupones/comprar`, {
