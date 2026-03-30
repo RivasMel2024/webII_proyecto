@@ -2,8 +2,17 @@ import { Router } from "express";
 import { 
   getTopOffers, 
   getAllOffers,
-  getOfertasVigentes
+  getOfertasVigentes,
+  createOferta,
+  aprobarOferta,
+  rechazarOferta,
+  reenviarOferta,
+  descartarOferta,
+  getMisOfertas,
 } from "../controllers/ofertasController.js";
+import { verifyJwt } from "../middleware/authJwt.js";
+import { requireRole } from "../middleware/rbac.js";
+import { ROLES } from "../utils/roles.js";
 
 const router = Router();
 
@@ -39,5 +48,23 @@ router.get("/", getAllOffers);
  *   - Cantidad de cupones NO agotada (si aplica)
  */
 router.get("/vigentes", getOfertasVigentes);
+
+// ==============================
+// Gestión de ciclo de vida
+// ==============================
+
+// Crear oferta (solo ADMIN_EMPRESA)
+router.post("/", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), createOferta);
+
+// Listado de ofertas de la empresa autenticada
+router.get("/mis-ofertas", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), getMisOfertas);
+
+// Aprobación/Rechazo (solo ADMIN_CUPONERA)
+router.patch("/:id/aprobar", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), aprobarOferta);
+router.patch("/:id/rechazar", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), rechazarOferta);
+
+// Reenvío/Descarte (solo ADMIN_EMPRESA dueño)
+router.patch("/:id/reenviar", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), reenviarOferta);
+router.patch("/:id/descartar", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), descartarOferta);
 
 export default router;

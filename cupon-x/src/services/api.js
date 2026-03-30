@@ -188,6 +188,64 @@ export const getAllOffers = async () => {
   }
 };
 
+export const createOferta = async (payload) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al crear oferta");
+  return data;
+};
+
+export const getMisOfertas = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  if (params.estado) queryParams.set("estado", params.estado);
+
+  const url = `${API_BASE_URL}/ofertas/mis-ofertas${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const res = await authFetch(url);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al obtener mis ofertas");
+  return data;
+};
+
+export const aprobarOferta = async (ofertaId) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/aprobar`, {
+    method: "PATCH",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al aprobar oferta");
+  return data;
+};
+
+export const rechazarOferta = async (ofertaId, justificacion) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/rechazar`, {
+    method: "PATCH",
+    body: JSON.stringify({ justificacion }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al rechazar oferta");
+  return data;
+};
+
+export const reenviarOferta = async (ofertaId) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/reenviar`, {
+    method: "PATCH",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al reenviar oferta");
+  return data;
+};
+
+export const descartarOferta = async (ofertaId) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/descartar`, {
+    method: "PATCH",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al descartar oferta");
+  return data;
+};
+
 // ============================================================
 // FUNCIONES PARA FILTRADO DE OFERTAS POR RUBRO
 // ============================================================

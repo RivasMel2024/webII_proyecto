@@ -1,6 +1,38 @@
 import pool from "../config/database.js";
 import { successResponse, errorResponse } from "../utils/responses.js";
 
+const ESTADOS = {
+  EN_ESPERA: "en_espera",
+  APROBADA: "aprobada",
+  RECHAZADA: "rechazada",
+  DESCARTADA: "descartada",
+};
+
+const parsePositiveNumber = (value) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+};
+
+const parseDateOnly = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
+};
+
+const normalizeText = (value) => String(value || "").trim();
+
+const getOfertaById = async (id) => {
+  const result = await pool.query(
+    `SELECT id, empresa_id, estado, razon_rechazo
+     FROM ofertas
+     WHERE id = $1
+     LIMIT 1`,
+    [id]
+  );
+  return result.rows[0] || null;
+};
+
 // Home: Top ofertas para vender (aunque nadie haya comprado)
 export const getTopOffers = async (req, res) => {
   try {
@@ -103,8 +135,7 @@ export const getOfertasVigentes = async (req, res) => {
       FROM ofertas o
       INNER JOIN empresas e ON o.empresa_id = e.id
 
-      -- ✅ CAMBIO CLAVE: usa rubro de la OFERTA si existe, si no usa rubro de la EMPRESA
-      INNER JOIN rubros r ON r.id = COALESCE(o.rubro_id, e.rubro_id)
+      INNER JOIN rubros r ON r.id = e.rubro_id
 
       LEFT JOIN cupones c ON c.oferta_id = o.id
       WHERE o.estado = 'aprobada'
@@ -144,5 +175,290 @@ export const getOfertasVigentes = async (req, res) => {
     return successResponse(res, result.rows, "Ofertas vigentes obtenidas correctamente");
   } catch (error) {
     return errorResponse(res, "Error al obtener ofertas vigentes", 500, error.message);
+  }
+};
+
+/**
+ * Crear oferta (ADMIN_EMPRESA)
+ */
+export const createOferta = async (req, res) => {
+  try {
+    const empresaId = req.user?.id;
+    if (!empresaId) return errorResponse(res, "No autenticado", 401);
+
+    const titulo = normalizeText(req.body.titulo);
+    const descripcion = normalizeText(req.body.descripcion);
+    const otrosDetalles = normalizeText(req.body.otros_detalles) || null;
+    const imagenUrl = normalizeText(req.body.imagen_url) || null;
+
+    const precioRegular = parsePositiveNumber(req.body.precio_regular);
+    const precioOferta = parsePositiveNumber(req.body.precio_oferta);
+    const cantidadLimiteRaw = req.body.cantidad_limite;
+    const cantidadLimite =
+      cantidadLimiteRaw === null || cantidadLimiteRaw === undefined || cantidadLimiteRaw === ""
+        ? null
+        : Number(cantidadLimiteRaw);
+
+    const fechaInicio = parseDateOnly(req.body.fecha_inicio_oferta);
+    const fechaFin = parseDateOnly(req.body.fecha_fin_oferta);
+    const fechaLimiteUso = parseDateOnly(req.body.fecha_limite_uso);
+
+    if (!titulo || !descripcion) {
+      return errorResponse(res, "titulo y descripcion son requeridos", 400);
+    }
+
+    if (!precioRegular || !precioOferta || precioRegular <= 0 || precioOferta <= 0) {
+      return errorResponse(res, "precio_regular y precio_oferta deben ser mayores a 0", 400);
+    }
+
+    if (precioOferta >= precioRegular) {
+      return errorResponse(res, "precio_oferta debe ser menor que precio_regular", 400);
+    }
+
+    if (!fechaInicio || !fechaFin || !fechaLimiteUso) {
+      return errorResponse(
+        res,
+        "fecha_inicio_oferta, fecha_fin_oferta y fecha_limite_uso son requeridas",
+        400
+      );
+    }
+
+    if (fechaInicio > fechaFin) {
+      return errorResponse(res, "fecha_inicio_oferta debe ser menor o igual que fecha_fin_oferta", 400);
+    }
+
+    if (fechaLimiteUso < fechaFin) {
+      return errorResponse(res, "fecha_limite_uso debe ser mayor o igual que fecha_fin_oferta", 400);
+    }
+
+    if (cantidadLimite !== null && (!Number.isInteger(cantidadLimite) || cantidadLimite <= 0)) {
+      return errorResponse(res, "cantidad_limite debe ser un entero mayor que 0", 400);
+    }
+
+    const insert = await pool.query(
+      `INSERT INTO ofertas (
+         empresa_id,
+         titulo,
+         precio_regular,
+         precio_oferta,
+         fecha_inicio_oferta,
+         fecha_fin_oferta,
+         fecha_limite_uso,
+         cantidad_limite,
+         descripcion,
+         otros_detalles,
+         imagen_url,
+         estado
+       )
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       RETURNING id, empresa_id, titulo, estado, fecha_inicio_oferta, fecha_fin_oferta, fecha_limite_uso`,
+      [
+        empresaId,
+        titulo,
+        precioRegular,
+        precioOferta,
+        req.body.fecha_inicio_oferta,
+        req.body.fecha_fin_oferta,
+        req.body.fecha_limite_uso,
+        cantidadLimite,
+        descripcion,
+        otrosDetalles,
+        imagenUrl,
+        ESTADOS.EN_ESPERA,
+      ]
+    );
+
+    return successResponse(res, insert.rows[0], "Oferta creada en espera de aprobación", 201);
+  } catch (error) {
+    return errorResponse(res, "Error al crear oferta", 500, error.message);
+  }
+};
+
+/**
+ * Aprobar oferta (ADMIN_CUPONERA)
+ */
+export const aprobarOferta = async (req, res) => {
+  try {
+    const ofertaId = Number(req.params.id);
+    const adminId = req.user?.id;
+
+    if (!ofertaId) return errorResponse(res, "ID de oferta inválido", 400);
+
+    const oferta = await getOfertaById(ofertaId);
+    if (!oferta) return errorResponse(res, "Oferta no encontrada", 404);
+    if (oferta.estado !== ESTADOS.EN_ESPERA) {
+      return errorResponse(res, "Transición inválida: solo se puede aprobar ofertas en espera", 409);
+    }
+
+    const result = await pool.query(
+      `UPDATE ofertas
+       SET estado = $1,
+           razon_rechazo = NULL,
+           revisada_por = $2,
+           fecha_revision = NOW()
+       WHERE id = $3
+       RETURNING id, estado, revisada_por, fecha_revision`,
+      [ESTADOS.APROBADA, adminId, ofertaId]
+    );
+
+    return successResponse(res, result.rows[0], "Oferta aprobada correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al aprobar oferta", 500, error.message);
+  }
+};
+
+/**
+ * Rechazar oferta (ADMIN_CUPONERA)
+ */
+export const rechazarOferta = async (req, res) => {
+  try {
+    const ofertaId = Number(req.params.id);
+    const adminId = req.user?.id;
+    const justificacion = normalizeText(req.body.justificacion);
+
+    if (!ofertaId) return errorResponse(res, "ID de oferta inválido", 400);
+    if (!justificacion) {
+      return errorResponse(res, "justificacion es requerida para rechazar una oferta", 400);
+    }
+
+    const oferta = await getOfertaById(ofertaId);
+    if (!oferta) return errorResponse(res, "Oferta no encontrada", 404);
+    if (oferta.estado !== ESTADOS.EN_ESPERA) {
+      return errorResponse(res, "Transición inválida: solo se puede rechazar ofertas en espera", 409);
+    }
+
+    const result = await pool.query(
+      `UPDATE ofertas
+       SET estado = $1,
+           razon_rechazo = $2,
+           revisada_por = $3,
+           fecha_revision = NOW()
+       WHERE id = $4
+       RETURNING id, estado, razon_rechazo, revisada_por, fecha_revision`,
+      [ESTADOS.RECHAZADA, justificacion, adminId, ofertaId]
+    );
+
+    return successResponse(res, result.rows[0], "Oferta rechazada correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al rechazar oferta", 500, error.message);
+  }
+};
+
+/**
+ * Reenviar oferta rechazada (ADMIN_EMPRESA dueño)
+ */
+export const reenviarOferta = async (req, res) => {
+  try {
+    const ofertaId = Number(req.params.id);
+    const empresaId = req.user?.id;
+
+    if (!ofertaId) return errorResponse(res, "ID de oferta inválido", 400);
+
+    const oferta = await getOfertaById(ofertaId);
+    if (!oferta) return errorResponse(res, "Oferta no encontrada", 404);
+    if (Number(oferta.empresa_id) !== Number(empresaId)) {
+      return errorResponse(res, "No autorizado para modificar esta oferta", 403);
+    }
+    if (oferta.estado !== ESTADOS.RECHAZADA) {
+      return errorResponse(res, "Transición inválida: solo se puede reenviar ofertas rechazadas", 409);
+    }
+
+    const result = await pool.query(
+      `UPDATE ofertas
+       SET estado = $1,
+           razon_rechazo = NULL,
+           revisada_por = NULL,
+           fecha_revision = NULL
+       WHERE id = $2
+       RETURNING id, estado`,
+      [ESTADOS.EN_ESPERA, ofertaId]
+    );
+
+    return successResponse(res, result.rows[0], "Oferta reenviada para nueva revisión");
+  } catch (error) {
+    return errorResponse(res, "Error al reenviar oferta", 500, error.message);
+  }
+};
+
+/**
+ * Descartar oferta rechazada (ADMIN_EMPRESA dueño)
+ */
+export const descartarOferta = async (req, res) => {
+  try {
+    const ofertaId = Number(req.params.id);
+    const empresaId = req.user?.id;
+
+    if (!ofertaId) return errorResponse(res, "ID de oferta inválido", 400);
+
+    const oferta = await getOfertaById(ofertaId);
+    if (!oferta) return errorResponse(res, "Oferta no encontrada", 404);
+    if (Number(oferta.empresa_id) !== Number(empresaId)) {
+      return errorResponse(res, "No autorizado para modificar esta oferta", 403);
+    }
+    if (oferta.estado !== ESTADOS.RECHAZADA) {
+      return errorResponse(res, "Transición inválida: solo se puede descartar ofertas rechazadas", 409);
+    }
+
+    const result = await pool.query(
+      `UPDATE ofertas
+       SET estado = $1
+       WHERE id = $2
+       RETURNING id, estado`,
+      [ESTADOS.DESCARTADA, ofertaId]
+    );
+
+    return successResponse(res, result.rows[0], "Oferta descartada correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al descartar oferta", 500, error.message);
+  }
+};
+
+/**
+ * Listado de ofertas por empresa autenticada (ADMIN_EMPRESA)
+ */
+export const getMisOfertas = async (req, res) => {
+  try {
+    const empresaId = req.user?.id;
+    const estado = normalizeText(req.query.estado);
+    const allowedEstados = new Set(Object.values(ESTADOS));
+
+    const params = [empresaId];
+    let where = "WHERE o.empresa_id = $1";
+
+    if (estado) {
+      if (!allowedEstados.has(estado)) {
+        return errorResponse(res, "estado inválido", 400);
+      }
+      params.push(estado);
+      where += ` AND o.estado = $${params.length}`;
+    }
+
+    const result = await pool.query(
+      `SELECT
+         o.id,
+         o.titulo,
+         o.descripcion,
+         o.precio_regular,
+         o.precio_oferta,
+         o.fecha_inicio_oferta,
+         o.fecha_fin_oferta,
+         o.fecha_limite_uso,
+         o.cantidad_limite,
+         o.estado,
+         o.razon_rechazo,
+         o.fecha_revision,
+         o.created_at,
+         COUNT(c.id) AS cupones_vendidos
+       FROM ofertas o
+       LEFT JOIN cupones c ON c.oferta_id = o.id
+       ${where}
+       GROUP BY o.id
+       ORDER BY o.created_at DESC`,
+      params
+    );
+
+    return successResponse(res, result.rows, "Ofertas de la empresa obtenidas correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al obtener ofertas de la empresa", 500, error.message);
   }
 };

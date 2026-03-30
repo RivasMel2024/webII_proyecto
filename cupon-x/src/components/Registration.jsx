@@ -19,6 +19,7 @@ const Registration = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [devVerificationUrl, setDevVerificationUrl] = useState('');
 
   const onChange = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
@@ -35,12 +36,18 @@ const Registration = () => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setDevVerificationUrl('');
     setLoading(true);
     try {
       const result = await registerCliente(form);
       setMessage(result.message || 'Registrado. Verifica tu cuenta.');
-      // Llevar al login
-      setTimeout(() => navigate('/login'), 800);
+
+      if (result.devVerificationUrl) {
+        setDevVerificationUrl(result.devVerificationUrl);
+      } else {
+        // Llevar al login automáticamente cuando no hay fallback de verificación
+        setTimeout(() => navigate('/login'), 1200);
+      }
     } catch (err) {
       setError(err.message || 'Error al registrar');
     } finally {
@@ -145,6 +152,13 @@ const Registration = () => {
             {message ? (
               <div className="text-success mb-3" style={{ fontSize: '0.9rem', whiteSpace: 'pre-line' }}>
                 {message}
+              </div>
+            ) : null}
+            {devVerificationUrl ? (
+              <div className="mb-3" style={{ fontSize: '0.9rem' }}>
+                <a href={devVerificationUrl} target="_blank" rel="noreferrer">
+                  Verificar cuenta ahora (enlace de desarrollo)
+                </a>
               </div>
             ) : null}
 
