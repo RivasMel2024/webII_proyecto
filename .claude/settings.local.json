@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(find 'c:/ESEN/Ciclos/Ciclo 7/Web ll/Proyecto final/webII_proyecto/cupon-x/webII_proyecto' -name *.sql -o -name *schema* -o -name *migration*)"
-    ]
-  }
-}
