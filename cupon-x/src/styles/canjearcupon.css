@@ -1,0 +1,90 @@
+.canje-page {
+  max-width: 960px;
+}
+
+.canje-page-title {
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.canje-page-text {
+  color: #4f5d67;
+  margin-bottom: 1.5rem;
+}
+
+.canje-card {
+  border-radius: 18px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fff9f4 100%);
+}
+
+.canje-header {
+  border-bottom: 1px solid rgba(0, 48, 73, 0.08);
+  padding-bottom: 0.8rem;
+}
+
+.canje-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.canje-subtitle {
+  margin-top: 0.45rem;
+  color: #5b6e7c;
+}
+
+.canje-label {
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.4rem;
+}
+
+.canje-input {
+  border-radius: 12px !important;
+  border: 2px solid #eef1f4 !important;
+  padding: 0.7rem 0.85rem !important;
+  font-weight: 500;
+}
+
+.canje-input:focus {
+  border-color: var(--color-secondary) !important;
+  box-shadow: 0 0 0 4px rgba(102, 155, 188, 0.12) !important;
+}
+
+.btn-canje-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  padding: 0.65rem 1.3rem !important;
+}
+
+.btn-canje-primary:hover,
+.btn-canje-primary:focus-visible {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+}
+
+.btn-canje-secondary {
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  padding: 0.65rem 1.3rem !important;
+}
+
+.canje-alert-success {
+  border-radius: 12px !important;
+  border: 1px solid #96d6a0 !important;
+}
+
+@media (max-width: 576px) {
+  .canje-title {
+    font-size: 1.45rem;
+  }
+
+  .btn-canje-primary,
+  .btn-canje-secondary {
+    width: 100%;
+  }
+}

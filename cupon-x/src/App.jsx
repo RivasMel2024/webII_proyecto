@@ -30,6 +30,7 @@ import RequireRole from './components/RequireRole';
 import CartPage from "./pages/CartPage"; 
 import HistorialPage from "./pages/HistorialPage"; 
 import OfertasPage from "./pages/OfertasPage";
+import CanjePage from './pages/CanjePage';
 
 // Importar función de autenticación
 import { isAuthenticated, getAuthUser, getRubros } from './services/api';
@@ -131,6 +132,15 @@ function App() {
                   <CuponCliente />
                 </RequireRole>
               } 
+            />
+
+            <Route
+              path="/canjear-cupon"
+              element={
+                <RequireRole allowedRoles={['ADMIN_CUPONERA']}>
+                  <CanjePage />
+                </RequireRole>
+              }
             />
 
             {/* Rutas de Funcionalidad Post-Login */}
