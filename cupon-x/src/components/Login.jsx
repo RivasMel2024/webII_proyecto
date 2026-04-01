@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import '../styles/login.css'; 
-import { login as loginApi, setAuthSession } from '../services/api';
+import { consumeAuthNotice, login as loginApi, setAuthSession } from '../services/api';
 
 const Login = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const locationNotice = location.state?.authNotice;
+    const storedNotice = consumeAuthNotice();
+    const notice = locationNotice || storedNotice;
+    if (notice) {
+      setError(notice);
+    }
+  }, [location.state]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -18,8 +28,8 @@ const Login = () => {
     try {
       const result = await loginApi({ email, password });
       setAuthSession({ token: result.token, user: result.user });
-      // Redirección simple: Admin Cuponera → cupones-clientes; otros → home
-      if (result.user?.role === 'ADMIN_CUPONERA') navigate('/cupones-clientes');
+      if (result.user?.role === 'ADMIN_EMPRESA') navigate('/empresa/dashboard');
+      else if (result.user?.role === 'ADMIN_CUPONERA') navigate('/cupones-clientes');
       else navigate('/');
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');

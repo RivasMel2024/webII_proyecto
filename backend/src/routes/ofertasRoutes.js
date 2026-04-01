@@ -9,6 +9,7 @@ import {
   reenviarOferta,
   descartarOferta,
   getMisOfertas,
+  getMisMetricas,
 } from "../controllers/ofertasController.js";
 import { verifyJwt } from "../middleware/authJwt.js";
 import { requireRole } from "../middleware/rbac.js";
@@ -58,6 +59,9 @@ router.post("/", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), createOferta);
 
 // Listado de ofertas de la empresa autenticada
 router.get("/mis-ofertas", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), getMisOfertas);
+
+// Métricas de la empresa autenticada
+router.get("/mis-metricas", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), getMisMetricas);
 
 // Aprobación/Rechazo (solo ADMIN_CUPONERA)
 router.patch("/:id/aprobar", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), aprobarOferta);

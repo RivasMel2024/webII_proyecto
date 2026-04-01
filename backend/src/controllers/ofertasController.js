@@ -462,3 +462,64 @@ export const getMisOfertas = async (req, res) => {
     return errorResponse(res, "Error al obtener ofertas de la empresa", 500, error.message);
   }
 };
+
+/**
+ * Métricas de la empresa autenticada (ADMIN_EMPRESA)
+ */
+export const getMisMetricas = async (req, res) => {
+  try {
+    const empresaId = req.user?.id;
+    if (!empresaId) return errorResponse(res, "No autenticado", 401);
+
+    const result = await pool.query(
+      `SELECT
+         COUNT(o.id)::int AS total_ofertas,
+         COUNT(o.id) FILTER (WHERE o.estado = 'en_espera')::int AS en_espera,
+         COUNT(o.id) FILTER (WHERE o.estado = 'aprobada')::int AS aprobada,
+         COUNT(o.id) FILTER (WHERE o.estado = 'rechazada')::int AS rechazada,
+         COUNT(o.id) FILTER (WHERE o.estado = 'descartada')::int AS descartada,
+         COALESCE(SUM(cv.cupones), 0)::int AS cupones_vendidos_total,
+         COALESCE(SUM(cv.ingresos), 0)::numeric AS ingresos_totales
+       FROM ofertas o
+       LEFT JOIN (
+         SELECT
+           c.oferta_id,
+           COUNT(c.id)::int AS cupones,
+           COALESCE(SUM(c.precio_pagado), 0)::numeric AS ingresos
+         FROM cupones c
+         GROUP BY c.oferta_id
+       ) cv ON cv.oferta_id = o.id
+       WHERE o.empresa_id = $1`,
+      [empresaId]
+    );
+
+    const row = result.rows[0] || {};
+    const totalOfertas = Number(row.total_ofertas || 0);
+    const aprobadas = Number(row.aprobada || 0);
+    const cuponesVendidos = Number(row.cupones_vendidos_total || 0);
+    const ingresosTotales = Number(row.ingresos_totales || 0);
+
+    const tasaAprobacion = totalOfertas > 0 ? (aprobadas / totalOfertas) * 100 : 0;
+    const ticketPromedio = cuponesVendidos > 0 ? ingresosTotales / cuponesVendidos : 0;
+
+    return successResponse(
+      res,
+      {
+        total_ofertas: totalOfertas,
+        por_estado: {
+          en_espera: Number(row.en_espera || 0),
+          aprobada: aprobadas,
+          rechazada: Number(row.rechazada || 0),
+          descartada: Number(row.descartada || 0),
+        },
+        cupones_vendidos_total: cuponesVendidos,
+        ingresos_totales: ingresosTotales,
+        tasa_aprobacion: Number(tasaAprobacion.toFixed(2)),
+        ticket_promedio: Number(ticketPromedio.toFixed(2)),
+      },
+      "Métricas obtenidas correctamente"
+    );
+  } catch (error) {
+    return errorResponse(res, "Error al obtener métricas", 500, error.message);
+  }
+};
