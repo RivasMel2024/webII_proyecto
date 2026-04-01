@@ -11,9 +11,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT),
-  ssl: {
-    rejectUnauthorized: false // Supabase requiere SSL
-  },
+  ssl: process.env.DB_SSL === "true"
+  ? { rejectUnauthorized: false }
+  : false,
   max: 10, // connectionLimit equivalente
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

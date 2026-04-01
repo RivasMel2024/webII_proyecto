@@ -134,6 +134,16 @@
   min-height: 40px;
 }
 
+.coupon-image-container {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.coupon-card {
+  border-radius: 15px !important;
+  overflow: hidden; 
+}
+
 /* ========== RESPONSIVE - iPad ========== */
 /* @media (max-width: 1024px) and (min-width: 768px) {
   .coupon-category-tag {

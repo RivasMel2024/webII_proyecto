@@ -57,7 +57,7 @@ export default function StoresPage() {
         {/* Header igual a All Coupons */}
         <div className="mb-3">
         <h2 className="fw-bold">
-            All <span style={{ color: "#c1121f" }}>Stores</span>
+            Todas <span style={{ color: "#c1121f" }}>las tiendas</span>
         </h2>
         </div>
 

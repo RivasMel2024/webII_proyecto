@@ -31,7 +31,7 @@ export const getCouponById = async (req, res) => {
   } catch (error) {
     errorResponse(res, 'Error al obtener cupón', 500, error.message);
   }
-};
+}; 
 
 /**
  * Crear nuevo cupón

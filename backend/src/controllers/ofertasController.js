@@ -46,6 +46,7 @@ export const getTopOffers = async (req, res) => {
         o.descripcion,
         o.precio_regular,
         o.precio_oferta,
+        o.imagen_url,
         ROUND((1 - (o.precio_oferta / NULLIF(o.precio_regular,0))) * 100) AS descuento_pct,
         o.fecha_limite_uso,
         COUNT(c.id) AS vendidos
@@ -54,7 +55,7 @@ export const getTopOffers = async (req, res) => {
       WHERE o.estado = 'aprobada'
         AND CURRENT_DATE BETWEEN o.fecha_inicio_oferta AND o.fecha_fin_oferta
       GROUP BY
-        o.id, o.titulo, o.descripcion, o.precio_regular, o.precio_oferta, o.fecha_limite_uso
+        o.id, o.titulo, o.descripcion, o.precio_regular, o.precio_oferta, o.fecha_limite_uso, o.imagen_url
       ORDER BY vendidos DESC, descuento_pct DESC
       LIMIT $1
       `,
@@ -76,6 +77,7 @@ export const getAllOffers = async (req, res) => {
         o.descripcion,
         o.precio_regular,
         o.precio_oferta,
+        o.imagen_url,
         ROUND((1 - (o.precio_oferta / NULLIF(o.precio_regular,0))) * 100) AS descuento_pct,
         o.fecha_limite_uso,
         o.estado
@@ -440,6 +442,7 @@ export const getMisOfertas = async (req, res) => {
          o.descripcion,
          o.precio_regular,
          o.precio_oferta,
+         o.imagen_url,
          o.fecha_inicio_oferta,
          o.fecha_fin_oferta,
          o.fecha_limite_uso,
@@ -452,7 +455,7 @@ export const getMisOfertas = async (req, res) => {
        FROM ofertas o
        LEFT JOIN cupones c ON c.oferta_id = o.id
        ${where}
-       GROUP BY o.id
+       GROUP BY o.id, o.imagen_url
        ORDER BY o.created_at DESC`,
       params
     );

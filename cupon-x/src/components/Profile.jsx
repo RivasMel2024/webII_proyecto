@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Row, Col, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getAuthUser, changePassword } from '../services/api';
-import '../styles/login.css';
+import '../styles/profile.css';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -19,7 +19,6 @@ const Profile = () => {
 
   useEffect(() => {
     const currentUser = getAuthUser();
-    console.log('Usuario actual:', currentUser); // Debug
     if (!currentUser) {
       navigate('/login');
       return;
@@ -58,78 +57,79 @@ const Profile = () => {
     }
   };
 
-
   if (!user) return null;
 
-  return (
-    <Container className="login-container" style={{ paddingTop: '2rem' }}>
-      <Card className="login-card">
-        <Card.Body className="p-4">
-          <h2 className="login-title">Mi Perfil</h2>
-          
-          <div className="mb-4">
-            <Row className="mb-3">
-              <Col md={6}>
-                <strong>Nombre:</strong>
-                <p>{user.nombres || 'N/A'}</p>
-              </Col>
-              <Col md={6}>
-                <strong>Apellidos:</strong>
-                <p>{user.apellidos || 'N/A'}</p>
-              </Col>
-            </Row>
+  // Iniciales para avatar
+  const iniciales = `${user.nombres?.[0] || ''}${user.apellidos?.[0] || ''}`.toUpperCase();
 
-            <Row className="mb-3">
+  return (
+    <Container className="profile-container">
+      <Card className="profile-card">
+        <Card.Body>
+
+          {/* Header */}
+          <div className="profile-header text-center">
+            <div className="profile-avatar">
+              {user.nombres?.[0] || "U"}
+            </div>
+            <h3 className="profile-name">
+              {user.nombres} {user.apellidos}
+            </h3>
+            <p className="profile-email">
+              {user.email || user.correo}
+            </p>
+          </div>
+
+          {/* Info */}
+          <div className="profile-info">
+            <Row>
               <Col md={6}>
-                <strong>Correo:</strong>
-                <p>{user.email || user.correo || 'N/A'}</p>
+                <div className="profile-item">
+                  <span>Teléfono</span>
+                  <p>{user.telefono || 'N/A'}</p>
+                </div>
               </Col>
+
               <Col md={6}>
-                <strong>Teléfono:</strong>
-                <p>{user.telefono || 'N/A'}</p>
+                <div className="profile-item">
+                  <span>Rol</span>
+                  <p>{user.role || 'CLIENTE'}</p>
+                </div>
               </Col>
             </Row>
 
             {user.dui && (
-              <Row className="mb-3">
-                <Col md={6}>
-                  <strong>DUI:</strong>
-                  <p>{user.dui}</p>
-                </Col>
-                <Col md={6}>
-                  <strong>Rol:</strong>
-                  <p>{user.role || 'CLIENTE'}</p>
-                </Col>
-              </Row>
+              <div className="profile-item">
+                <span>DUI</span>
+                <p>{user.dui}</p>
+              </div>
             )}
 
             {user.direccion && (
-              <Row className="mb-3">
-                <Col md={12}>
-                  <strong>Dirección:</strong>
-                  <p>{user.direccion}</p>
-                </Col>
-              </Row>
+              <div className="profile-item">
+                <span>Dirección</span>
+                <p>{user.direccion}</p>
+              </div>
             )}
           </div>
 
+          {/* Actions */}
           {!showChangePassword ? (
             <Button 
-              variant="outline-primary" 
-              className="w-100 mb-3"
+              className="btn-profile-primary w-100"
               onClick={() => setShowChangePassword(true)}
             >
               Cambiar Contraseña
             </Button>
           ) : (
-            <div className="mt-4">
-              <h5>Cambiar Contraseña</h5>
+            <div className="profile-password mt-4">
+              <h5 className="mb-3">Cambiar Contraseña</h5>
+
               <Form onSubmit={handlePasswordChange}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="login-label">Contraseña Actual</Form.Label>
+                  <Form.Label>Contraseña Actual</Form.Label>
                   <Form.Control
                     type="password"
-                    className="login-input"
                     required
                     value={passwordForm.currentPassword}
                     onChange={(e) =>
@@ -139,10 +139,9 @@ const Profile = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label className="login-label">Nueva Contraseña</Form.Label>
+                  <Form.Label>Nueva Contraseña</Form.Label>
                   <Form.Control
                     type="password"
-                    className="login-input"
                     required
                     value={passwordForm.newPassword}
                     onChange={(e) =>
@@ -152,10 +151,9 @@ const Profile = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label className="login-label">Confirmar Nueva Contraseña</Form.Label>
+                  <Form.Label>Confirmar Nueva Contraseña</Form.Label>
                   <Form.Control
                     type="password"
-                    className="login-input"
                     required
                     value={passwordForm.confirmPassword}
                     onChange={(e) =>
@@ -164,23 +162,16 @@ const Profile = () => {
                   />
                 </Form.Group>
 
-                {error && (
-                  <div className="text-danger mb-3" style={{ fontSize: '0.9rem' }}>
-                    {error}
-                  </div>
-                )}
-                {message && (
-                  <div className="text-success mb-3" style={{ fontSize: '0.9rem' }}>
-                    {message}
-                  </div>
-                )}
+                {error && <div className="text-danger mb-2">{error}</div>}
+                {message && <div className="text-success mb-2">{message}</div>}
 
                 <div className="d-flex gap-2">
-                  <Button type="submit" className="btn-login-submit flex-grow-1" disabled={loading}>
+                  <Button type="submit" className="btn-profile-primary flex-grow-1" disabled={loading}>
                     {loading ? 'Actualizando...' : 'Actualizar'}
                   </Button>
+
                   <Button
-                    variant="secondary"
+                    className="btn-profile-secondary"
                     onClick={() => {
                       setShowChangePassword(false);
                       setError('');
@@ -194,7 +185,6 @@ const Profile = () => {
             </div>
           )}
 
-         
         </Card.Body>
       </Card>
     </Container>

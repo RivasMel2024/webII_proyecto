@@ -347,3 +347,25 @@ export const comprarCupon = async ({ ofertaId, cantidad = 1, tarjeta }) => {
   if (!res.ok) throw new Error(data?.message || 'Error al comprar cupón');
   return data;
 };
+
+// ============================================================
+// FUNCIONES PARA DETALLES DE CUPON
+// ============================================================
+
+export const getCuponById = async (id) => {
+  const res = await authFetch(`${API_BASE_URL}/cupones/${id}`);
+  const data = await res.json();
+
+  if (res.status === 403) throw new Error("No autorizado");
+  if (!res.ok) throw new Error(data?.message || "Error al obtener cupón");
+  
+  return data; 
+};
+
+export const getOfertaById = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/ofertas/${id}`);
+  const data = await res.json();
+
+  if (!res.ok) throw new Error(data?.message || "Error al obtener oferta");
+  return data; 
+};

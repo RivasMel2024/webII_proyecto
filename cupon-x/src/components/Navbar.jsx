@@ -112,7 +112,7 @@ const NavBar = () => {
                 className="btn-signin d-flex align-items-center"
               >
                 <FaUser className="me-2" />
-                <span className="d-none d-lg-inline">Sign In</span>
+                <span className="d-none d-lg-inline">Ingresar</span>
               </Button>
             )
           )}
