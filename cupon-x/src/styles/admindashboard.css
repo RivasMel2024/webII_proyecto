@@ -1,0 +1,300 @@
+.admin-dashboard {
+  min-height: 80vh;
+}
+
+/* HEADER */
+.admin-header h2 {
+  color: #111;
+}
+
+.admin-header p {
+  font-size: 0.95rem;
+}
+
+/* CARD */
+.admin-card {
+  border-radius: 16px;
+  background: #fff;
+}
+
+/* TABS */
+.custom-tabs .nav-link {
+  border: none !important;
+  border-radius: 10px !important;
+  margin: 0 4px;
+  font-weight: 600;
+  color: #555 !important;
+  transition: all 0.2s ease;
+}
+
+.custom-tabs .nav-link:hover {
+  background-color: #f5f5f5;
+  color: #000 !important;
+}
+
+.custom-tabs .nav-link.active {
+  background-color: #f9fafb !important;
+  color: #111 !important;
+  border-bottom: 2px solid #c1121f !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+}
+
+/* //// 
+PANEL DE ESTADÍSTICAS 
+//// */
+
+.estadisticas-panel {
+  width: 100%;
+}
+
+/* CARD BASE */
+.stat-card {
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
+  height: 100%;
+}
+
+/* fondo suave por tipo */
+.stat-card-blue {
+  background: rgba(58, 134, 255, 0.05);
+}
+
+.stat-card-red {
+  background: rgba(193, 18, 31, 0.05);
+}
+
+.stat-card-gray {
+  background: rgba(0,0,0,0.03);
+}
+
+.stat-card-status {
+  background: rgba(224, 159, 62, 0.08);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+}
+
+/* TEXTOS */
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 900;
+  color: #111;
+}
+
+.stat-value.highlight {
+  color: #c1121f; /* tu rojo pero solo como acento */
+}
+
+.stat-value.warning {
+  color: #e09f3e;
+}
+
+.stat-value.success {
+  color: #2a9d8f;
+}
+
+.stat-subtle {
+  font-size: 12px;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* CONTENIDO */
+.tab-content-box {
+  padding: 10px 5px 5px;
+}
+
+/* //// 
+PANEL DE EMPRESAS 
+//// */
+
+/* CONTENEDOR */
+.gestion-empresas {
+  padding: 10px;
+}
+
+/* HEADER */
+.empresas-header h4 {
+  color: #1e293b;
+}
+
+.empresas-header small {
+  color: #64748b;
+}
+
+/* BOTONES */
+.btn-empresa-primary {
+  background: #1f4e79;
+  border: none;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.btn-empresa-primary:hover {
+  background: #173a5e;
+}
+
+.btn-empresa-secondary {
+  background: #f1f5f9;
+  border: none;
+  color: #334155;
+  font-weight: 500;
+}
+
+.btn-empresa-danger {
+  background: transparent;
+  color: #c1121f;
+  border: 1px solid rgba(193, 18, 31, 0.3);
+  font-weight: 500;
+}
+
+.btn-empresa-danger:hover {
+  background: rgba(193, 18, 31, 0.08);
+}
+
+/* TABLA */
+.table-container {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.custom-table {
+  margin-bottom: 0;
+}
+
+.custom-table thead {
+  background: #f8fafc;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.custom-table tbody tr {
+  border-top: 1px solid #f1f5f9;
+}
+
+.custom-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* TEXTO */
+.custom-table td {
+  color: #334155;
+  font-size: 14px;
+}
+
+/* BADGES (MUY SUAVES) */
+.badge-rubro {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.badge-comision {
+  color: #1f4e79;
+  font-weight: 600;
+}
+
+/* FORM */
+.form-label-custom {
+  font-weight: 600;
+  font-size: 13px;
+  color: #475569;
+}
+
+.input-custom {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.input-custom:focus {
+  border-color: #1f4e79;
+  box-shadow: 0 0 0 2px rgba(31, 78, 121, 0.08);
+}
+
+/* //// 
+PANEL DE OFERTAS 
+//// */
+
+/* FILTRO */
+.select-filtro {
+  width: 200px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+/* ESTADOS (SUAVES, NO CHILLONES) */
+.estado-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.estado-en_espera {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.estado-aprobada {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.estado-rechazada {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* BOTONES */
+.btn-aprobar {
+  background: #1f4e79;
+  border: none;
+  font-weight: 500;
+}
+
+.btn-aprobar:hover {
+  background: #173a5e;
+}
+
+.btn-rechazar {
+  background: transparent;
+  border: 1px solid rgba(193, 18, 31, 0.3);
+  color: #c1121f;
+}
+
+.btn-rechazar:hover {
+  background: rgba(193, 18, 31, 0.08);
+}
+
+/* TEXTO RECHAZO */
+.razon-rechazo {
+  max-width: 180px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* RESPONSIVE (más aire) */
+@media (max-width: 768px) {
+  .custom-tabs .nav-link {
+    font-size: 0.85rem;
+    padding: 8px;
+  }
+}

@@ -465,3 +465,66 @@ export const getMisOfertas = async (req, res) => {
     return errorResponse(res, "Error al obtener ofertas de la empresa", 500, error.message);
   }
 };
+
+/**
+ * Gestión de Ofertas (Aprobar/Rechazar)
+ */
+export const getOfertasByEstado = async (req, res) => {
+  try {
+    const { estado } = req.params; // 'en_espera', 'aprobada', etc.
+    const { rows } = await pool.query(
+      `SELECT o.*, e.nombre as empresa_nombre 
+       FROM ofertas o 
+       JOIN empresas e ON o.empresa_id = e.id 
+       WHERE o.estado = $1 
+       ORDER BY o.created_at DESC`,
+      [estado]
+    );
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error al obtener ofertas" });
+  }
+};
+
+export const getOfertasAdmin = async (req, res) => {
+  try {
+    const { estado } = req.query; // Para filtrar desde el dashboard
+    let query = `
+      SELECT o.*, e.nombre as empresa_nombre, r.nombre as rubro_nombre
+      FROM ofertas o
+      JOIN empresas e ON o.empresa_id = e.id
+      JOIN rubros r ON o.rubro_id = r.id
+    `;
+    
+    const params = [];
+    if (estado) {
+      query += ` WHERE o.estado = $1`;
+      params.push(estado);
+    }
+    
+    query += ` ORDER BY o.created_at DESC`;
+    
+    const { rows } = await pool.query(query, params);
+    return successResponse(res, rows, "Ofertas obtenidas para administración");
+  } catch (error) {
+    return errorResponse(res, "Error al obtener ofertas", 500, error.message);
+  }
+};
+
+// función para cambiar el estado
+export const revisarOferta = async (req, res) => {
+  const { id } = req.params;
+  const { estado, razon_rechazo } = req.body; // estado: 'aprobada' o 'rechazada'
+  
+  try {
+    const { rows } = await pool.query(
+      `UPDATE ofertas 
+       SET estado = $1, razon_rechazo = $2, fecha_revision = NOW() 
+       WHERE id = $3 RETURNING *`,
+      [estado, razon_rechazo || null, id]
+    );
+    return successResponse(res, rows[0], `Oferta ${estado} correctamente`);
+  } catch (error) {
+    return errorResponse(res, "Error al revisar oferta", 500, error.message);
+  }
+};

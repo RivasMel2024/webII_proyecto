@@ -114,131 +114,130 @@ export default function CuponesCliente({ clienteId }) {
   // };
 
   return (
-    <div className="container my-4 cupones-clientes-wrap">
-      {/* Header */}
-      <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-        <div>
-          <h2 className="m-0 cupones-title">
-            Cupones del Cliente <span className="text-muted">#{clienteId ?? "—"}</span>
-          </h2>
-          <div className="text-muted small">{subtitle}</div>
-        </div>
-
-        <Button
-          variant="outline-primary"
-          size="sm"
-          onClick={() => loadCupones(clienteId)}
-          disabled={loading}
-        >
-          Recargar
-        </Button>
+  <div className="container my-4 cupones-clientes-wrap">
+    {/* Header */}
+    <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-4">
+      <div>
+        <h2 className="m-0 fw-semibold" style={{ color: "#2c2c2c" }}>
+          Cupones del Cliente <span className="text-muted">#{clienteId ?? "—"}</span>
+        </h2>
+        <div className="text-muted small mt-1">{subtitle}</div>
       </div>
 
-      {/* Estados */}
-      {loading && (
-        <div className="alert alert-info d-flex align-items-center gap-2">
-          <Spinner animation="border" size="sm" /> Cargando cupones...
-        </div>
-      )}
-
-      {error && (
-        <div className="alert alert-danger">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {!loading && !error && total === 0 && (
-        <div className="alert alert-warning">No hay cupones para este cliente.</div>
-      )}
-
-      {/* Grid de Cards (estilo Top Coupons) */}
-      {!loading && !error && total > 0 && (
-        <div className="row g-4">
-          {cupones.map((c) => (
-            <div className="col-12 col-md-6 col-lg-4" key={`${c.id}-${c.codigo}`}>
-              <Card className="coupon-card h-100">
-                <Card.Body className="d-flex flex-column p-4">
-                  {/* Top info: “marca” + estado */}
-                  <div className="coupon-top-info d-flex align-items-center justify-content-between gap-3 mb-3">
-                    <div className="d-flex align-items-center gap-2 flex-wrap">
-                      <span className="coupon-brand-tag">
-                        {(c.empresa_nombre || "Empresa").toUpperCase()}
-                      </span>
-                      <span className="coupon-category-tag">
-                        {(c.oferta_titulo || "Oferta").toUpperCase()}
-                      </span>
-                    </div>
-                    {estadoBadge(c.estado)}
-                  </div>
-
-                  {/* “Precio” grande (para que se parezca al diseño) */}
-                  <h3 className="coupon-price-value">
-                    ${fmtMoney(c.precio_pagado)} <span className="coupon-off">OFF</span>
-                  </h3>
-
-                  {/* Descripción con check */}
-                  <div className="coupon-description-box">
-                    <p className="coupon-text-desc">
-                      <FaCheckCircle className="me-2 text-success" />
-                      {c.oferta_descripcion || "Oferta disponible para el cliente."}
-                    </p>
-                  </div>
-
-                  {/* Código */}
-                  <div className="coupon-code-container">
-                    <FaTicketAlt className="code-icon-style me-3" />
-                    <span className="code-font">{c.codigo}</span>
-
-                    <Button
-                      variant="light"
-                      size="sm"
-                      className="ms-auto coupon-copy-btn"
-                      onClick={() => copiarCodigo(c.codigo)}
-                      type="button"
-                    >
-                      <FaCopy className="me-2" />
-                      {copiado === c.codigo ? "Copiado" : "Copiar"}
-                    </Button>
-                  </div>
-
-                  {/* Vence */}
-                  <div className="expiry-footer mt-3">
-                    <FaCalendarAlt className="me-2" />
-                    <span>Vence: {fmtDateOnly(c.fecha_limite_uso)}</span>
-                  </div>
-
-                  {/* Acciones al fondo */}
-                  {/* <div className="mt-auto pt-3 d-flex gap-2">
-                    <Button
-                      className="btn-action-full"
-                      variant="danger"
-                      onClick={() => onDelete(c.id)}
-                      disabled={deletingId === c.id}
-                      type="button"
-                    >
-                      {deletingId === c.id ? (
-                        <>
-                          <Spinner animation="border" size="sm" className="me-2" />
-                          Eliminando...
-                        </>
-                      ) : (
-                        <>
-                          <FaTrashAlt className="me-2" />
-                          ELIMINAR CUPÓN
-                        </>
-                      )}
-                    </Button>
-                  </div> */}
-
-                  <div className="small text-muted mt-3">
-                    <strong>ID:</strong> {c.id} &nbsp;•&nbsp; <strong>Cliente:</strong> {c.cliente_id}
-                  </div>
-                </Card.Body>
-              </Card>
-            </div>
-          ))}
-        </div>
-      )}
+      <Button
+        variant="outline-secondary"
+        size="sm"
+        onClick={() => loadCupones(clienteId)}
+        disabled={loading}
+      >
+        Recargar
+      </Button>
     </div>
-  );
+
+    {/* Estados */}
+    {loading && (
+      <div className="alert d-flex align-items-center gap-2" style={{ background: "#f5f7fa", border: "none" }}>
+        <Spinner animation="border" size="sm" />
+        <span>Cargando cupones...</span>
+      </div>
+    )}
+
+    {error && (
+      <div className="alert" style={{ background: "#fff5f5", color: "#842029", border: "none" }}>
+        <strong>Error:</strong> {error}
+      </div>
+    )}
+
+    {!loading && !error && total === 0 && (
+      <div className="alert" style={{ background: "#fff8e6", border: "none" }}>
+        No hay cupones para este cliente.
+      </div>
+    )}
+
+    {/* Grid */}
+    {!loading && !error && total > 0 && (
+      <div className="row g-4">
+        {cupones.map((c) => (
+          <div className="col-12 col-md-6 col-lg-4" key={`${c.id}-${c.codigo}`}>
+            <Card className="h-100 border-0 shadow-sm" style={{ borderRadius: "10px" }}>
+              <Card.Body className="d-flex flex-column p-4">
+
+                {/* Top info */}
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <div className="d-flex flex-wrap gap-2">
+                    <span className="badge bg-light text-dark fw-normal">
+                      {(c.empresa_nombre || "Empresa").toUpperCase()}
+                    </span>
+                    <span className="badge bg-secondary-subtle text-dark fw-normal">
+                      {(c.oferta_titulo || "Oferta").toUpperCase()}
+                    </span>
+                  </div>
+
+                  {/* Estado */}
+                  <div>
+                    {(c.estado || "").toLowerCase() === "disponible" && (
+                      <Badge bg="success-subtle" text="success">Disponible</Badge>
+                    )}
+                    {(c.estado || "").toLowerCase() === "canjeado" && (
+                      <Badge bg="secondary">Canjeado</Badge>
+                    )}
+                    {(c.estado || "").toLowerCase() === "vencido" && (
+                      <Badge bg="danger-subtle" text="danger">Vencido</Badge>
+                    )}
+                  </div>
+                </div>
+
+                {/* Precio */}
+                <h3 style={{ fontWeight: "600", color: "#1f1f1f" }}>
+                  ${fmtMoney(c.precio_pagado)}
+                </h3>
+
+                {/* Descripción */}
+                <p className="text-muted small mt-2">
+                  <FaCheckCircle className="me-2 text-success" />
+                  {c.oferta_descripcion || "Oferta disponible para el cliente."}
+                </p>
+
+                {/* Código */}
+                <div
+                  className="d-flex align-items-center mt-3 p-2"
+                  style={{
+                    background: "#f8f9fa",
+                    borderRadius: "8px"
+                  }}
+                >
+                  <FaTicketAlt className="me-2 text-muted" />
+                  <span className="fw-semibold">{c.codigo}</span>
+
+                  <Button
+                    variant="light"
+                    size="sm"
+                    className="ms-auto"
+                    onClick={() => copiarCodigo(c.codigo)}
+                    type="button"
+                  >
+                    <FaCopy className="me-1" />
+                    {copiado === c.codigo ? "Copiado" : "Copiar"}
+                  </Button>
+                </div>
+
+                {/* Fecha */}
+                <div className="text-muted small mt-3">
+                  <FaCalendarAlt className="me-2" />
+                  Vence: {fmtDateOnly(c.fecha_limite_uso)}
+                </div>
+
+                {/* Footer info */}
+                <div className="small text-muted mt-3">
+                  <strong>ID:</strong> {c.id} &nbsp;•&nbsp; <strong>Cliente:</strong> {c.cliente_id}
+                </div>
+
+              </Card.Body>
+            </Card>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 }

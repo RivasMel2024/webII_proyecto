@@ -16,14 +16,14 @@ export default function VistaCupones() {
 
   return (
     <div className="container my-4">
-      <h3>Seleccionar cliente</h3>
+      <h3></h3>
 
       <select
         className="form-select mb-3"
         value={clienteId}
         onChange={(e) => setClienteId(e.target.value)}
       >
-        <option value="">Seleccione un cliente</option>
+        <option value="">Escoge un cliente...</option>
         {clientes.map((c) => (
           <option key={c.id} value={c.id}>
             {c.nombre}

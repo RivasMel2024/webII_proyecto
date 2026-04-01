@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Navbar, Nav, Button, Container, Badge, Dropdown } from "react-bootstrap";
-import { FaUser, FaShoppingCart, FaHistory, FaUserCircle } from "react-icons/fa";
+import { Navbar, Nav, Button, Container, Badge, Dropdown, NavDropdown } from "react-bootstrap";
+import { FaUser, FaShoppingCart, FaHistory, FaUserCircle, FaChartLine, FaBuilding, FaTicketAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getAuthUser, isAuthenticated, logout } from "../services/api";
 import { useCart } from "../context/CartContext";
@@ -26,11 +26,12 @@ const NavBar = () => {
     };
 
     checkAuth();
-    // Verificar autenticación cada vez que cambie la ruta
     window.addEventListener('storage', checkAuth);
+    window.addEventListener('authChange', checkAuth);
     
     return () => {
       window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('authChange', checkAuth);
     };
   }, [location]);
 
@@ -41,9 +42,8 @@ const NavBar = () => {
     navigate('/login');
   };
 
-  // Verificar si el usuario es admin
   const isAdmin = user?.role === 'ADMIN_CUPONERA';
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/verify';
+  const isAuthPage = ['/login', '/register', '/forgot-password', '/verify'].includes(location.pathname);
   const cartCount = getCartCount();
 
   return (
@@ -53,70 +53,63 @@ const NavBar = () => {
           CuponX
         </Navbar.Brand>
 
-        <Nav className="align-items-center ms-auto">
-          {/* CASO: USUARIO LOGUEADO */}
-          {authenticated && user ? (
-            <div className="d-flex align-items-center">
-              {/* Solo mostrar iconos de carrito e historial si NO es admin */}
-              {!isAdmin && (
-                <>
-                  <Link to="/history" className="nav-icon-link me-3" title="Mis compras">
-                    <FaHistory size={20} />
-                  </Link>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="align-items-center ms-auto">
+            {authenticated && user ? (
+              <div className="d-flex align-items-center">
+                {!isAdmin && (
+                  <>
+                    <Link to="/history" className="nav-icon-link me-3" title="Mis compras">
+                      <FaHistory size={20} />
+                    </Link>
+                    <Link to="/cart" className="nav-icon-link me-3 position-relative" title="Carrito">
+                      <FaShoppingCart size={22} />
+                      {cartCount > 0 && <Badge pill className="cart-badge">{cartCount}</Badge>}
+                    </Link>
+                  </>
+                )}
 
-                  <Link to="/cart" className="nav-icon-link me-3 position-relative" title="Carrito">
-                    <FaShoppingCart size={22} />
-                    {cartCount > 0 && (
-                      <Badge pill className="cart-badge">{cartCount}</Badge>
+                <Dropdown align="end">
+                  <Dropdown.Toggle id="dropdown-user" className="btn-user-menu d-flex align-items-center">
+                    <FaUserCircle className="me-2" size={20} />
+                    <span className="d-none d-lg-inline">{user.nombres || user.email}</span>
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu className="dropdown-menu-custom shadow border-0">
+                    <Dropdown.Item as={Link} to="/profile">Mi Perfil</Dropdown.Item>
+                    
+                    {/* SECCIÓN CLIENTE */}
+                    {user.role === 'CLIENTE' && (
+                      <Dropdown.Item as={Link} to="/mis-cupones">Mis Cupones</Dropdown.Item>
                     )}
-                  </Link>
-                </>
-              )}
 
-              <Dropdown align="end">
-                <Dropdown.Toggle 
-                  id="dropdown-user"
-                  className="btn-user-menu d-flex align-items-center"
-                >
-                  <FaUserCircle className="me-2" size={20} />
-                  <span className="d-none d-lg-inline">{user.nombres || user.email}</span>
-                </Dropdown.Toggle>
+                    {/* SECCIÓN ADMINISTRADOR CENTRALIZADA */}
+                    {isAdmin && (
+                      <>
+                        <Dropdown.Item as={Link} to="/admin">
+                          Dashboard
+                        </Dropdown.Item>
+                      </>
+                    )}
 
-                <Dropdown.Menu className="dropdown-menu-custom">
-                  <Dropdown.Item as={Link} to="/profile" className="dropdown-item-custom">
-                    Mi Perfil
-                  </Dropdown.Item>
-                  {user.role === 'CLIENTE' && (
-                    <Dropdown.Item as={Link} to="/mis-cupones" className="dropdown-item-custom">
-                      Mis Cupones
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={handleLogout} className="text-danger">
+                      Cerrar Sesión
                     </Dropdown.Item>
-                  )}
-                  {user.role === 'ADMIN_CUPONERA' && (
-                    <Dropdown.Item as={Link} to="/cupones-clientes" className="dropdown-item-custom">
-                      Cupones Clientes
-                    </Dropdown.Item>
-                  )}
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout} className="dropdown-item-custom">
-                    Cerrar Sesión
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </div>
-          ) : (
-            /* CASO: USUARIO NO LOGUEADO (Y no estamos en login/register) */
-            !isAuthPage && (
-              <Button 
-                as={Link} 
-                to="/login" 
-                className="btn-signin d-flex align-items-center"
-              >
-                <FaUser className="me-2" />
-                <span className="d-none d-lg-inline">Ingresar</span>
-              </Button>
-            )
-          )}
-        </Nav>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+            ) : (
+              !isAuthPage && (
+                <Button as={Link} to="/login" className="btn-signin d-flex align-items-center">
+                  <FaUser className="me-2" />
+                  <span>Ingresar</span>
+                </Button>
+              )
+            )}
+          </Nav>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
   );

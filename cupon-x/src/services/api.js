@@ -369,3 +369,120 @@ export const getOfertaById = async (id) => {
   if (!res.ok) throw new Error(data?.message || "Error al obtener oferta");
   return data; 
 };
+
+// ============================================================
+// FUNCIONES PARA STATS Y GESTIÓN DE ADMIN
+// ============================================================
+
+// Obtener todas las empresas (Lista para el Admin)
+export const getAdminEmpresas = async () => {
+  const res = await authFetch(`${API_BASE_URL}/empresas`);
+  if (!res.ok) throw new Error("Error al obtener empresas");
+  return await res.json();
+};
+
+// Crear empresa
+export const createEmpresa = async (payload) => {
+  const res = await authFetch(`${API_BASE_URL}/empresas`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al crear empresa');
+  return data;
+};
+
+// Actualizar empresa
+export const updateEmpresa = async (id, payload) => {
+  const res = await authFetch(`${API_BASE_URL}/empresas/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al actualizar empresa');
+  return data;
+};
+
+// Eliminar (Desactivar) empresa
+export const deleteEmpresa = async (id) => {
+  const res = await authFetch(`${API_BASE_URL}/empresas/${id}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al eliminar empresa');
+  return data;
+};
+
+// Obtener ofertas para el Admin con soporte de filtros
+export const getAdminOfertas = async (estado = '') => {
+  const url = estado 
+    ? `${API_BASE_URL}/admin/ofertas?estado=${estado}` 
+    : `${API_BASE_URL}/admin/ofertas`;
+    
+  const res = await authFetch(url);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al obtener ofertas");
+  return data;
+};
+
+// Aprobar Oferta (Ruta PATCH)
+export const aprobarOfertaApi = async (id) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${id}/aprobar`, {
+    method: 'PATCH',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al aprobar oferta");
+  return data;
+};
+
+// Rechazar Oferta (Ruta PATCH)
+export const rechazarOfertaApi = async (id, razon) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${id}/rechazar`, {
+    method: 'PATCH',
+    body: JSON.stringify({ razon_rechazo: razon }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al rechazar oferta");
+  return data;
+};
+
+// Obtener Estadísticas del Dashboard
+export const getAdminStatsApi = async () => {
+  const res = await authFetch(`${API_BASE_URL}/admin/stats`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || "Error al obtener estadísticas");
+  return data;
+};
+
+// ============================================================
+// CRUD DE RUBROS (ADMIN)
+// ============================================================
+
+export const createRubroApi = async (payload) => {
+  const res = await authFetch(`${API_BASE_URL}/rubros`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al crear rubro');
+  return data;
+};
+
+export const updateRubroApi = async (id, payload) => {
+  const res = await authFetch(`${API_BASE_URL}/rubros/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al actualizar rubro');
+  return data;
+};
+
+export const deleteRubroApi = async (id) => {
+  const res = await authFetch(`${API_BASE_URL}/rubros/${id}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al desactivar rubro');
+  return data;
+};
