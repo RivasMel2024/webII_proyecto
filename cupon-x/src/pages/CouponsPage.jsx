@@ -45,6 +45,7 @@ export default function CouponsPage() {
       description: o.descripcion || "Sin descripción",
       code: "Oferta disponible",
       expiry: formatDateOnly(o.fecha_limite_uso),
+      imagen_url: o.imagen_url || o.image_url || null,
       // Agregar datos completos para el carrito
       titulo: o.titulo || "Oferta",
       descripcion: o.descripcion || "Sin descripción",
@@ -84,7 +85,7 @@ export default function CouponsPage() {
     <section className="py-5">
       <Container>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2 className="fw-bold mb-0">All Coupons</h2>
+          <h2 className="fw-bold mb-0">Todos los cupones</h2>
         </div>
 
         <Form className="mb-4">

@@ -43,7 +43,7 @@ const GestionEmpresas = () => {
     <div className="gestion-empresas">
 
       {/* HEADER */}
-      <div className="empresas-header d-flex justify-content-between align-items-center mb-4">
+      <div className="empresas-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
         <div>
           <h4 className="fw-bold mb-1">Empresas Registradas</h4>
           <small className="text-muted">Gestiona las empresas afiliadas a la plataforma</small>

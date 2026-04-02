@@ -28,7 +28,6 @@ const AdminDashboard = () => {
             defaultActiveKey="stats" 
             id="admin-tabs" 
             className="mb-4 custom-tabs"
-            justify
           >
             <Tab eventKey="stats" title="Estadísticas">
               <div className="tab-content-box">

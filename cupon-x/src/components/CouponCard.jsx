@@ -37,7 +37,7 @@ const CouponCard = ({ data }) => {
   };
 
   const handleViewDetails = () => {
-    navigate(`/cupones/${data.id}`);
+    navigate(`/ofertas/${data.id}`);
   };
 
   return (

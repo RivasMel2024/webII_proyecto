@@ -30,7 +30,7 @@ import RequireRole from './components/RequireRole';
 import CartPage from "./pages/CartPage"; 
 import HistorialPage from "./pages/HistorialPage"; 
 import OfertasPage from "./pages/OfertasPage";
-import CuponDetailPage from "./pages/CuponDetailPage";
+import OfertaDetailPage from "./pages/OfertaDetailPage";
 import AdminDashboard from './pages/AdminDashboard';
 
 // Importar función de autenticación
@@ -165,14 +165,7 @@ function App() {
             <Route path="/ofertas" element={<OfertasPage />} />
             <Route path="/stores" element={<StoresPage />} />
 
-            <Route
-              path="/cupones/:id"
-              element={
-                <RequireAuth>
-                  <CuponDetailPage />
-                </RequireAuth>
-              }
-            />
+            <Route path="/ofertas/:id" element={<OfertaDetailPage />} />
 
           </Routes>
         </main>

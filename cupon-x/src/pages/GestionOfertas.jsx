@@ -41,7 +41,7 @@ const GestionOfertas = () => {
     <div className="gestion-ofertas">
 
       {/* HEADER */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
         <div>
           <h4 className="fw-bold mb-1">Revisión de Ofertas</h4>
           <small className="text-muted">Aprueba o rechaza ofertas enviadas por empresas</small>
@@ -87,7 +87,7 @@ const GestionOfertas = () => {
 
                 <td className="text-center">
                   {o.estado === 'en_espera' && (
-                    <div className="d-flex justify-content-center gap-2">
+                    <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
                       <Button 
                         size="sm" 
                         className="btn-aprobar"

@@ -528,3 +528,33 @@ export const revisarOferta = async (req, res) => {
     return errorResponse(res, "Error al revisar oferta", 500, error.message);
   }
 };
+
+export const getOfertaDetalle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(`
+      SELECT
+        o.*,
+        e.nombre AS empresa_nombre,
+        e.descripcion AS empresa_descripcion,
+        e.direccion,
+        e.telefono,
+        e.correo,
+        e.color_hex
+      FROM ofertas o
+      JOIN empresas e ON o.empresa_id = e.id
+      WHERE o.id = $1
+        AND o.estado = 'aprobada'
+      LIMIT 1
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return errorResponse(res, "Oferta no encontrada", 404);
+    }
+
+    return successResponse(res, result.rows[0], "Detalle de oferta");
+  } catch (error) {
+    return errorResponse(res, "Error al obtener oferta", 500, error.message);
+  }
+};

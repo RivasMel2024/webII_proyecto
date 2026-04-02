@@ -83,7 +83,7 @@ const CouponGrid = () => {
       <Container>
 
         {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-4">
           <h2 className="fw-bold mb-0">
             Top <span style={{ color: "#c1121f" }}>Cupones</span>
           </h2>
@@ -107,7 +107,7 @@ const CouponGrid = () => {
             </Col>
           ) : (
             adapted.map((item) => (
-              <Col key={item.id} xs={12} sm={6} md={4} lg={4}>
+              <Col key={item.id} xs={12} sm={6} lg={4}>
                 <CouponCard data={item} />
               </Col>
             ))

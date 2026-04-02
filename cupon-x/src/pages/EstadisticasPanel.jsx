@@ -38,7 +38,7 @@ const EstadisticasPanel = () => {
       <Row className="g-4">
 
         {/* 🔵 Ventas */}
-        <Col md={3}>
+        <Col xs={12} sm={6} lg={3}>
           <Card className="stat-card stat-card-blue">
             <Card.Body>
               <div className="stat-label">Ventas Brutas</div>

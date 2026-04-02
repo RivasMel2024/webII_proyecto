@@ -56,7 +56,7 @@ const NavBar = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="align-items-center ms-auto">
-            {authenticated && user ? (
+            {authenticated && user && !isAuthPage ? (
               <div className="d-flex align-items-center">
                 {!isAdmin && (
                   <>
@@ -88,7 +88,7 @@ const NavBar = () => {
                     {isAdmin && (
                       <>
                         <Dropdown.Item as={Link} to="/admin">
-                          Dashboard
+                          Dashboard Principal
                         </Dropdown.Item>
                       </>
                     )}
@@ -116,4 +116,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-

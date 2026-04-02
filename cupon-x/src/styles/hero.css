@@ -88,6 +88,16 @@
   opacity: 0.5;
 }
 
+@media (max-width: 992px) {
+  .hero-section {
+    padding: 60px 0;
+  }
+
+  .hero-image-wrapper {
+    display: none;
+  }
+}
+
 /* Breakpoint móvil: ocultar imagen decorativa y ajustar espaciado */
 @media (max-width: 768px) {
   .hero-section {

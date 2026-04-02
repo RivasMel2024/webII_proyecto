@@ -82,7 +82,7 @@ const GestionRubros = () => {
   return (
     <div className="gestion-empresas">
       {/* HEADER */}
-      <div className="empresas-header d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
         <div>
           <h4 className="fw-semibold mb-1">Rubros</h4>
           <small>Categorías para organizar empresas y ofertas</small>

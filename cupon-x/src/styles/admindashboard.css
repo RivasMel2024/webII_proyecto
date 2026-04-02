@@ -291,10 +291,151 @@ PANEL DE OFERTAS
   font-size: 12px;
 }
 
-/* RESPONSIVE (más aire) */
-@media (max-width: 768px) {
-  .custom-tabs .nav-link {
+/* =========================
+   TABLET (≤ 992px)
+========================= */
+@media (max-width: 992px) {
+
+  .admin-dashboard {
+    padding: 10px;
+  }
+
+  /* HEADER */
+  .admin-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .admin-header p {
     font-size: 0.85rem;
+  }
+
+  /* STATS */
+  .stat-value {
+    font-size: 22px;
+  }
+
+  /* TABS */
+  .custom-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .custom-tabs .nav-link {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  /* FILTRO */
+  .select-filtro {
+    width: 160px;
+  }
+
+  /* TABLAS */
+  .custom-table td {
+    font-size: 13px;
+  }
+
+}
+
+
+/* =========================
+   CELULAR (≤ 576px)
+========================= */
+@media (max-width: 576px) {
+
+    .modal-dialog {
+    margin: 10px;
+  }
+
+  .admin-dashboard {
     padding: 8px;
+  }
+
+  /* HEADER */
+  .admin-header {
+    text-align: center;
+  }
+
+  .admin-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .admin-header p {
+    font-size: 0.8rem;
+  }
+
+  /* TABS → scroll horizontal */
+  .custom-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 5px;
+  }
+
+  .custom-tabs .nav-link {
+    font-size: 12px;
+    padding: 6px 8px;
+    margin: 0 2px;
+  }
+
+  /* STATS → stack */
+  .stat-card {
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+
+  /* BOTONES */
+  .btn-empresa-primary,
+  .btn-empresa-secondary,
+  .btn-empresa-danger {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  /* FORM */
+  .input-custom {
+    font-size: 14px;
+  }
+
+  /* FILTRO */
+  .select-filtro {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  /* TABLA → scroll horizontal */
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .custom-table {
+    min-width: 600px; /* evita que se rompa */
+  }
+
+  /* TEXTO */
+  .custom-table td {
+    font-size: 12px;
+  }
+
+  /* BADGES */
+  .badge-rubro {
+    font-size: 11px;
+  }
+
+  .estado-badge {
+    font-size: 11px;
+  }
+
+  /* RECHAZO */
+  .razon-rechazo {
+    max-width: 140px;
+    font-size: 11px;
   }
 }
