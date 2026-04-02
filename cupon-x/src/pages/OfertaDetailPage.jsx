@@ -44,7 +44,7 @@ export default function OfertaDetailPage() {
   return (
     <div className="oferta-container">
 
-      {/* 🔙 BOTÓN VOLVER */}
+      {/* BOTÓN VOLVER */}
       <button 
         className="btn-back"
         onClick={() => navigate(-1)}
@@ -52,7 +52,7 @@ export default function OfertaDetailPage() {
         <FaArrowLeft /> Volver
       </button>
 
-      {/* 🧾 CARD PRINCIPAL */}
+      {/* CARD PRINCIPAL */}
       <div className="oferta-card">
 
         <div className="oferta-image-wrapper">
@@ -88,7 +88,7 @@ export default function OfertaDetailPage() {
             {oferta.descripcion}
           </p>
 
-          {/* 📅 FECHAS */}
+          {/* FECHAS */}
           <div className="oferta-fechas">
             {oferta.fecha_fin_oferta && (
               <p>📅 Disponible hasta: {new Date(oferta.fecha_fin_oferta).toLocaleDateString()}</p>
@@ -98,7 +98,7 @@ export default function OfertaDetailPage() {
             )}
           </div>
 
-          {/* 📜 CONDICIONES (AHORA DENTRO) */}
+          {/* CONDICIONES*/}
           <div className="oferta-condiciones-inline">
             <h4>Condiciones</h4>
             <p>{oferta.otros_detalles || "Sin condiciones adicionales"}</p>
@@ -107,7 +107,7 @@ export default function OfertaDetailPage() {
         </div>
       </div>
 
-      {/* 🏢 EMPRESA (SEPARADO) */}
+      {/* EMPRESA*/}
       <div className="empresa-card">
         <h3>{oferta.empresa_nombre}</h3>
         <p className="empresa-desc">{oferta.empresa_descripcion}</p>
