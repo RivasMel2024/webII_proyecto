@@ -41,8 +41,7 @@ const NavBar = () => {
     navigate('/login');
   };
 
-  // Verificar si el usuario es admin
-  const isAdmin = user?.role === 'ADMIN_CUPONERA';
+  const isCliente = user?.role === 'CLIENTE';
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/verify';
   const cartCount = getCartCount();
 
@@ -57,8 +56,8 @@ const NavBar = () => {
           {/* CASO: USUARIO LOGUEADO */}
           {authenticated && user ? (
             <div className="d-flex align-items-center">
-              {/* Solo mostrar iconos de carrito e historial si NO es admin */}
-              {!isAdmin && (
+               {/* Solo mostrar iconos de carrito e historial para CLIENTE */}
+              {isCliente && (
                 <>
                   <Link to="/history" className="nav-icon-link me-3" title="Mis compras">
                     <FaHistory size={20} />
@@ -84,11 +83,11 @@ const NavBar = () => {
 
                 <Dropdown.Menu className="dropdown-menu-custom">
                   <Dropdown.Item as={Link} to="/profile" className="dropdown-item-custom">
-                    Mi Perfil
+                    Mi perfil
                   </Dropdown.Item>
                   {user.role === 'CLIENTE' && (
                     <Dropdown.Item as={Link} to="/mis-cupones" className="dropdown-item-custom">
-                      Mis Cupones
+                      Mis cupones
                     </Dropdown.Item>
                   )}
                   {(user.role === 'ADMIN_CUPONERA' || user.role === 'EMPLEADO') && (
@@ -98,12 +97,27 @@ const NavBar = () => {
                   )}
                   {user.role === 'ADMIN_CUPONERA' && (
                     <Dropdown.Item as={Link} to="/cupones-clientes" className="dropdown-item-custom">
-                      Cupones Clientes
+                      Cupones clientes
+                    </Dropdown.Item>
+                  )}
+                  {user.role === 'ADMIN_EMPRESA' && (
+                    <Dropdown.Item as={Link} to="/empresa/dashboard" className="dropdown-item-custom">
+                      Panel empresa
+                    </Dropdown.Item>
+                  )}
+                  {user.role === 'ADMIN_EMPRESA' && (
+                    <Dropdown.Item as={Link} to="/empresa/empleados" className="dropdown-item-custom">
+                      Gestión de empleados
+                    </Dropdown.Item>
+                  )}
+                  {user.role === 'ADMIN_EMPRESA' && (
+                    <Dropdown.Item as={Link} to="/empresa/metricas" className="dropdown-item-custom">
+                      Métricas
                     </Dropdown.Item>
                   )}
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout} className="dropdown-item-custom">
-                    Cerrar Sesión
+                    Cerrar sesión
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>

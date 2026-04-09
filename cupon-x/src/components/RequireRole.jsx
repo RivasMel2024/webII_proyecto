@@ -1,12 +1,13 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { getAuthUser } from '../services/api';
+import { consumeAuthNotice, getAuthUser, isAuthenticated } from '../services/api';
 
 export default function RequireRole({ children, allowedRoles }) {
   const location = useLocation();
+  const authNotice = consumeAuthNotice();
   const user = getAuthUser();
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!isAuthenticated() || !user) {
+    return <Navigate to="/login" state={{ from: location, authNotice }} replace />;
   }
 
   if (!allowedRoles.includes(user.role)) {

@@ -31,6 +31,9 @@ import CartPage from "./pages/CartPage";
 import HistorialPage from "./pages/HistorialPage"; 
 import OfertasPage from "./pages/OfertasPage";
 import CanjePage from './pages/CanjePage';
+import EmpresaDashboardPage from './pages/EmpresaDashboardPage';
+import EmpresaEmpleadosPage from './pages/EmpresaEmpleadosPage';
+import EmpresaMetricasPage from './pages/EmpresaMetricasPage';
 
 // Importar función de autenticación
 import { isAuthenticated, getAuthUser, getRubros } from './services/api';
@@ -139,6 +142,33 @@ function App() {
               element={
                 <RequireRole allowedRoles={['ADMIN_CUPONERA', 'EMPLEADO']}>
                   <CanjePage />
+                </RequireRole>
+              }
+            />
+
+            <Route
+              path="/empresa/dashboard"
+              element={
+                <RequireRole allowedRoles={['ADMIN_EMPRESA']}>
+                  <EmpresaDashboardPage />
+                </RequireRole>
+              }
+            />
+
+            <Route
+              path="/empresa/empleados"
+              element={
+                <RequireRole allowedRoles={['ADMIN_EMPRESA']}>
+                  <EmpresaEmpleadosPage />
+                </RequireRole>
+              }
+            />
+
+            <Route
+              path="/empresa/metricas"
+              element={
+                <RequireRole allowedRoles={['ADMIN_EMPRESA']}>
+                  <EmpresaMetricasPage />
                 </RequireRole>
               }
             />

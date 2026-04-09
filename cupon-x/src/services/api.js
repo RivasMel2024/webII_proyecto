@@ -1,6 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const AUTH_STORAGE_KEY = 'cuponx.auth';
+const AUTH_NOTICE_KEY = 'cuponx.auth.notice';
 
 export const getAuthSession = () => {
   try {
@@ -22,6 +23,17 @@ export const clearAuthSession = () => {
   localStorage.removeItem(AUTH_STORAGE_KEY);
   // Disparar evento personalizado para notificar cambio de autenticación
   window.dispatchEvent(new Event('authChange'));
+};
+
+export const consumeAuthNotice = () => {
+  try {
+    const value = sessionStorage.getItem(AUTH_NOTICE_KEY);
+    if (!value) return '';
+    sessionStorage.removeItem(AUTH_NOTICE_KEY);
+    return value;
+  } catch {
+    return '';
+  }
 };
 
 // Funciones de utilidad para autenticación
@@ -56,6 +68,47 @@ const authFetch = async (url, options = {}) => {
   };
 
   return fetch(url, { ...options, headers });
+};
+
+const getFriendlyHttpMessage = (status, backendMessage, fallbackMessage) => {
+  if (status === 401) return 'Tu sesión expiró. Inicia sesión nuevamente.';
+  if (status === 403) return 'No autorizado para esta acción.';
+  if (status === 409) return backendMessage || 'Transición inválida para el estado actual.';
+  return backendMessage || fallbackMessage;
+};
+
+const handleUnauthorized = (message) => {
+  clearAuthSession();
+  try {
+    sessionStorage.setItem(AUTH_NOTICE_KEY, message || 'Tu sesión expiró. Inicia sesión nuevamente.');
+  } catch {
+    // Ignorar errores de storage para no bloquear redireccion
+  }
+
+  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    window.location.assign('/login');
+  }
+};
+
+const resolveApiResponse = async (res, fallbackMessage) => {
+  let data = null;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
+  }
+
+  if (!res.ok) {
+    const message = getFriendlyHttpMessage(res.status, data?.message, fallbackMessage);
+    if (res.status === 401) {
+      handleUnauthorized(message);
+    }
+    const error = new Error(message);
+    error.status = res.status;
+    throw error;
+  }
+
+  return data;
 };
 
 export const testConnection = async () => {
@@ -188,6 +241,57 @@ export const getAllOffers = async () => {
   }
 };
 
+export const createOferta = async (payload) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return resolveApiResponse(res, "Error al crear oferta");
+};
+
+export const getMisOfertas = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  if (params.estado) queryParams.set("estado", params.estado);
+
+  const url = `${API_BASE_URL}/ofertas/mis-ofertas${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const res = await authFetch(url);
+  return resolveApiResponse(res, "Error al obtener mis ofertas");
+};
+
+export const getMisMetricas = async () => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/mis-metricas`);
+  return resolveApiResponse(res, "Error al obtener métricas");
+};
+
+export const aprobarOferta = async (ofertaId) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/aprobar`, {
+    method: "PATCH",
+  });
+  return resolveApiResponse(res, "Error al aprobar oferta");
+};
+
+export const rechazarOferta = async (ofertaId, justificacion) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/rechazar`, {
+    method: "PATCH",
+    body: JSON.stringify({ justificacion }),
+  });
+  return resolveApiResponse(res, "Error al rechazar oferta");
+};
+
+export const reenviarOferta = async (ofertaId) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/reenviar`, {
+    method: "PATCH",
+  });
+  return resolveApiResponse(res, "Error al reenviar oferta");
+};
+
+export const descartarOferta = async (ofertaId) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${ofertaId}/descartar`, {
+    method: "PATCH",
+  });
+  return resolveApiResponse(res, "Error al descartar oferta");
+};
+
 // ============================================================
 // FUNCIONES PARA FILTRADO DE OFERTAS POR RUBRO
 // ============================================================
@@ -288,6 +392,42 @@ export const canjearCupon = async ({ codigo, dui }) => {
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || 'Error al canjear cupón');
   return data;
+
+// ============================================================
+// FUNCIONES PARA EMPLEADOS (ADMIN_EMPRESA / ADMIN_CUPONERA)
+// ============================================================
+
+export const getEmpleados = async () => {
+  const res = await authFetch(`${API_BASE_URL}/empleados`);
+  return resolveApiResponse(res, "Error al obtener empleados");
+};
+
+export const getEmpleadoById = async (id) => {
+  const res = await authFetch(`${API_BASE_URL}/empleados/${id}`);
+  return resolveApiResponse(res, "Error al obtener empleado");
+};
+
+export const createEmpleado = async (payload) => {
+  const res = await authFetch(`${API_BASE_URL}/empleados`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return resolveApiResponse(res, "Error al crear empleado");
+};
+
+export const updateEmpleado = async (id, payload) => {
+  const res = await authFetch(`${API_BASE_URL}/empleados/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+  return resolveApiResponse(res, "Error al actualizar empleado");
+};
+
+export const deleteEmpleado = async (id) => {
+  const res = await authFetch(`${API_BASE_URL}/empleados/${id}`, {
+    method: "DELETE",
+  });
+  return resolveApiResponse(res, "Error al desactivar empleado");
 };
 
 // Comprar cupón(es)
@@ -296,7 +436,5 @@ export const comprarCupon = async ({ ofertaId, cantidad = 1, tarjeta }) => {
     method: 'POST',
     body: JSON.stringify({ ofertaId, cantidad, tarjeta }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.message || 'Error al comprar cupón');
-  return data;
+  return resolveApiResponse(res, 'Error al comprar cupón');
 };
