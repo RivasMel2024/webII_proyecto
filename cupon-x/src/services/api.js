@@ -392,6 +392,7 @@ export const canjearCupon = async ({ codigo, dui }) => {
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || 'Error al canjear cupón');
   return data;
+};
 
 // ============================================================
 // FUNCIONES PARA EMPLEADOS (ADMIN_EMPRESA / ADMIN_CUPONERA)
