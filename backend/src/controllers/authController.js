@@ -95,6 +95,25 @@ const queryOne = async (sql, params) => {
   }
 };
 
+const getPublicAppUrl = (req) => {
+  const configuredUrl = String(process.env.APP_PUBLIC_URL || '').trim();
+  if (configuredUrl) return configuredUrl.replace(/\/$/, '');
+
+  const origin = String(req?.headers?.origin || '').trim();
+  if (origin) return origin.replace(/\/$/, '');
+
+  const referer = String(req?.headers?.referer || '').trim();
+  if (referer) {
+    try {
+      return new URL(referer).origin;
+    } catch {
+      return referer.replace(/\/$/, '');
+    }
+  }
+
+  return 'http://localhost:5173';
+};
+
 const findAccountsByEmail = async (email) => {
   const correo = normalizeEmail(email);
 
@@ -273,7 +292,7 @@ export const registerCliente = async (req, res) => {
         [nombres, apellidos, telefono, correo, passwordHash, direccion, pais, dui, tokenVerificacion]
       );
 
-      const verifyUrl = `${process.env.APP_PUBLIC_URL || 'http://localhost:5173'}/verify?token=${tokenVerificacion}`;
+      const verifyUrl = `${getPublicAppUrl(req)}/verify?token=${tokenVerificacion}`;
       await sendEmail({
         to: correo,
         subject: 'Verifica tu cuenta - CuponX',
@@ -367,7 +386,7 @@ export const forgotPassword = async (req, res) => {
     const { role, row } = accounts[0];
     const resetToken = signResetToken({ uid: row.id, role, email: row.correo });
 
-    const resetUrl = `${process.env.APP_PUBLIC_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${getPublicAppUrl(req)}/reset-password?token=${resetToken}`;
     await sendEmail({
       to: row.correo,
       subject: 'Recuperación de contraseña - CuponX',
