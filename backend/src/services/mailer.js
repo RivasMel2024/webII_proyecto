@@ -10,25 +10,41 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     return { ok: true, mode: 'console' };
   }
 
+  const smtpPort = Number(process.env.SMTP_PORT);
+  const smtpPass = String(process.env.SMTP_PASS || '').replace(/^"|"$/g, '').trim();
+
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
     auth: {
       user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      pass: smtpPass,
     },
   });
 
-  const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM || process.env.SMTP_USER,
-    to,
-    subject,
-    text,
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.MAIL_FROM || process.env.SMTP_USER,
+      to,
+      subject,
+      text,
+      html,
+    });
 
-  return { ok: true, mode: 'smtp', messageId: info.messageId };
+    return { ok: true, mode: 'smtp', messageId: info.messageId };
+  } catch (error) {
+    console.error('[MAIL:ERROR]', {
+      to,
+      subject,
+      message: error.message,
+      code: error.code,
+    });
+    throw error;
+  }
 };
 
 /**
