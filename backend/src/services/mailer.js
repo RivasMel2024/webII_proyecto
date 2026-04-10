@@ -1,34 +1,80 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const hasSmtpConfig = () => {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
 };
 
+const hasResendConfig = () => {
+  return Boolean(process.env.RESEND_API_KEY);
+};
+
 export const sendEmail = async ({ to, subject, html, text }) => {
-  if (!hasSmtpConfig()) {
-    console.log('[MAIL:FALLBACK]', { to, subject, text });
-    return { ok: true, mode: 'console' };
+  // Prioridad: Resend > SMTP > Fallback
+  
+  if (hasResendConfig()) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const result = await resend.emails.send({
+        from: process.env.MAIL_FROM || 'CuponX <onboarding@resend.dev>',
+        to,
+        subject,
+        html,
+        text,
+      });
+      
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      
+      console.log('[MAIL:RESEND]', { to, subject, id: result.data?.id });
+      return { ok: true, mode: 'resend', messageId: result.data?.id };
+    } catch (error) {
+      console.error('[MAIL:RESEND:ERROR]', {
+        to,
+        subject,
+        message: error.message,
+      });
+      throw error;
+    }
   }
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+  if (hasSmtpConfig()) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+        secure: Number(process.env.SMTP_PORT) === 465,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
 
-  const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM || process.env.SMTP_USER,
-    to,
-    subject,
-    text,
-    html,
-  });
+      const info = await transporter.sendMail({
+        from: process.env.MAIL_FROM || process.env.SMTP_USER,
+        to,
+        subject,
+        text,
+        html,
+      });
 
-  return { ok: true, mode: 'smtp', messageId: info.messageId };
+      console.log('[MAIL:SMTP]', { to, subject, messageId: info.messageId });
+      return { ok: true, mode: 'smtp', messageId: info.messageId };
+    } catch (error) {
+      console.error('[MAIL:SMTP:ERROR]', {
+        to,
+        subject,
+        message: error.message,
+        code: error.code,
+      });
+      throw error;
+    }
+  }
+
+  // Fallback: consola
+  console.log('[MAIL:FALLBACK]', { to, subject, text });
+  return { ok: true, mode: 'console' };
 };
 
 /**
