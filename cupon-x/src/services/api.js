@@ -411,6 +411,11 @@ export const getEmpleados = async () => {
   return resolveApiResponse(res, "Error al obtener empleados");
 };
 
+export const getEmpleadosByEmpresa = async (empresaId) => {
+  const res = await authFetch(`${API_BASE_URL}/empleados?empresa_id=${empresaId}`);
+  return resolveApiResponse(res, "Error al obtener empleados de la empresa");
+};
+
 export const getEmpleadoById = async (id) => {
   const res = await authFetch(`${API_BASE_URL}/empleados/${id}`);
   return resolveApiResponse(res, "Error al obtener empleado");

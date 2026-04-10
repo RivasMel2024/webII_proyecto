@@ -26,6 +26,9 @@ export const getAllEmpleados = async (req, res) => {
     if (role === ROLES.ADMIN_EMPRESA) {
       query += " WHERE ae.empresa_id = $1";
       params.push(empresaId);
+    } else if (req.query.empresa_id) {
+      query += " WHERE ae.empresa_id = $1";
+      params.push(Number(req.query.empresa_id));
     }
 
     query += " ORDER BY ae.apellidos ASC, ae.nombres ASC";

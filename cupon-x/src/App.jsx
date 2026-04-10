@@ -37,6 +37,7 @@ import EmpresaMetricasPage from './pages/EmpresaMetricasPage';
 import OfertaDetailPage from "./pages/OfertaDetailPage";
 import StoreDetailPage from "./pages/StoreDetailPage";
 import AdminDashboard from './pages/AdminDashboard';
+import AdminEmpresaEmpleadosPage from './pages/AdminEmpresaEmpleadosPage';
 
 // Importar función de autenticación
 import { isAuthenticated, getAuthUser, getRubros } from './services/api';
@@ -209,6 +210,15 @@ function App() {
 
             <Route path="/ofertas/:id" element={<OfertaDetailPage />} />
             <Route path="/stores/:id" element={<StoreDetailPage />} />
+
+            <Route
+              path="/admin/empresas/:id/empleados"
+              element={
+                <RequireRole allowedRoles={['ADMIN_CUPONERA']}>
+                  <AdminEmpresaEmpleadosPage />
+                </RequireRole>
+              }
+            />
 
           </Routes>
         </main>

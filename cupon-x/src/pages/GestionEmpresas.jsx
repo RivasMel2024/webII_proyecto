@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { getAdminEmpresas, createEmpresa, deleteEmpresa, updateEmpresa, getRubros } from '../services/api';
 import '../styles/admindashboard.css';
 
@@ -12,6 +13,7 @@ const initialForm = {
 };
 
 const GestionEmpresas = () => {
+  const navigate = useNavigate();
   const [empresas, setEmpresas] = useState([]);
   const [rubros, setRubros] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -112,13 +114,28 @@ const GestionEmpresas = () => {
                   <td><span className="badge-rubro">{emp.rubro_nombre}</span></td>
                   <td>{emp.activo ? 'Activa' : 'Inactiva'}</td>
                   <td className="text-center">
-                    <Button
-                      size="sm"
-                      variant={emp.activo ? 'outline-danger' : 'outline-success'}
-                      onClick={() => handleToggleActivo(emp)}
-                    >
-                      {emp.activo ? 'Desactivar' : 'Reactivar'}
-                    </Button>
+                    <div className="d-flex justify-content-center gap-2">
+                      <Button
+                        size="sm"
+                        style={{
+                          border: '1px solid #1a4b8c',
+                          color: '#1a4b8c',
+                          background: 'transparent',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        onClick={() => navigate(`/admin/empresas/${emp.id}/empleados`)}
+                      >
+                        Ver Empleados
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={emp.activo ? 'outline-danger' : 'outline-success'}
+                        onClick={() => handleToggleActivo(emp)}
+                      >
+                        {emp.activo ? 'Desactivar' : 'Reactivar'}
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))
