@@ -16,7 +16,6 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   process.env.FRONTEND_URL, // Para producción
-  process.env.APP_PUBLIC_URL,
 ].filter(Boolean);
 
 app.use(cors({

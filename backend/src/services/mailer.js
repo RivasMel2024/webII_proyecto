@@ -1,18 +1,7 @@
 import nodemailer from 'nodemailer';
-import { lookup } from 'dns/promises';
 
 const hasSmtpConfig = () => {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
-};
-
-const ipv4Lookup = async (hostname) => {
-  try {
-    const addresses = await lookup(hostname, { family: 4 });
-    return addresses.address;
-  } catch (error) {
-    console.error('[DNS:ERROR] IPv4 lookup failed', { hostname, error: error.message });
-    return hostname;
-  }
 };
 
 export const sendEmail = async ({ to, subject, html, text }) => {
@@ -21,48 +10,25 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     return { ok: true, mode: 'console' };
   }
 
-  const smtpPort = Number(process.env.SMTP_PORT);
-  const smtpPass = String(process.env.SMTP_PASS || '')
-    .replace(/^"|"$/g, '')
-    .replace(/\s+/g, '')
-    .trim();
-  const smtpHost = process.env.SMTP_HOST;
-
-  const ipv4Address = await ipv4Lookup(smtpHost);
-
   const transporter = nodemailer.createTransport({
-    host: ipv4Address,
-    port: smtpPort,
-    secure: false,
-    requireTLS: true,
-    family: 4,
-    connectionTimeout: 15000,
-    socketTimeout: 15000,
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: Number(process.env.SMTP_PORT) === 465,
     auth: {
       user: process.env.SMTP_USER,
-      pass: smtpPass,
+      pass: process.env.SMTP_PASS,
     },
   });
 
-  try {
-    const info = await transporter.sendMail({
-      from: process.env.MAIL_FROM || process.env.SMTP_USER,
-      to,
-      subject,
-      text,
-      html,
-    });
+  const info = await transporter.sendMail({
+    from: process.env.MAIL_FROM || process.env.SMTP_USER,
+    to,
+    subject,
+    text,
+    html,
+  });
 
-    return { ok: true, mode: 'smtp', messageId: info.messageId };
-  } catch (error) {
-    console.error('[MAIL:ERROR]', {
-      to,
-      subject,
-      message: error.message,
-      code: error.code,
-    });
-    throw error;
-  }
+  return { ok: true, mode: 'smtp', messageId: info.messageId };
 };
 
 /**
