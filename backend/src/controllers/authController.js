@@ -405,6 +405,11 @@ export const forgotPassword = async (req, res) => {
       message: 'Si el correo existe, se enviará un enlace de recuperación.',
     });
   } catch (error) {
+    console.error('Error en forgotPassword:', {
+      message: error.message,
+      code: error.code,
+      status: error.status,
+    });
     return res.status(500).json({ success: false, message: 'Error al solicitar recuperación' });
   }
 };

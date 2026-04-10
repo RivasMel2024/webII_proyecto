@@ -11,7 +11,10 @@ export const sendEmail = async ({ to, subject, html, text }) => {
   }
 
   const smtpPort = Number(process.env.SMTP_PORT);
-  const smtpPass = String(process.env.SMTP_PASS || '').replace(/^"|"$/g, '').trim();
+  const smtpPass = String(process.env.SMTP_PASS || '')
+    .replace(/^"|"$/g, '')
+    .replace(/\s+/g, '')
+    .trim();
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
