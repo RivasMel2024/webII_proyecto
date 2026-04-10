@@ -1,7 +1,18 @@
 import nodemailer from 'nodemailer';
+import { lookup } from 'dns/promises';
 
 const hasSmtpConfig = () => {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+};
+
+const ipv4Lookup = async (hostname) => {
+  try {
+    const addresses = await lookup(hostname, { family: 4 });
+    return addresses.address;
+  } catch (error) {
+    console.error('[DNS:ERROR] IPv4 lookup failed', { hostname, error: error.message });
+    return hostname;
+  }
 };
 
 export const sendEmail = async ({ to, subject, html, text }) => {
@@ -15,15 +26,18 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     .replace(/^"|"$/g, '')
     .replace(/\s+/g, '')
     .trim();
+  const smtpHost = process.env.SMTP_HOST;
+
+  const ipv4Address = await ipv4Lookup(smtpHost);
 
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host: ipv4Address,
     port: smtpPort,
-    secure: smtpPort === 465,
+    secure: false,
+    requireTLS: true,
     family: 4,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
+    connectionTimeout: 15000,
+    socketTimeout: 15000,
     auth: {
       user: process.env.SMTP_USER,
       pass: smtpPass,
