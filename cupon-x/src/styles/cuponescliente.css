@@ -163,29 +163,23 @@
   padding: 12px 14px;
 }
 
-/* ========== RESPONSIVE - iPad ========== */
-/* @media (max-width: 1024px) and (min-width: 768px) {
-  .coupon-category-tag {
-    font-size: 10px;
-    padding: 4px 8px;
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+@media (max-width: 992px) {
 
-  .coupon-brand-tag {
-    font-size: 0.9rem;
+  .cupones-clientes-wrap {
+    max-width: 100%;
   }
 
   .coupon-price-value {
-    font-size: 36px;
+    font-size: 34px;
   }
 
-  .coupon-text-desc {
+  .coupon-card {
+    border-radius: 16px;
+  }
+
+  .coupon-description-box {
     font-size: 13px;
   }
-} */
 
 /* ========== RESPONSIVE - Móvil ========== */
 @media (max-width: 767px) {
@@ -212,5 +206,67 @@
   .coupon-price-value {
     font-size: 32px;
   }
+  .code-font {
+    font-size: 0.95rem;
+  }
 }
 
+@media (max-width: 576px) {
+
+  .cupones-clientes-wrap {
+    padding: 0 10px;
+  }
+
+  /* HEADER */
+  .cupones-clientes-wrap h2 {
+    font-size: 1.3rem;
+    text-align: left;
+  }
+
+  /* CARD */
+  .coupon-card {
+    border-radius: 14px;
+  }
+
+  .coupon-price-value {
+    font-size: 28px;
+    text-align: center;
+  }
+
+  .coupon-off {
+    font-size: 14px;
+  }
+
+  .coupon-description-box {
+    font-size: 12.5px;
+    padding: 8px 10px;
+  }
+
+  /* CÓDIGO */
+  .coupon-code-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .code-font {
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+  }
+
+  .coupon-copy-btn {
+    width: 100%;
+  }
+
+  /* FOOTER */
+  .expiry-footer {
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .btn-action-full {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+}
+}

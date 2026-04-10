@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import routes from './src/routes/index.js';
 import { errorHandler, logger } from './src/middleware/errorHandler.js';
+import adminRoutes from './src/routes/admin.js';
 
 dotenv.config();
 
@@ -35,6 +36,9 @@ app.use(cors({
 app.use(logger);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Rutas de admin
+app.use("/api/admin", adminRoutes);
 
 // Rutas principales
 app.use('/api', routes);

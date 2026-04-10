@@ -128,6 +128,14 @@ button.btn-user-menu {
   padding: 0.5rem 0;
   margin-top: 0.5rem;
   min-width: 180px;
+  position: absolute !important;
+  top: 100%;
+  right: 0;
+}
+
+/* Dropdown padre con posición relativa */
+.dropdown {
+  position: relative !important;
 }
 
 .dropdown-item {
@@ -139,6 +147,13 @@ button.btn-user-menu {
 .dropdown-item:hover {
   background-color: var(--color-secondary) !important;
   color: var(--color-background) !important;
+}
+
+/* Ocultar dropdown en páginas de autenticación */
+.navbar-auth .dropdown,
+.navbar-auth .dropdown-menu-custom,
+.navbar-auth .btn-user-menu {
+  display: none !important;
 }
 
 .dropdown-item-custom {

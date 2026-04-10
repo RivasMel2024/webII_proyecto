@@ -33,11 +33,11 @@ export default function TopStores() {
     <section style={{ padding: "24px 0" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2 style={{ margin: 0 }}>
-          Top <span style={{ color: "#d11" }}>Stores</span>
+          Top <span style={{ color: "#d11" }}>Tiendas</span>
         </h2>
 
         <Link to="/stores" style={{ fontSize: 12, textDecoration: "none" }}>
-          See All Stores
+          Ver todas
         </Link>
       </div>
 

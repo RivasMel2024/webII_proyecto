@@ -38,24 +38,24 @@ const CouponGrid = () => {
     load();
   }, []);
 
-  // Adaptar ofertas al formato de tu CouponCard
-const adapted = useMemo(() => {
-  return (offers || []).map((o) => ({
-    id: o.oferta_id ?? o.id,
-    brand: o.titulo || "Oferta",
-    category: "Disponible",
-    price: `$${Number(o.precio_oferta ?? 0).toFixed(2)}`,
-    description: o.descripcion || "Sin descripción",
-    code: "Oferta disponible",
-    expiry: formatDateOnly(o.fecha_limite_uso),
-    // Agregar datos completos para el carrito
-    titulo: o.titulo || "Oferta",
-    descripcion: o.descripcion || "Sin descripción",
-    precio_oferta: Number(o.precio_oferta ?? 0),
-    fecha_limite_uso: formatDateOnly(o.fecha_limite_uso),
-  }));
-}, [offers]);
+  const adapted = useMemo(() => {
+    return (offers || []).map((o) => ({
+      id: o.oferta_id ?? o.id,
+      brand: o.titulo || "Oferta",
+      category: "Disponible",
+      price: `$${Number(o.precio_oferta ?? 0).toFixed(2)}`,
+      description: o.descripcion || "Sin descripción",
+      code: "Oferta disponible",
+      expiry: formatDateOnly(o.fecha_limite_uso),
 
+      titulo: o.titulo || "Oferta",
+      descripcion: o.descripcion || "Sin descripción",
+      precio_oferta: Number(o.precio_oferta ?? 0),
+      fecha_limite_uso: formatDateOnly(o.fecha_limite_uso),
+
+      imagen_url: o.imagen_url || null,
+    }));
+  }, [offers]);
 
   if (loading) {
     return (
@@ -82,10 +82,10 @@ const adapted = useMemo(() => {
     <section className="coupon-grid-section py-5">
       <Container>
 
-        {/* Header Top Coupons */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        {/* Header */}
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-4">
           <h2 className="fw-bold mb-0">
-            Top <span style={{ color: "#c1121f" }}>Coupons</span>
+            Top <span style={{ color: "#c1121f" }}>Cupones</span>
           </h2>
 
           <Link
@@ -93,10 +93,11 @@ const adapted = useMemo(() => {
             className="text-decoration-none fw-semibold"
             style={{ color: "#1f4e79" }}
           >
-            See All Coupons
+            Ver Todos los Cupones
           </Link>
         </div>
 
+        {/* Grid */}
         <Row className="g-4">
           {adapted.length === 0 ? (
             <Col>
@@ -106,7 +107,7 @@ const adapted = useMemo(() => {
             </Col>
           ) : (
             adapted.map((item) => (
-              <Col key={item.id} xs={12} sm={6} md={4} lg={4}>
+              <Col key={item.id} xs={12} sm={6} lg={4}>
                 <CouponCard data={item} />
               </Col>
             ))

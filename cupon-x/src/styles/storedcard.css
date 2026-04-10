@@ -20,7 +20,7 @@
 }
 
 .store-card-top {
-  height: 90px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,7 +29,7 @@
 .store-card-toptext {
   color: #fff;
   font-weight: 900;
-  font-size: 13px;
+  font-size: 20px;
   letter-spacing: 1px;
   text-transform: uppercase;
   text-align: center;
@@ -37,18 +37,18 @@
 }
 
 .store-card-body {
-  padding: 12px 12px 14px;
+  padding: 18px 16px 18px;
 }
 
 .store-card-name {
   font-weight: 900;
-  font-size: 13px;
+  font-size: 18px;
   color: #111;
   margin-bottom: 2px;
 }
 
 .store-card-rubro {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   opacity: .75;
   margin-bottom: 4px;
@@ -56,7 +56,7 @@
 }
 
 .store-card-desc {
-  font-size: 11px;
+  font-size: 14px;
   opacity: .75;
   color: #444;
   line-height: 1.15;
@@ -69,7 +69,7 @@
 }
 
 .store-card-reward {
-  font-size: 10.5px;
+  font-size: 14px;
   background: #f3f6ff;
   padding: 6px 8px;
   border-radius: 8px;
@@ -78,8 +78,8 @@
 }
 
 .store-card-reward .dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #4c7dff;
   display: inline-block;

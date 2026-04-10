@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), async (req, res) => {
   try {
-    const [rows] = await db.query(`
+    const { rows } = await db.query(`
       SELECT 
         id,
         CONCAT(nombres, ' ', apellidos) AS nombre,

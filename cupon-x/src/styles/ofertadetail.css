@@ -1,0 +1,163 @@
+.oferta-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* CARD PRINCIPAL */
+.oferta-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* IMAGEN */
+.oferta-image-wrapper {
+  position: relative;
+  height: 350px;
+}
+
+.oferta-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* BADGE DESCUENTO */
+.oferta-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #C1121F;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* CONTENIDO */
+.oferta-content {
+  padding: 25px;
+}
+
+.oferta-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* PRECIOS */
+.oferta-pricing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.precio-oferta {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2a9d8f;
+}
+
+.precio-regular {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+.ahorro {
+  color: #457b9d;
+  font-weight: 500;
+}
+
+/* DESCRIPCIÓN */
+.oferta-description {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* 🔙 BOTÓN VOLVER */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  background: transparent;
+  border: none;
+  color: #C1121F;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.btn-back:hover {
+  color: #8e0c15;
+}
+
+/* 📅 FECHAS */
+.oferta-fechas {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #555;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* 📜 CONDICIONES */
+.oferta-condiciones-inline {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.oferta-condiciones-inline h4 {
+  margin-bottom: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.oferta-condiciones-inline p {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* 🏢 EMPRESA */
+.empresa-card {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  border-left: 6px solid #C1121F;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.empresa-desc {
+  color: #666;
+  margin: 10px 0;
+}
+
+.empresa-info {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .oferta-image-wrapper {
+    height: 220px;
+  }
+
+  .oferta-title {
+    font-size: 1.4rem;
+  }
+
+  .precio-oferta {
+    font-size: 1.4rem;
+  }
+}

@@ -13,7 +13,6 @@ export const getRubros = async (req, res) => {
         nombre,
         activo
       FROM rubros
-      WHERE activo = TRUE
       ORDER BY nombre ASC
     `);
 

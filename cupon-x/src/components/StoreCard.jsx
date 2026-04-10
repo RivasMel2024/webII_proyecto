@@ -16,7 +16,7 @@ export default function StoreCard({ data }) {
 
           <div className="store-card-reward">
             <span className="dot" />
-            Upto {data.reward}% Voucher Rewards
+            Up to {data.reward}% Voucher Regalos
           </div>
         </div>
       </div>

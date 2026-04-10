@@ -10,6 +10,7 @@ import {
   descartarOferta,
   getMisOfertas,
   getMisMetricas,
+  getOfertaDetalle
 } from "../controllers/ofertasController.js";
 import { verifyJwt } from "../middleware/authJwt.js";
 import { requireRole } from "../middleware/rbac.js";
@@ -33,6 +34,7 @@ router.get("/top", getTopOffers);
  * Obtiene todas las ofertas aprobadas
  */
 router.get("/", getAllOffers);
+router.get("/:id", getOfertaDetalle);
 
 /**
  * GET /api/ofertas/vigentes

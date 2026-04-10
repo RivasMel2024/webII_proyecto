@@ -25,12 +25,20 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
     try {
       const result = await loginApi({ email, password });
       setAuthSession({ token: result.token, user: result.user });
       if (result.user?.role === 'ADMIN_EMPRESA') navigate('/empresa/dashboard');
-      else if (result.user?.role === 'ADMIN_CUPONERA') navigate('/cupones-clientes');
+      // else if (result.user?.role === 'ADMIN_CUPONERA') navigate('/cupones-clientes');
       else navigate('/');
+
+      if (result.user?.role === 'ADMIN_CUPONERA') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {

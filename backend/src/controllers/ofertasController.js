@@ -46,6 +46,7 @@ export const getTopOffers = async (req, res) => {
         o.descripcion,
         o.precio_regular,
         o.precio_oferta,
+        o.imagen_url,
         ROUND((1 - (o.precio_oferta / NULLIF(o.precio_regular,0))) * 100) AS descuento_pct,
         o.fecha_limite_uso,
         COUNT(c.id) AS vendidos
@@ -54,7 +55,7 @@ export const getTopOffers = async (req, res) => {
       WHERE o.estado = 'aprobada'
         AND CURRENT_DATE BETWEEN o.fecha_inicio_oferta AND o.fecha_fin_oferta
       GROUP BY
-        o.id, o.titulo, o.descripcion, o.precio_regular, o.precio_oferta, o.fecha_limite_uso
+        o.id, o.titulo, o.descripcion, o.precio_regular, o.precio_oferta, o.fecha_limite_uso, o.imagen_url
       ORDER BY vendidos DESC, descuento_pct DESC
       LIMIT $1
       `,
@@ -76,6 +77,7 @@ export const getAllOffers = async (req, res) => {
         o.descripcion,
         o.precio_regular,
         o.precio_oferta,
+        o.imagen_url,
         ROUND((1 - (o.precio_oferta / NULLIF(o.precio_regular,0))) * 100) AS descuento_pct,
         o.fecha_limite_uso,
         o.estado
@@ -440,6 +442,7 @@ export const getMisOfertas = async (req, res) => {
          o.descripcion,
          o.precio_regular,
          o.precio_oferta,
+         o.imagen_url,
          o.fecha_inicio_oferta,
          o.fecha_fin_oferta,
          o.fecha_limite_uso,
@@ -452,7 +455,7 @@ export const getMisOfertas = async (req, res) => {
        FROM ofertas o
        LEFT JOIN cupones c ON c.oferta_id = o.id
        ${where}
-       GROUP BY o.id
+       GROUP BY o.id, o.imagen_url
        ORDER BY o.created_at DESC`,
       params
     );
@@ -520,6 +523,96 @@ export const getMisMetricas = async (req, res) => {
       "Métricas obtenidas correctamente"
     );
   } catch (error) {
-    return errorResponse(res, "Error al obtener métricas", 500, error.message);
+    return errorResponse(res, "Error al obtener métricas", 500, error.message);}}
+
+ /* Gestión de Ofertas (Aprobar/Rechazar)
+ */
+export const getOfertasByEstado = async (req, res) => {
+  try {
+    const { estado } = req.params; // 'en_espera', 'aprobada', etc.
+    const { rows } = await pool.query(
+      `SELECT o.*, e.nombre as empresa_nombre 
+       FROM ofertas o 
+       JOIN empresas e ON o.empresa_id = e.id 
+       WHERE o.estado = $1 
+       ORDER BY o.created_at DESC`,
+      [estado]
+    );
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error al obtener ofertas" });
+  }
+};
+
+export const getOfertasAdmin = async (req, res) => {
+  try {
+    const { estado } = req.query; // Para filtrar desde el dashboard
+    let query = `
+      SELECT o.*, e.nombre as empresa_nombre, r.nombre as rubro_nombre
+      FROM ofertas o
+      JOIN empresas e ON o.empresa_id = e.id
+      JOIN rubros r ON o.rubro_id = r.id
+    `;
+    
+    const params = [];
+    if (estado) {
+      query += ` WHERE o.estado = $1`;
+      params.push(estado);
+    }
+    
+    query += ` ORDER BY o.created_at DESC`;
+    
+    const { rows } = await pool.query(query, params);
+    return successResponse(res, rows, "Ofertas obtenidas para administración");
+  } catch (error) {
+    return errorResponse(res, "Error al obtener ofertas", 500, error.message);
+  }
+};
+
+// función para cambiar el estado
+export const revisarOferta = async (req, res) => {
+  const { id } = req.params;
+  const { estado, razon_rechazo } = req.body; // estado: 'aprobada' o 'rechazada'
+  
+  try {
+    const { rows } = await pool.query(
+      `UPDATE ofertas 
+       SET estado = $1, razon_rechazo = $2, fecha_revision = NOW() 
+       WHERE id = $3 RETURNING *`,
+      [estado, razon_rechazo || null, id]
+    );
+    return successResponse(res, rows[0], `Oferta ${estado} correctamente`);
+  } catch (error) {
+    return errorResponse(res, "Error al revisar oferta", 500, error.message);
+  }
+};
+
+export const getOfertaDetalle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(`
+      SELECT
+        o.*,
+        e.nombre AS empresa_nombre,
+        e.descripcion AS empresa_descripcion,
+        e.direccion,
+        e.telefono,
+        e.correo,
+        e.color_hex
+      FROM ofertas o
+      JOIN empresas e ON o.empresa_id = e.id
+      WHERE o.id = $1
+        AND o.estado = 'aprobada'
+      LIMIT 1
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return errorResponse(res, "Oferta no encontrada", 404);
+    }
+
+    return successResponse(res, result.rows[0], "Detalle de oferta");
+  } catch (error) {
+    return errorResponse(res, "Error al obtener oferta", 500, error.message);
   }
 };

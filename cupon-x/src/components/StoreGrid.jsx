@@ -70,7 +70,7 @@ const StoreGrid = () => {
         {/* Header Top Stores (igual al de cupones) */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="fw-bold mb-0">
-            Top <span style={{ color: "#c1121f" }}>Stores</span>
+            Top <span style={{ color: "#c1121f" }}>Tiendas</span>
           </h2>
 
           <Link
@@ -78,7 +78,7 @@ const StoreGrid = () => {
             className="text-decoration-none fw-semibold"
             style={{ color: "#1f4e79" }}
           >
-            See All Stores
+            Ver todas las tiendas
           </Link>
         </div>
 
@@ -91,7 +91,7 @@ const StoreGrid = () => {
             </Col>
           ) : (
             adapted.map((item) => (
-              <Col key={item.id} xs={12} sm={6} md={4} lg={2}>
+              <Col key={item.id} xs={12} sm={6} md={4} lg={4}>
                 {/* lg=2 => 6 por fila en desktop */}
                 <StoreCard data={item} />
               </Col>

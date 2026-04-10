@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Card, Button, Toast } from 'react-bootstrap';
-import { FaCalendarAlt, FaTicketAlt, FaCheckCircle, FaShoppingCart } from 'react-icons/fa';
+import {
+  FaCalendarAlt,
+  FaTicketAlt,
+  FaCheckCircle,
+  FaShoppingCart,
+  FaEye
+} from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../services/api';
@@ -17,7 +23,6 @@ const CouponCard = ({ data }) => {
       return;
     }
 
-    // Agregar al carrito con toda la información de la oferta
     addToCart({
       id: data.id,
       titulo: data.titulo || data.brand,
@@ -27,24 +32,44 @@ const CouponCard = ({ data }) => {
       categoria: data.category,
     });
 
-    // Mostrar toast de confirmación
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
   };
+
+  const handleViewDetails = () => {
+    navigate(`/ofertas/${data.id}`);
+  };
+
   return (
     <>
-      <Card className="coupon-card h-100">
+      <Card className="coupon-card h-100 shadow-sm border-0 overflow-hidden">
+
+        <div className="coupon-image-container mb-3">
+          <img
+            src={data.imagen_url || "https://placehold.co/300x180?text=Sin+Imagen"}
+            alt={data.titulo}
+            className="w-100"
+            style={{
+              height: "180px",
+              objectFit: "cover",
+              borderRadius: "12px"
+            }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://placehold.co/300x180?text=Error";
+            }}
+          />
+        </div>
+
         <Card.Body className="d-flex flex-column p-4">
-          {/* 1. Marca y Categoría (Con gap para evitar que se peguen) */}
-          <div className="coupon-top-info d-flex align-items-center gap-3 mb-3">
+
+          <div className="coupon-top-info d-flex align-items-center gap-2 mb-2">
             <span className="coupon-brand-tag">{data.brand}</span>
             <span className="coupon-category-tag">{data.category}</span>
           </div>
-          
-          {/* 2. Precio */}
+
           <h3 className="coupon-price-value">{data.price}</h3>
 
-          {/* 3. Descripción */}
           <div className="coupon-description-box">
             <p className="coupon-text-desc">
               <FaCheckCircle className="me-2 text-success" />
@@ -52,34 +77,44 @@ const CouponCard = ({ data }) => {
             </p>
           </div>
 
-          {/* 4. Código (Con margen al icono me-3) */}
           <div className="coupon-code-container">
-            <FaTicketAlt className="code-icon-style me-3" /> 
-            <span className="code-font">{data.code}</span>
+            <FaTicketAlt className="me-3" />
+            <span>{data.code}</span>
           </div>
 
-          {/* 5. Vencimiento */}
           <div className="expiry-footer mt-3">
             <FaCalendarAlt className="me-2" />
             <span>Vence: {data.expiry}</span>
           </div>
-          
-          {/* Botón de Acción a pantalla completa */}
+
           <div className="mt-auto pt-3">
-             <Button 
-               className="btn-action-full"
-               onClick={handleAddToCart}
-             >
+            <div className="d-flex gap-2">
+
+              <Button
+                className="flex-grow-1 btn-action-full"
+                onClick={handleAddToCart}
+              >
                 <FaShoppingCart className="me-2" />
-                AGREGAR AL CARRITO
-             </Button>
+                AGREGAR
+              </Button>
+
+              <Button
+                variant="light"
+                className="d-flex align-items-center justify-content-center px-3 border text-secondary"
+                style={{ borderRadius: "10px" }}
+                onClick={handleViewDetails}
+              >
+                <FaEye />
+              </Button>
+
+            </div>
           </div>
+
         </Card.Body>
       </Card>
 
-      {/* Toast de confirmación */}
-      <Toast 
-        show={showToast} 
+      <Toast
+        show={showToast}
         onClose={() => setShowToast(false)}
         style={{
           position: 'fixed',

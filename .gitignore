@@ -1,3 +1,4 @@
 /.github
 /node_modules
-.claude/
+/.claude
+.DS_Store

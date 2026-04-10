@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import './App.css'; 
 
 // Context
@@ -34,6 +34,8 @@ import CanjePage from './pages/CanjePage';
 import EmpresaDashboardPage from './pages/EmpresaDashboardPage';
 import EmpresaEmpleadosPage from './pages/EmpresaEmpleadosPage';
 import EmpresaMetricasPage from './pages/EmpresaMetricasPage';
+import OfertaDetailPage from "./pages/OfertaDetailPage";
+import AdminDashboard from './pages/AdminDashboard';
 
 // Importar función de autenticación
 import { isAuthenticated, getAuthUser, getRubros } from './services/api';
@@ -62,13 +64,9 @@ function App() {
       setUserRole(getAuthUser()?.role || null);
     };
 
-    // Verificar autenticación cuando cambie la ruta
     checkAuth();
 
-    // Escuchar eventos de storage para sincronizar entre pestañas
     window.addEventListener('storage', checkAuth);
-    
-    // Escuchar evento personalizado para cambios de autenticación
     window.addEventListener('authChange', checkAuth);
 
     return () => {
@@ -95,29 +93,36 @@ function App() {
   return (
     <CartProvider>
       <div className="app-layout">
-        {/* <ConexionTest /> */}
 
-        {/* Navbar con detección automática de autenticación */}
+        {/* Navbar */}
         <Navbar />
 
         <main className="main-content">
           <Routes>
-            {/* Vista Principal */}
-            <Route path="/" element={
-              <>
-                <Hero rubros={rubros} redirectToOfertas={true} />
-                <CouponGrid />
-                <StoreGrid />
-              </>
-            } />
 
-            {/* Rutas de Autenticación */}
+            {/* 🔥 HOME con redirección para admin */}
+            <Route 
+              path="/" 
+              element={
+                isLoggedIn && userRole === 'ADMIN_CUPONERA' ? (
+                  <Navigate to="/admin" replace />
+                ) : (
+                  <>
+                    <Hero rubros={rubros} redirectToOfertas={true} />
+                    <CouponGrid />
+                    <StoreGrid />
+                  </>
+                )
+              } 
+            />
+
+            {/* Auth */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Registration />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify" element={<VerifyAccount />} />
-            
-            {/* Ruta para clientes: Ver sus propios cupones */}
+
+            {/* Cliente */}
             <Route 
               path="/mis-cupones" 
               element={
@@ -127,7 +132,7 @@ function App() {
               } 
             />
 
-            {/* Ruta para admins: Ver todos los cupones con dropdown */}
+            {/* Admin */}
             <Route 
               path="/cupones-clientes" 
               element={
@@ -174,22 +179,39 @@ function App() {
             />
 
             {/* Rutas de Funcionalidad Post-Login */}
+            <Route 
+              path="/admin" 
+              element={
+                <RequireRole allowedRoles={['ADMIN_CUPONERA']}>
+                  <AdminDashboard />
+                </RequireRole>
+              } 
+            />
+
+            {/* Funcionalidad */}
             <Route path="/cart" element={<CartPage />} /> 
             <Route path="/history" element={<HistorialPage />} />
-            <Route path="/profile" element={
-              <RequireAuth>
-                <Profile />
-              </RequireAuth>
-            } />
 
-            {/* Otras Vistas */}
+            <Route 
+              path="/profile" 
+              element={
+                <RequireAuth>
+                  <Profile />
+                </RequireAuth>
+              } 
+            />
+
+            {/* Vistas */}
             <Route path="/coupons" element={<CouponsPage />} />
             <Route path="/ofertas" element={<OfertasPage />} />
             <Route path="/stores" element={<StoresPage />} />
+
+            <Route path="/ofertas/:id" element={<OfertaDetailPage />} />
+
           </Routes>
         </main>
 
-        {/* El footer se oculta en login, registro, carrito e historial */}
+        {/* Footer */}
         {!isAuthPage && <Footer />}
       </div>
     </CartProvider>

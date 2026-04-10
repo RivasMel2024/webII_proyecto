@@ -134,38 +134,105 @@
   min-height: 40px;
 }
 
-/* ========== RESPONSIVE - iPad ========== */
-/* @media (max-width: 1024px) and (min-width: 768px) {
-  .coupon-category-tag {
-    font-size: 0.65rem;
-    padding: 3px 8px;
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.coupon-image-container {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.coupon-card {
+  border-radius: 15px !important;
+  overflow: hidden; 
+}
+
+/* =========================
+   TABLET
+========================= */
+@media (max-width: 992px) {
+
+  .coupon-grid-section {
+    padding: 60px 0;
   }
 
-  .coupon-top-info {
-    gap: 0.5rem !important;
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  .coupon-price-value {
+    font-size: 2rem;
+  }
+
+  .coupon-card {
+    border-radius: 18px !important;
+  }
+
+  .coupon-description-box {
+    padding: 12px;
+  }
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 576px) {
+
+  .coupon-grid-section {
+    padding: 40px 0;
+  }
+
+  .coupon-grid-section .d-flex {
+    text-align: center;
+  }
+
+  /* HEADER */
+  .section-title {
+    font-size: 1.5rem;
+    text-align: left;
+  }
+
+  .see-all-link {
+    font-size: 0.85rem;
+  }
+
+  /* CARD */
+  .coupon-card {
+    border-radius: 14px !important;
+  }
+
+  .coupon-price-value {
+    font-size: 1.8rem;
+    text-align: center;
   }
 
   .coupon-brand-tag {
     font-size: 0.9rem;
   }
 
-  .coupon-price-value {
-    font-size: 2rem;
-  }
-} */
-
-/* ========== RESPONSIVE - Móvil ========== */
-@media (max-width: 767px) {
   .coupon-category-tag {
     font-size: 0.7rem;
     padding: 3px 10px;
   }
 
-  .coupon-price-value {
-    font-size: 1.8rem;
+  .coupon-description-box {
+    font-size: 0.85rem;
+    padding: 10px;
   }
+
+  .coupon-code-container {
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .code-font {
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .btn-action-full {
+    padding: 12px !important;
+    font-size: 0.9rem !important;
+  }
+
 }
