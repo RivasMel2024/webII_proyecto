@@ -137,7 +137,7 @@ PANEL DE EMPRESAS
 
 /* BOTONES */
 .btn-empresa-primary {
-  background: #1f4e79;
+  background: #C1121F;
   border: none;
   font-weight: 600;
   padding: 8px 16px;
@@ -145,7 +145,7 @@ PANEL DE EMPRESAS
 }
 
 .btn-empresa-primary:hover {
-  background: #173a5e;
+  background: #780000;
 }
 
 .btn-empresa-secondary {

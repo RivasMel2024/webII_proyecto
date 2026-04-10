@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { 
-  getTopOffers, 
+import {
+  getTopOffers,
   getAllOffers,
   getOfertasVigentes,
   createOferta,
+  updateOferta,
   aprobarOferta,
   rechazarOferta,
   reenviarOferta,
@@ -68,6 +69,9 @@ router.get("/mis-metricas", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), getMisM
 // Aprobación/Rechazo (solo ADMIN_CUPONERA)
 router.patch("/:id/aprobar", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), aprobarOferta);
 router.patch("/:id/rechazar", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), rechazarOferta);
+
+// Editar oferta (solo ADMIN_EMPRESA dueño, en_espera o rechazada)
+router.patch("/:id", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), updateOferta);
 
 // Reenvío/Descarte (solo ADMIN_EMPRESA dueño)
 router.patch("/:id/reenviar", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), reenviarOferta);

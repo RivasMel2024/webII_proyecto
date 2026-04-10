@@ -249,6 +249,14 @@ export const createOferta = async (payload) => {
   return resolveApiResponse(res, "Error al crear oferta");
 };
 
+export const updateOferta = async (id, payload) => {
+  const res = await authFetch(`${API_BASE_URL}/ofertas/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  return resolveApiResponse(res, "Error al actualizar oferta");
+};
+
 export const getMisOfertas = async (params = {}) => {
   const queryParams = new URLSearchParams();
   if (params.estado) queryParams.set("estado", params.estado);
@@ -431,7 +439,7 @@ export const deleteEmpleado = async (id) => {
   return resolveApiResponse(res, "Error al desactivar empleado");
 };
 
-// Comprar cupón(es)
+// Comprar cupón individual
 export const comprarCupon = async ({ ofertaId, cantidad = 1, tarjeta }) => {
   const res = await authFetch(`${API_BASE_URL}/cupones/comprar`, {
     method: 'POST',
@@ -439,6 +447,17 @@ export const comprarCupon = async ({ ofertaId, cantidad = 1, tarjeta }) => {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || 'Error al comprar cupón');
+  return data;
+};
+
+// Comprar carrito completo — un solo correo de confirmación
+export const comprarCarrito = async ({ items, tarjeta }) => {
+  const res = await authFetch(`${API_BASE_URL}/cupones/comprar-carrito`, {
+    method: 'POST',
+    body: JSON.stringify({ items, tarjeta }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || 'Error al procesar el carrito');
   return data;
 };
 

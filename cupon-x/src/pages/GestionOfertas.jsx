@@ -37,6 +37,8 @@ const GestionOfertas = () => {
     }
   };
 
+  const mostrarAcciones = filtro !== 'aprobada';
+
   return (
     <div className="gestion-ofertas">
 
@@ -68,7 +70,7 @@ const GestionOfertas = () => {
               <th>Título</th>
               <th>Precio</th>
               <th>Estado</th>
-              <th className="text-center">Acciones</th>
+              {mostrarAcciones && <th className="text-center">Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -85,36 +87,38 @@ const GestionOfertas = () => {
                   </span>
                 </td>
 
-                <td className="text-center">
-                  {o.estado === 'en_espera' && (
-                    <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
-                      <Button 
-                        size="sm" 
-                        className="btn-aprobar"
-                        onClick={() => handleAprobar(o.id)}
-                      >
-                        Aprobar
-                      </Button>
+                {mostrarAcciones && (
+                  <td className="text-center">
+                    {o.estado === 'en_espera' && (
+                      <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                        <Button
+                          size="sm"
+                          className="btn-aprobar"
+                          onClick={() => handleAprobar(o.id)}
+                        >
+                          Aprobar
+                        </Button>
 
-                      <Button 
-                        size="sm" 
-                        className="btn-rechazar"
-                        onClick={() => {
-                          setOfertaSeleccionada(o);
-                          setShowModal(true);
-                        }}
-                      >
-                        Rechazar
-                      </Button>
-                    </div>
-                  )}
+                        <Button
+                          size="sm"
+                          className="btn-rechazar"
+                          onClick={() => {
+                            setOfertaSeleccionada(o);
+                            setShowModal(true);
+                          }}
+                        >
+                          Rechazar
+                        </Button>
+                      </div>
+                    )}
 
-                  {o.estado === 'rechazada' && (
-                    <div className="razon-rechazo">
-                      <small>{o.razon_rechazo}</small>
-                    </div>
-                  )}
-                </td>
+                    {o.estado === 'rechazada' && (
+                      <div className="razon-rechazo">
+                        <small>{o.razon_rechazo}</small>
+                      </div>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

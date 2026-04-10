@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaChartLine, FaCheckCircle, FaCoins, FaReceipt, FaSyncAlt, FaTag, FaTicketAlt } from 'react-icons/fa';
 import { getMisMetricas } from '../services/api';
 import '../styles/empresa-panel.css';
+import '../styles/variables.css';
 
 const fallbackMetricas = {
   total_ofertas: 0,
@@ -118,7 +119,7 @@ export default function EmpresaMetricasPage() {
           </small>
         </div>
 
-        <button type="button" className="btn btn-outline-primary d-flex align-items-center gap-2" onClick={loadMetricas} disabled={loadingMetricas}>
+        <button type="button" className="btn btn-signin d-flex align-items-center gap-2" onClick={loadMetricas} disabled={loadingMetricas}>
           <FaSyncAlt />
           {loadingMetricas ? 'Actualizando...' : 'Actualizar'}
         </button>

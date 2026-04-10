@@ -53,6 +53,7 @@ export const getAllEmpresas = async (req, res) => {
         e.color_hex,
         e.descripcion,
         e.reward_pct,
+        e.activo,
         r.nombre AS rubro_nombre
       FROM empresas e
       JOIN rubros r ON r.id = e.rubro_id

@@ -13,7 +13,7 @@ import QRCode from "qrcode";
 import { getCuponesByCliente, deleteCupon } from "../services/api";
 import "../styles/cuponescliente.css";
 
-export default function CuponesCliente({ clienteId, clienteNombre }) {
+export default function CuponesCliente({ clienteId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cupones, setCupones] = useState([]);
@@ -22,14 +22,22 @@ export default function CuponesCliente({ clienteId, clienteNombre }) {
   const [showCodigoById, setShowCodigoById] = useState({});
   const [qrByCodigo, setQrByCodigo] = useState({});
 
+  const [filtro, setFiltro] = useState('todos');
+
+  const cuponesFiltrados = useMemo(() => {
+    if (filtro === 'todos') return cupones;
+    return cupones.filter((c) => (c.estado || '').toLowerCase() === filtro);
+  }, [cupones, filtro]);
+
   const total = cupones.length;
+  const totalFiltrado = cuponesFiltrados.length;
 
   const subtitle = useMemo(() => {
     if (!clienteId) return "Seleccioná un cliente para ver sus cupones";
     if (loading) return "Cargando información…";
     if (error) return "Hubo un problema al cargar";
-    return `${total} cupón${total === 1 ? "" : "es"} encontrado${total === 1 ? "" : "s"}`;
-  }, [clienteId, loading, error, total]);
+    return `${totalFiltrado} cupón${totalFiltrado === 1 ? "" : "es"} encontrado${totalFiltrado === 1 ? "" : "s"}`;
+  }, [clienteId, loading, error, totalFiltrado]);
 
   const fmtDateOnly = (d) => {
     if (!d) return "—";
@@ -254,24 +262,38 @@ export default function CuponesCliente({ clienteId, clienteNombre }) {
   return (
     <div className="container my-4 cupones-clientes-wrap coupon-page-shell">
       {/* Header */}
-      <div className="coupon-page-header d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
-        <div className="coupon-header-copy">
-          <div className="coupon-header-kicker">Wallet de cupones</div>
-          <h2 className="m-0 cupones-title">
-            {clienteNombre ? `Cupones de ${clienteNombre}` : <>Cupones del Cliente <span className="coupon-client-id">#{clienteId ?? "—"}</span></>}
-          </h2>
-          <div className="coupon-header-subtitle">{subtitle}</div>
-        </div>
+      <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <div className="coupon-header-subtitle">{subtitle}</div>
 
-        <Button
-          variant="primary"
-          size="sm"
-          className="coupon-refresh-btn"
-          onClick={() => loadCupones(clienteId)}
-          disabled={loading}
-        >
-          Recargar
-        </Button>
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          {['todos', 'disponible', 'vencido', 'canjeado'].map((op) => (
+            <button
+              key={op}
+              type="button"
+              onClick={() => setFiltro(op)}
+              className="btn btn-sm"
+              style={{
+                borderRadius: '20px',
+                border: filtro === op ? 'none' : '1px solid #dee2e6',
+                background: filtro === op ? '#c1121f' : 'transparent',
+                color: filtro === op ? '#fff' : '#555',
+                fontWeight: filtro === op ? 600 : 400,
+                padding: '4px 14px',
+              }}
+            >
+              {op.charAt(0).toUpperCase() + op.slice(1)}
+            </button>
+          ))}
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            style={{ borderRadius: '20px' }}
+            onClick={() => loadCupones(clienteId)}
+            disabled={loading}
+          >
+            Recargar
+          </Button>
+        </div>
       </div>
 
       {/* Estados */}
@@ -291,10 +313,14 @@ export default function CuponesCliente({ clienteId, clienteNombre }) {
         <div className="alert alert-warning">No hay cupones para este cliente.</div>
       )}
 
+      {!loading && !error && total > 0 && totalFiltrado === 0 && (
+        <div className="alert alert-info">No hay cupones con estado "{filtro}".</div>
+      )}
+
       {/* Grid de Cards (estilo Top Coupons) */}
-      {!loading && !error && total > 0 && (
+      {!loading && !error && totalFiltrado > 0 && (
         <div className="row g-4 coupon-grid-pro">
-          {cupones.map((c) => (
+          {cuponesFiltrados.map((c) => (
             <div className="col-12 col-md-6 col-lg-4" key={`${c.id}-${c.codigo}`}>
               <Card className="coupon-card h-100 coupon-card-pro">
                 <Card.Body className="d-flex flex-column p-4">

@@ -8,6 +8,7 @@ import {
   updateEmpleado,
 } from '../services/api';
 import '../styles/empresa-panel.css';
+import '../styles/variables.css';
 
 const initialCreateForm = {
   nombres: '',
@@ -226,21 +227,36 @@ export default function EmpresaEmpleadosPage() {
     }
   };
 
-  const handleDelete = async (empleadoId) => {
+  const handleToggleActivo = async (empleado) => {
+    const empleadoId = empleado.id;
+    const estaActivo = Boolean(empleado.activo);
     if (!canManage || actionLoadingById[`delete-${empleadoId}`]) return;
-    const shouldDelete = window.confirm('¿Seguro que deseas desactivar este empleado?');
-    if (!shouldDelete) return;
+
+    const mensaje = estaActivo
+      ? '¿Seguro que deseas desactivar este empleado?'
+      : '¿Seguro que deseas reactivar este empleado?';
+    if (!window.confirm(mensaje)) return;
 
     setActionLoadingById((prev) => ({ ...prev, [`delete-${empleadoId}`]: true }));
     setSubmitError('');
     setSubmitSuccess('');
 
     try {
-      await deleteEmpleado(empleadoId);
+      if (estaActivo) {
+        await deleteEmpleado(empleadoId);
+        setSubmitSuccess('Empleado desactivado correctamente.');
+      } else {
+        await updateEmpleado(empleadoId, {
+          nombres: empleado.nombres,
+          apellidos: empleado.apellidos,
+          correo: empleado.correo,
+          activo: true,
+        });
+        setSubmitSuccess('Empleado reactivado correctamente.');
+      }
       await loadEmpleados();
-      setSubmitSuccess('Empleado desactivado correctamente.');
     } catch (err) {
-      setSubmitError(toUserErrorMessage(err.message || 'Error al desactivar empleado'));
+      setSubmitError(toUserErrorMessage(err.message || 'Error al actualizar empleado'));
     } finally {
       setActionLoadingById((prev) => ({ ...prev, [`delete-${empleadoId}`]: false }));
     }
@@ -251,7 +267,7 @@ export default function EmpresaEmpleadosPage() {
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 empresa-panel-header">
         <h1 className="h3 mb-0 empresa-panel-title">Gestión de empleados</h1>
         {canManage && (
-          <button type="button" className="btn btn-primary" onClick={openCreateModal}>
+          <button type="button" className="btn btn-signin" onClick={openCreateModal}>
             Nuevo empleado
           </button>
         )}
@@ -305,11 +321,13 @@ export default function EmpresaEmpleadosPage() {
                             </button>
                             <button
                               type="button"
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleDelete(empleado.id)}
+                              className={`btn btn-sm ${empleado.activo ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                              onClick={() => handleToggleActivo(empleado)}
                               disabled={Boolean(actionLoadingById[`delete-${empleado.id}`])}
                             >
-                              {actionLoadingById[`delete-${empleado.id}`] ? 'Desactivando...' : 'Desactivar'}
+                              {actionLoadingById[`delete-${empleado.id}`]
+                                ? (empleado.activo ? 'Desactivando...' : 'Reactivando...')
+                                : (empleado.activo ? 'Desactivar' : 'Reactivar')}
                             </button>
                           </div>
                         ) : (
@@ -377,7 +395,7 @@ export default function EmpresaEmpleadosPage() {
               <button type="button" className="btn btn-outline-secondary" onClick={() => setModalCreateOpen(false)}>
                 Cancelar
               </button>
-              <button type="submit" className="btn btn-primary" disabled={Boolean(actionLoadingById.create)}>
+              <button type="submit" className="btn btn-signin" disabled={Boolean(actionLoadingById.create)}>
                 {actionLoadingById.create ? 'Guardando...' : 'Crear empleado'}
               </button>
             </div>
@@ -438,7 +456,7 @@ export default function EmpresaEmpleadosPage() {
               <button type="button" className="btn btn-outline-secondary" onClick={() => setModalEditOpen(false)}>
                 Cancelar
               </button>
-              <button type="submit" className="btn btn-primary" disabled={Boolean(actionLoadingById[`edit-${editForm.id}`])}>
+              <button type="submit" className="btn btn-signin" disabled={Boolean(actionLoadingById[`edit-${editForm.id}`])}>
                 {actionLoadingById[`edit-${editForm.id}`] ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>

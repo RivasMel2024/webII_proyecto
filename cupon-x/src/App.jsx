@@ -28,13 +28,14 @@ import StoresPage from "./pages/StoresPage";
 import RequireAuth from './components/RequireAuth';
 import RequireRole from './components/RequireRole';
 import CartPage from "./pages/CartPage"; 
-import HistorialPage from "./pages/HistorialPage"; 
+// import HistorialPage from "./pages/HistorialPage"; 
 import OfertasPage from "./pages/OfertasPage";
 import CanjePage from './pages/CanjePage';
 import EmpresaDashboardPage from './pages/EmpresaDashboardPage';
 import EmpresaEmpleadosPage from './pages/EmpresaEmpleadosPage';
 import EmpresaMetricasPage from './pages/EmpresaMetricasPage';
 import OfertaDetailPage from "./pages/OfertaDetailPage";
+import StoreDetailPage from "./pages/StoreDetailPage";
 import AdminDashboard from './pages/AdminDashboard';
 
 // Importar función de autenticación
@@ -190,7 +191,7 @@ function App() {
 
             {/* Funcionalidad */}
             <Route path="/cart" element={<CartPage />} /> 
-            <Route path="/history" element={<HistorialPage />} />
+            {/* <Route path="/history" element={<HistorialPage />} /> */}
 
             <Route 
               path="/profile" 
@@ -207,6 +208,7 @@ function App() {
             <Route path="/stores" element={<StoresPage />} />
 
             <Route path="/ofertas/:id" element={<OfertaDetailPage />} />
+            <Route path="/stores/:id" element={<StoreDetailPage />} />
 
           </Routes>
         </main>

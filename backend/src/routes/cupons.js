@@ -5,6 +5,7 @@ import {
   getCuponesByCliente,
   deleteCupon,
   comprarCupon,
+  comprarCarrito,
   canjearCupon
 } from '../controllers/cuponsController.js';
 import { verifyJwt } from '../middleware/authJwt.js';
@@ -30,8 +31,11 @@ router.get('/:id', verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), getCouponById);
 // Eliminar cupón (Admin Cuponera)
 router.delete('/:id', verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), deleteCupon);
 
-// Compra de cupón (CLIENTE)
+// Compra de cupón individual (CLIENTE)
 router.post('/comprar', verifyJwt, requireRole(ROLES.CLIENTE), comprarCupon);
+
+// Compra de carrito completo — un solo correo (CLIENTE)
+router.post('/comprar-carrito', verifyJwt, requireRole(ROLES.CLIENTE), comprarCarrito);
 
 // Canje de cupón (solo EMPLEADO: administradores_empresas)
 router.post('/canjear', verifyJwt, requireRole(ROLES.EMPLEADO), canjearCupon);

@@ -60,7 +60,7 @@ const NavBar = () => {
               <div className="d-flex align-items-center">
                 {!isAdmin && (
                   <>
-                    <Link to="/history" className="nav-icon-link me-3" title="Mis compras">
+                    <Link to="/mis-cupones" className="nav-icon-link me-3" title="Mis Cupones">
                       <FaHistory size={20} />
                     </Link>
                     <Link to="/cart" className="nav-icon-link me-3 position-relative" title="Carrito">
@@ -81,11 +81,11 @@ const NavBar = () => {
                       Mi Perfil
                     </Dropdown.Item>
 
-                    {user.role === 'CLIENTE' && (
+                    {/* {user.role === 'CLIENTE' && (
                       <Dropdown.Item as={Link} to="/mis-cupones" className="dropdown-item-custom">
                         Mis Cupones
                       </Dropdown.Item>
-                    )}
+                    )} */}
 
                     {isAdmin && (
                       <Dropdown.Item as={Link} to="/admin" className="dropdown-item-custom">

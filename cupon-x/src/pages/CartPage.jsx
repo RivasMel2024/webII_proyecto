@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Button, Table, Modal, Form, Badge, Spinner, 
 import { FaTrash, FaShoppingCart, FaArrowLeft, FaCreditCard, FaLock, FaTicketAlt, FaCheckCircle } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { comprarCupon } from '../services/api';
+import { comprarCarrito } from '../services/api';
 import "../styles/variables.css";
 
 const CartPage = () => {
@@ -44,25 +44,19 @@ const CartPage = () => {
         throw new Error('Por favor completa todos los campos de la tarjeta');
       }
 
-      // Procesar cada item del carrito
-      const compras = [];
-      const codigosGenerados = [];
-      for (const item of cartItems) {
-        const resultado = await comprarCupon({
-          ofertaId: item.id,
-          cantidad: item.cantidad,
-          tarjeta: {
-            numero: cardData.numero.replace(/\s/g, ''),
-            titular: cardData.titular,
-            expiracion: cardData.expiracion,
-            cvv: cardData.cvv,
-          },
-        });
-        compras.push(resultado);
-        if (Array.isArray(resultado?.data?.codigos)) {
-          codigosGenerados.push(...resultado.data.codigos);
-        }
-      }
+      const tarjeta = {
+        numero: cardData.numero.replace(/\s/g, ''),
+        titular: cardData.titular,
+        expiracion: cardData.expiracion,
+        cvv: cardData.cvv,
+      };
+
+      const resultado = await comprarCarrito({
+        items: cartItems.map((item) => ({ ofertaId: item.id, cantidad: item.cantidad })),
+        tarjeta,
+      });
+
+      const codigosGenerados = Array.isArray(resultado?.data?.codigos) ? resultado.data.codigos : [];
 
       setGeneratedCodes(codigosGenerados);
       setpurchaseSuccess(true);
@@ -278,12 +272,12 @@ const CartPage = () => {
                     name="numero"
                     value={cardData.numero}
                     onChange={handleInputChange}
-                    maxLength="19"
+                    maxLength="16"
                     required 
                     disabled={loading}
                   />
                   <Form.Text className="text-muted">
-                    Mínimo 13 dígitos
+                    Mínimo 16 dígitos
                   </Form.Text>
                 </Form.Group>
 

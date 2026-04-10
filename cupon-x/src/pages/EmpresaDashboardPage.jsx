@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { createOferta, descartarOferta, getAuthUser, getEmpleados, getMisMetricas, getMisOfertas, reenviarOferta } from '../services/api';
+import { Modal, Button, Form } from 'react-bootstrap';
+import { createOferta, updateOferta, descartarOferta, getAuthUser, getEmpleados, getMisMetricas, getMisOfertas, reenviarOferta } from '../services/api';
 import { Link } from 'react-router-dom';
 import '../styles/empresa-panel.css';
+import '../styles/variables.css';
 
 const toModuleErrorMessage = (message) => {
   const text = String(message || '');
@@ -18,7 +20,7 @@ function MetricasSection({ data, loading, error }) {
     <section className="mb-4 p-3 empresa-soft-card" style={{ backgroundColor: 'rgba(102, 155, 188, 0.08)' }}>
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h2 className="h5 mb-0">Métricas</h2>
-        <Link to="/empresa/metricas" className="btn btn-outline-primary btn-sm">Ver métricas completas</Link>
+        <Link to="/empresa/metricas" className="btn btn-signin btn-sm">Ver métricas completas</Link>
       </div>
       {loading && <p className="mb-1">Cargando métricas...</p>}
       {error && <p className="text-danger mb-1">{error}</p>}
@@ -243,7 +245,7 @@ function CrearOfertaSection({ data, loading, error, onOfertaCreada, refreshOfert
           {submitSuccess && <p className="text-success mt-3 mb-0">{submitSuccess}</p>}
 
           <div className="mt-3 d-flex align-items-center gap-2">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
+            <button type="submit" className="btn btn-signin" disabled={submitting}>
               {submitting ? 'Creando oferta...' : 'Crear oferta'}
             </button>
             {data.note && <small className="text-muted">{data.note}</small>}
@@ -256,6 +258,114 @@ function CrearOfertaSection({ data, loading, error, onOfertaCreada, refreshOfert
 
 const ESTADOS_OFERTA = ['en_espera', 'aprobada', 'rechazada', 'descartada'];
 
+const toDateInput = (val) => {
+  if (!val) return '';
+  return String(val).slice(0, 10);
+};
+
+function EditOfertaModal({ oferta, onClose, onSaved }) {
+  const [form, setForm] = useState({
+    titulo: oferta.titulo || '',
+    descripcion: oferta.descripcion || '',
+    precio_regular: oferta.precio_regular ?? '',
+    precio_oferta: oferta.precio_oferta ?? '',
+    fecha_inicio_oferta: toDateInput(oferta.fecha_inicio_oferta),
+    fecha_fin_oferta: toDateInput(oferta.fecha_fin_oferta),
+    fecha_limite_uso: toDateInput(oferta.fecha_limite_uso),
+    cantidad_limite: oferta.cantidad_limite ?? '',
+    otros_detalles: oferta.otros_detalles || '',
+    imagen_url: oferta.imagen_url || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    try {
+      await updateOferta(oferta.id, {
+        ...form,
+        precio_regular: Number(form.precio_regular),
+        precio_oferta: Number(form.precio_oferta),
+        cantidad_limite: form.cantidad_limite === '' ? null : Number(form.cantidad_limite),
+      });
+      onSaved();
+    } catch (err) {
+      setError(toModuleErrorMessage(err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal show onHide={onClose} centered size="lg">
+      <Form onSubmit={handleSubmit}>
+        <Modal.Header closeButton>
+          <Modal.Title className="fw-bold">Editar Oferta</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error && <div className="alert alert-danger py-2">{error}</div>}
+          <div className="row g-3">
+            <div className="col-md-6">
+              <Form.Label>Título</Form.Label>
+              <Form.Control name="titulo" value={form.titulo} onChange={handleChange} required />
+            </div>
+            <div className="col-md-6">
+              <Form.Label>Imagen URL (opcional)</Form.Label>
+              <Form.Control name="imagen_url" value={form.imagen_url} onChange={handleChange} />
+            </div>
+            <div className="col-12">
+              <Form.Label>Descripción</Form.Label>
+              <Form.Control as="textarea" rows={2} name="descripcion" value={form.descripcion} onChange={handleChange} required />
+            </div>
+            <div className="col-md-4">
+              <Form.Label>Precio regular</Form.Label>
+              <Form.Control type="number" min="0" step="0.01" name="precio_regular" value={form.precio_regular} onChange={handleChange} required />
+            </div>
+            <div className="col-md-4">
+              <Form.Label>Precio oferta</Form.Label>
+              <Form.Control type="number" min="0" step="0.01" name="precio_oferta" value={form.precio_oferta} onChange={handleChange} required />
+            </div>
+            <div className="col-md-4">
+              <Form.Label>Cantidad límite (opcional)</Form.Label>
+              <Form.Control type="number" min="1" step="1" name="cantidad_limite" value={form.cantidad_limite} onChange={handleChange} />
+            </div>
+            <div className="col-md-4">
+              <Form.Label>Fecha inicio oferta</Form.Label>
+              <Form.Control type="date" name="fecha_inicio_oferta" value={form.fecha_inicio_oferta} onChange={handleChange} required />
+            </div>
+            <div className="col-md-4">
+              <Form.Label>Fecha fin oferta</Form.Label>
+              <Form.Control type="date" name="fecha_fin_oferta" value={form.fecha_fin_oferta} onChange={handleChange} required />
+            </div>
+            <div className="col-md-4">
+              <Form.Label>Fecha límite uso</Form.Label>
+              <Form.Control type="date" name="fecha_limite_uso" value={form.fecha_limite_uso} onChange={handleChange} required />
+            </div>
+            <div className="col-12">
+              <Form.Label>Otros detalles (opcional)</Form.Label>
+              <Form.Control as="textarea" rows={2} name="otros_detalles" value={form.otros_detalles} onChange={handleChange} />
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={onClose} disabled={saving}>Cancelar</Button>
+          <Button type="submit" className="btn-signin" disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar cambios'}
+          </Button>
+        </Modal.Footer>
+      </Form>
+    </Modal>
+  );
+}
+
 function OffersByStatusSection({ onRefreshReady, canManage }) {
   const [selectedEstado, setSelectedEstado] = useState('en_espera');
   const [ofertasState, setOfertasState] = useState([]);
@@ -264,6 +374,7 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
   const [actionLoadingById, setActionLoadingById] = useState({});
   const [actionSuccess, setActionSuccess] = useState('');
   const [actionError, setActionError] = useState('');
+  const [editingOferta, setEditingOferta] = useState(null);
 
   const loadOfertasByEstado = useCallback(async (estado) => {
     setLoadingOfertas(true);
@@ -279,18 +390,14 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
     }
   }, []);
 
-  useEffect(() => {
-    loadOfertasByEstado(selectedEstado);
-  }, [selectedEstado, loadOfertasByEstado]);
+  useEffect(() => { loadOfertasByEstado(selectedEstado); }, [selectedEstado, loadOfertasByEstado]);
 
   const refreshCurrentEstado = useCallback(async () => {
     await loadOfertasByEstado(selectedEstado);
   }, [loadOfertasByEstado, selectedEstado]);
 
   useEffect(() => {
-    if (onRefreshReady) {
-      onRefreshReady(refreshCurrentEstado);
-    }
+    if (onRefreshReady) onRefreshReady(refreshCurrentEstado);
   }, [onRefreshReady, refreshCurrentEstado]);
 
   const handleEstadoChange = (estado) => {
@@ -305,7 +412,6 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
     setActionSuccess('');
     setActionError('');
     setActionLoadingById((prev) => ({ ...prev, [ofertaId]: true }));
-
     try {
       if (actionType === 'reenviar') {
         await reenviarOferta(ofertaId);
@@ -322,6 +428,8 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
     }
   };
 
+  const canEdit = (estado) => estado === 'en_espera' || estado === 'rechazada';
+
   return (
     <section className="mb-4 p-3 empresa-soft-card">
       <h2 className="h5 mb-3">Ofertas por estado</h2>
@@ -331,7 +439,7 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
           <button
             key={estado}
             type="button"
-            className={`btn btn-sm ${selectedEstado === estado ? 'btn-primary' : 'btn-outline-primary'}`}
+            className={`btn btn-sm ${selectedEstado === estado ? 'btn-signin' : 'btn-outline-danger'}`}
             onClick={() => handleEstadoChange(estado)}
             disabled={loadingOfertas}
           >
@@ -358,7 +466,7 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
                 <th>Límite Uso</th>
                 <th>Estado</th>
                 <th>Razón Rechazo</th>
-                <th>Cupones Vendidos</th>
+                <th>Vendidos</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -371,33 +479,49 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
                 ofertasState.map((oferta) => (
                   <tr key={oferta.id}>
                     <td>{oferta.titulo || '-'}</td>
-                    <td>{oferta.precio_regular ?? '-'}</td>
-                    <td>{oferta.precio_oferta ?? '-'}</td>
-                    <td>{oferta.fecha_inicio_oferta || '-'}</td>
-                    <td>{oferta.fecha_fin_oferta || '-'}</td>
-                    <td>{oferta.fecha_limite_uso || '-'}</td>
+                    <td>${oferta.precio_regular ?? '-'}</td>
+                    <td>${oferta.precio_oferta ?? '-'}</td>
+                    <td>{toDateInput(oferta.fecha_inicio_oferta) || '-'}</td>
+                    <td>{toDateInput(oferta.fecha_fin_oferta) || '-'}</td>
+                    <td>{toDateInput(oferta.fecha_limite_uso) || '-'}</td>
                     <td>{oferta.estado || '-'}</td>
-                    <td>{oferta.razon_rechazo || '-'}</td>
+                    <td style={{ maxWidth: 140, fontSize: 12 }}>{oferta.razon_rechazo || '-'}</td>
                     <td>{oferta.cupones_vendidos ?? 0}</td>
                     <td>
-                      {oferta.estado === 'rechazada' && canManage ? (
-                        <div className="d-flex gap-2">
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-success"
-                            onClick={() => handleOfertaAction(oferta.id, 'reenviar')}
-                            disabled={!!actionLoadingById[oferta.id]}
-                          >
-                            {actionLoadingById[oferta.id] ? 'Procesando...' : 'Reenviar'}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleOfertaAction(oferta.id, 'descartar')}
-                            disabled={!!actionLoadingById[oferta.id]}
-                          >
-                            {actionLoadingById[oferta.id] ? 'Procesando...' : 'Descartar'}
-                          </button>
+                      {canManage ? (
+                        <div className="d-flex flex-wrap gap-1">
+                          {canEdit(oferta.estado) && (
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => setEditingOferta(oferta)}
+                            >
+                              Editar
+                            </button>
+                          )}
+                          {oferta.estado === 'rechazada' && (
+                            <>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-success"
+                                onClick={() => handleOfertaAction(oferta.id, 'reenviar')}
+                                disabled={!!actionLoadingById[oferta.id]}
+                              >
+                                {actionLoadingById[oferta.id] ? '...' : 'Reenviar'}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleOfertaAction(oferta.id, 'descartar')}
+                                disabled={!!actionLoadingById[oferta.id]}
+                              >
+                                {actionLoadingById[oferta.id] ? '...' : 'Descartar'}
+                              </button>
+                            </>
+                          )}
+                          {!canEdit(oferta.estado) && oferta.estado !== 'rechazada' && (
+                            <span className="text-muted">-</span>
+                          )}
                         </div>
                       ) : (
                         <span className="text-muted">-</span>
@@ -409,6 +533,18 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {editingOferta && (
+        <EditOfertaModal
+          oferta={editingOferta}
+          onClose={() => setEditingOferta(null)}
+          onSaved={async () => {
+            setEditingOferta(null);
+            setActionSuccess('Oferta actualizada correctamente.');
+            await loadOfertasByEstado(selectedEstado);
+          }}
+        />
       )}
     </section>
   );
@@ -429,7 +565,7 @@ function EmpleadosResumenSection({ data, loading, error }) {
             <p className="mb-1">Total empleados: <strong>{totalEmpleados}</strong></p>
             <p className="mb-0">Activos: <strong>{activos}</strong></p>
           </div>
-          <Link to="/empresa/empleados" className="btn btn-outline-primary btn-sm">
+          <Link to="/empresa/empleados" className="btn btn-signin btn-sm">
             Ir a gestión de empleados
           </Link>
         </div>

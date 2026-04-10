@@ -277,6 +277,88 @@ export const createOferta = async (req, res) => {
 };
 
 /**
+ * Editar oferta (ADMIN_EMPRESA dueño) — solo si está en_espera o rechazada
+ */
+export const updateOferta = async (req, res) => {
+  try {
+    const ofertaId = Number(req.params.id);
+    const empresaId = req.user?.id;
+
+    if (!ofertaId) return errorResponse(res, "ID de oferta inválido", 400);
+
+    const oferta = await getOfertaById(ofertaId);
+    if (!oferta) return errorResponse(res, "Oferta no encontrada", 404);
+    if (Number(oferta.empresa_id) !== Number(empresaId)) {
+      return errorResponse(res, "No puedes editar una oferta que no es tuya", 403);
+    }
+    if (!["en_espera", "rechazada"].includes(oferta.estado)) {
+      return errorResponse(res, "Solo se pueden editar ofertas en estado en_espera o rechazada", 409);
+    }
+
+    const titulo = normalizeText(req.body.titulo);
+    const descripcion = normalizeText(req.body.descripcion);
+    const otrosDetalles = normalizeText(req.body.otros_detalles) || null;
+    const imagenUrl = normalizeText(req.body.imagen_url) || null;
+    const precioRegular = parsePositiveNumber(req.body.precio_regular);
+    const precioOferta = parsePositiveNumber(req.body.precio_oferta);
+    const cantidadLimiteRaw = req.body.cantidad_limite;
+    const cantidadLimite =
+      cantidadLimiteRaw === null || cantidadLimiteRaw === undefined || cantidadLimiteRaw === ""
+        ? null
+        : Number(cantidadLimiteRaw);
+
+    const fechaInicio = parseDateOnly(req.body.fecha_inicio_oferta);
+    const fechaFin = parseDateOnly(req.body.fecha_fin_oferta);
+    const fechaLimiteUso = parseDateOnly(req.body.fecha_limite_uso);
+
+    if (!titulo || !descripcion) return errorResponse(res, "titulo y descripcion son requeridos", 400);
+    if (!precioRegular || !precioOferta || precioRegular <= 0 || precioOferta <= 0) {
+      return errorResponse(res, "precio_regular y precio_oferta deben ser mayores a 0", 400);
+    }
+    if (precioOferta >= precioRegular) {
+      return errorResponse(res, "precio_oferta debe ser menor que precio_regular", 400);
+    }
+    if (!fechaInicio || !fechaFin || !fechaLimiteUso) {
+      return errorResponse(res, "Las tres fechas son requeridas", 400);
+    }
+    if (fechaInicio > fechaFin) {
+      return errorResponse(res, "fecha_inicio_oferta debe ser menor o igual que fecha_fin_oferta", 400);
+    }
+    if (fechaLimiteUso < fechaFin) {
+      return errorResponse(res, "fecha_limite_uso debe ser mayor o igual que fecha_fin_oferta", 400);
+    }
+    if (cantidadLimite !== null && (!Number.isInteger(cantidadLimite) || cantidadLimite <= 0)) {
+      return errorResponse(res, "cantidad_limite debe ser un entero mayor que 0", 400);
+    }
+
+    const result = await pool.query(
+      `UPDATE ofertas SET
+         titulo             = $1,
+         descripcion        = $2,
+         precio_regular     = $3,
+         precio_oferta      = $4,
+         fecha_inicio_oferta = $5,
+         fecha_fin_oferta   = $6,
+         fecha_limite_uso   = $7,
+         cantidad_limite    = $8,
+         otros_detalles     = $9,
+         imagen_url         = $10
+       WHERE id = $11
+       RETURNING id, titulo, estado, precio_regular, precio_oferta, fecha_inicio_oferta, fecha_fin_oferta, fecha_limite_uso`,
+      [
+        titulo, descripcion, precioRegular, precioOferta,
+        req.body.fecha_inicio_oferta, req.body.fecha_fin_oferta, req.body.fecha_limite_uso,
+        cantidadLimite, otrosDetalles, imagenUrl, ofertaId,
+      ]
+    );
+
+    return successResponse(res, result.rows[0], "Oferta actualizada correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al actualizar oferta", 500, error.message);
+  }
+};
+
+/**
  * Aprobar oferta (ADMIN_CUPONERA)
  */
 export const aprobarOferta = async (req, res) => {
@@ -546,22 +628,36 @@ export const getOfertasByEstado = async (req, res) => {
 
 export const getOfertasAdmin = async (req, res) => {
   try {
-    const { estado } = req.query; // Para filtrar desde el dashboard
-    let query = `
-      SELECT o.*, e.nombre as empresa_nombre, r.nombre as rubro_nombre
+    const { estado } = req.query;
+    const params = [];
+    let whereClause = '';
+
+    if (estado) {
+      params.push(estado);
+      whereClause = `WHERE o.estado = $1`;
+    }
+
+    const query = `
+      SELECT
+        o.id,
+        o.titulo,
+        o.descripcion,
+        o.precio_regular,
+        o.precio_oferta,
+        o.estado,
+        o.razon_rechazo,
+        o.fecha_inicio_oferta,
+        o.fecha_fin_oferta,
+        o.fecha_limite_uso,
+        o.imagen_url,
+        o.created_at,
+        e.nombre AS empresa_nombre
       FROM ofertas o
       JOIN empresas e ON o.empresa_id = e.id
-      JOIN rubros r ON o.rubro_id = r.id
+      ${whereClause}
+      ORDER BY o.created_at DESC
     `;
-    
-    const params = [];
-    if (estado) {
-      query += ` WHERE o.estado = $1`;
-      params.push(estado);
-    }
-    
-    query += ` ORDER BY o.created_at DESC`;
-    
+
     const { rows } = await pool.query(query, params);
     return successResponse(res, rows, "Ofertas obtenidas para administración");
   } catch (error) {

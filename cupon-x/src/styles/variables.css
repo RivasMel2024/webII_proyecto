@@ -32,7 +32,7 @@ body {
 
 /* --- BOTONES (Sign In / Mi Perfil) --- */
 .btn-signin {
-  background-color: var(--color-primary-dark) !important;
+  background-color: var(--color-primary) !important;
   color: var(--color-background) !important;
   border-radius: 6px;
   padding: 0.4rem 1rem;

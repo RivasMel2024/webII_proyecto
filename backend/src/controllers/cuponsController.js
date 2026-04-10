@@ -1,6 +1,6 @@
 import pool from '../config/database.js';
 import { successResponse, errorResponse } from '../utils/responses.js';
-import { sendEmail } from '../services/mailer.js';
+import { sendEmail, buildCompraEmail } from '../services/mailer.js';
 
 /**
  * Obtener todos los cupones
@@ -161,14 +161,21 @@ export const comprarCupon = async (req, res) => {
 
     const client = await pool.connect();
     try {
-      const ofertaRows = await client.query('SELECT id, precio_oferta, titulo FROM ofertas WHERE id = $1 LIMIT 1', [ofertaId]);
+      const ofertaRows = await client.query(
+        `SELECT o.id, o.precio_oferta, o.titulo, o.descripcion, o.fecha_limite_uso,
+                e.nombre AS empresa_nombre
+         FROM ofertas o
+         JOIN empresas e ON e.id = o.empresa_id
+         WHERE o.id = $1 LIMIT 1`,
+        [ofertaId]
+      );
       if (!ofertaRows.rows.length) return errorResponse(res, 'Oferta no encontrada', 404);
 
-      const precioPagado = ofertaRows.rows[0].precio_oferta;
+      const oferta = ofertaRows.rows[0];
+      const precioPagado = oferta.precio_oferta;
       const codigos = [];
 
       for (let i = 0; i < cantidad; i += 1) {
-        // PostgreSQL: llamar función que retorna JSON
         const outRows = await client.query('SELECT sp_comprar_cupon($1, $2, $3) AS resultado', [ofertaId, clienteId, precioPagado]);
         const resultado = outRows.rows[0]?.resultado;
 
@@ -178,18 +185,11 @@ export const comprarCupon = async (req, res) => {
         codigos.push(resultado.codigo_cupon);
       }
 
-      const clienteRows = await client.query('SELECT correo FROM clientes WHERE id = $1 LIMIT 1', [clienteId]);
-      const correo = clienteRows.rows[0]?.correo;
-
-      if (correo) {
-        const texto = `Compra confirmada. Oferta: ${ofertaRows.rows[0].titulo}. Códigos: ${codigos.join(', ')}`;
-        await sendEmail({
-          to: correo,
-          subject: 'Confirmación de compra - CuponX',
-          text: texto,
-          html: `<p>${texto}</p>`,
-        });
-      }
+      const clienteRows = await client.query(
+        'SELECT correo, nombres, apellidos FROM clientes WHERE id = $1 LIMIT 1',
+        [clienteId]
+      );
+      const cliente = clienteRows.rows[0];
 
       return successResponse(res, { codigos }, 'Compra realizada correctamente', 201);
     } finally {
@@ -197,6 +197,111 @@ export const comprarCupon = async (req, res) => {
     }
   } catch (error) {
     return errorResponse(res, 'Error al comprar cupón', 500, error.message);
+  }
+};
+
+/**
+ * Comprar el carrito completo (CLIENTE) — envía UN solo correo con todos los cupones
+ * Body: { items: [{ ofertaId, cantidad }], tarjeta? }
+ */
+export const comprarCarrito = async (req, res) => {
+  try {
+    const clienteId = req.user?.id;
+    const items = req.body.items;
+    const tarjeta = req.body.tarjeta || {};
+
+    if (!clienteId) return errorResponse(res, 'No autenticado', 401);
+    if (!Array.isArray(items) || items.length === 0) return errorResponse(res, 'items es requerido', 400);
+
+    if (tarjeta && Object.keys(tarjeta).length) {
+      const numero = String(tarjeta.numero || '').replace(/\s+/g, '');
+      const cvv = String(tarjeta.cvv || '').trim();
+      if (numero.length < 13 || numero.length > 19) return errorResponse(res, 'Tarjeta inválida', 400);
+      if (cvv.length < 3 || cvv.length > 4) return errorResponse(res, 'CVV inválido', 400);
+    }
+
+    const client = await pool.connect();
+    try {
+      const emailItems = [];
+      const todosCodigos = [];
+
+      for (const item of items) {
+        const ofertaId = Number(item.ofertaId);
+        const cantidad = Number(item.cantidad || 1);
+
+        if (!ofertaId || !Number.isInteger(cantidad) || cantidad < 1 || cantidad > 20) {
+          return errorResponse(res, `Item inválido: ofertaId=${ofertaId}`, 400);
+        }
+
+        const ofertaRows = await client.query(
+          `SELECT o.id, o.precio_oferta, o.titulo, o.descripcion, o.fecha_limite_uso,
+                  e.nombre AS empresa_nombre
+           FROM ofertas o
+           JOIN empresas e ON e.id = o.empresa_id
+           WHERE o.id = $1 LIMIT 1`,
+          [ofertaId]
+        );
+        if (!ofertaRows.rows.length) return errorResponse(res, `Oferta ${ofertaId} no encontrada`, 404);
+
+        const oferta = ofertaRows.rows[0];
+        const codigos = [];
+
+        for (let i = 0; i < cantidad; i += 1) {
+          const outRows = await client.query(
+            'SELECT sp_comprar_cupon($1, $2, $3) AS resultado',
+            [ofertaId, clienteId, oferta.precio_oferta]
+          );
+          const resultado = outRows.rows[0]?.resultado;
+          if (!resultado?.codigo_cupon) {
+            return errorResponse(res, resultado?.mensaje || 'No fue posible completar la compra', 400);
+          }
+          codigos.push(resultado.codigo_cupon);
+          todosCodigos.push(resultado.codigo_cupon);
+        }
+
+        emailItems.push({
+          empresaNombre: oferta.empresa_nombre,
+          ofertaTitulo: oferta.titulo,
+          ofertaDescripcion: oferta.descripcion,
+          precioPagado: oferta.precio_oferta,
+          fechaLimite: oferta.fecha_limite_uso,
+          codigos,
+        });
+      }
+
+      // Obtener datos del cliente y enviar UN solo correo
+      const clienteRows = await client.query(
+        'SELECT correo, nombres, apellidos FROM clientes WHERE id = $1 LIMIT 1',
+        [clienteId]
+      );
+      const cliente = clienteRows.rows[0];
+
+      if (cliente?.correo) {
+        const totalPagado = emailItems.reduce(
+          (acc, it) => acc + Number(it.precioPagado) * it.codigos.length,
+          0
+        );
+
+        const { html, text } = buildCompraEmail({
+          clienteNombre: [cliente.nombres, cliente.apellidos].filter(Boolean).join(' ') || cliente.correo,
+          totalPagado,
+          items: emailItems,
+        });
+
+        await sendEmail({
+          to: cliente.correo,
+          subject: `Confirmación de compra - CuponX`,
+          html,
+          text,
+        });
+      }
+
+      return successResponse(res, { codigos: todosCodigos }, 'Compra realizada correctamente', 201);
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    return errorResponse(res, 'Error al procesar el carrito', 500, error.message);
   }
 };
 
