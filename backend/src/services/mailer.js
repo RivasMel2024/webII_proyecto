@@ -20,6 +20,7 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     host: process.env.SMTP_HOST,
     port: smtpPort,
     secure: smtpPort === 465,
+    family: 4,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
