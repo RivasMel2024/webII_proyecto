@@ -31,13 +31,6 @@ const router = Router();
 router.get("/top", getTopOffers);
 
 /**
- * GET /api/ofertas
- * Obtiene todas las ofertas aprobadas
- */
-router.get("/", getAllOffers);
-router.get("/:id", getOfertaDetalle);
-
-/**
  * GET /api/ofertas/vigentes
  * Obtiene ofertas vigentes con filtros opcionales
  * 
@@ -52,6 +45,9 @@ router.get("/:id", getOfertaDetalle);
  *   - Cantidad de cupones NO agotada (si aplica)
  */
 router.get("/vigentes", getOfertasVigentes);
+
+// Obtiene todas las ofertas aprobadas
+router.get("/", getAllOffers);
 
 // ==============================
 // Gestión de ciclo de vida
@@ -76,5 +72,8 @@ router.patch("/:id", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), updateOferta);
 // Reenvío/Descarte (solo ADMIN_EMPRESA dueño)
 router.patch("/:id/reenviar", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), reenviarOferta);
 router.patch("/:id/descartar", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), descartarOferta);
+
+// Detalle de oferta por ID (público)
+router.get("/:id", getOfertaDetalle);
 
 export default router;
