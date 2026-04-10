@@ -570,7 +570,7 @@ export const aprobarOfertaApi = async (id) => {
 export const rechazarOfertaApi = async (id, razon) => {
   const res = await authFetch(`${API_BASE_URL}/ofertas/${id}/rechazar`, {
     method: 'PATCH',
-    body: JSON.stringify({ razon_rechazo: razon }),
+    body: JSON.stringify({ justificacion: razon }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || "Error al rechazar oferta");

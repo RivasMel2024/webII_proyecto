@@ -42,6 +42,14 @@ import AdminEmpresaEmpleadosPage from './pages/AdminEmpresaEmpleadosPage';
 // Importar función de autenticación
 import { isAuthenticated, getAuthUser, getRubros } from './services/api';
 
+// Redirige a ADMIN_EMPRESA y EMPLEADO a su panel si intentan acceder a rutas de cliente
+function SoloCliente({ children }) {
+  const user = getAuthUser();
+  if (user?.role === 'ADMIN_EMPRESA') return <Navigate to="/empresa/dashboard" replace />;
+  if (user?.role === 'EMPLEADO') return <Navigate to="/canjear-cupon" replace />;
+  return children;
+}
+
 function App() {
   const location = useLocation();
 
@@ -103,11 +111,15 @@ function App() {
           <Routes>
 
             {/* 🔥 HOME con redirección para admin */}
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 isLoggedIn && userRole === 'ADMIN_CUPONERA' ? (
                   <Navigate to="/admin" replace />
+                ) : isLoggedIn && userRole === 'ADMIN_EMPRESA' ? (
+                  <Navigate to="/empresa/dashboard" replace />
+                ) : isLoggedIn && userRole === 'EMPLEADO' ? (
+                  <Navigate to="/canjear-cupon" replace />
                 ) : (
                   <>
                     <Hero rubros={rubros} redirectToOfertas={true} />
@@ -115,7 +127,7 @@ function App() {
                     <StoreGrid />
                   </>
                 )
-              } 
+              }
             />
 
             {/* Auth */}
@@ -204,12 +216,12 @@ function App() {
             />
 
             {/* Vistas */}
-            <Route path="/coupons" element={<CouponsPage />} />
-            <Route path="/ofertas" element={<OfertasPage />} />
-            <Route path="/stores" element={<StoresPage />} />
+            <Route path="/coupons" element={<SoloCliente><CouponsPage /></SoloCliente>} />
+            <Route path="/ofertas" element={<SoloCliente><OfertasPage /></SoloCliente>} />
+            <Route path="/stores" element={<SoloCliente><StoresPage /></SoloCliente>} />
 
-            <Route path="/ofertas/:id" element={<OfertaDetailPage />} />
-            <Route path="/stores/:id" element={<StoreDetailPage />} />
+            <Route path="/ofertas/:id" element={<SoloCliente><OfertaDetailPage /></SoloCliente>} />
+            <Route path="/stores/:id" element={<SoloCliente><StoreDetailPage /></SoloCliente>} />
 
             <Route
               path="/admin/empresas/:id/empleados"

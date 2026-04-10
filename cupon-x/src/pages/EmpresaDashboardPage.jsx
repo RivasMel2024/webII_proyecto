@@ -263,7 +263,7 @@ const toDateInput = (val) => {
   return String(val).slice(0, 10);
 };
 
-function EditOfertaModal({ oferta, onClose, onSaved }) {
+function EditOfertaModal({ oferta, onClose, onSaved, onReenviado }) {
   const [form, setForm] = useState({
     titulo: oferta.titulo || '',
     descripcion: oferta.descripcion || '',
@@ -285,17 +285,19 @@ function EditOfertaModal({ oferta, onClose, onSaved }) {
     setError('');
   };
 
+  const buildPayload = () => ({
+    ...form,
+    precio_regular: Number(form.precio_regular),
+    precio_oferta: Number(form.precio_oferta),
+    cantidad_limite: form.cantidad_limite === '' ? null : Number(form.cantidad_limite),
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError('');
     try {
-      await updateOferta(oferta.id, {
-        ...form,
-        precio_regular: Number(form.precio_regular),
-        precio_oferta: Number(form.precio_oferta),
-        cantidad_limite: form.cantidad_limite === '' ? null : Number(form.cantidad_limite),
-      });
+      await updateOferta(oferta.id, buildPayload());
       onSaved();
     } catch (err) {
       setError(toModuleErrorMessage(err.message));
@@ -303,6 +305,22 @@ function EditOfertaModal({ oferta, onClose, onSaved }) {
       setSaving(false);
     }
   };
+
+  const handleReenviar = async () => {
+    setSaving(true);
+    setError('');
+    try {
+      await updateOferta(oferta.id, buildPayload());
+      await reenviarOferta(oferta.id);
+      onReenviado();
+    } catch (err) {
+      setError(toModuleErrorMessage(err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const esRechazada = oferta.estado === 'rechazada';
 
   return (
     <Modal show onHide={onClose} centered size="lg">
@@ -357,9 +375,20 @@ function EditOfertaModal({ oferta, onClose, onSaved }) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button type="submit" className="btn-signin" disabled={saving}>
-            {saving ? 'Guardando...' : 'Guardar cambios'}
-          </Button>
+          {esRechazada ? (
+            <Button
+              type="button"
+              variant="outline-success"
+              onClick={handleReenviar}
+              disabled={saving}
+            >
+              {saving ? 'Enviando...' : 'Reenviar'}
+            </Button>
+          ) : (
+            <Button type="submit" className="btn-signin" disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar cambios'}
+            </Button>
+          )}
         </Modal.Footer>
       </Form>
     </Modal>
@@ -500,24 +529,14 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
                             </button>
                           )}
                           {oferta.estado === 'rechazada' && (
-                            <>
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-outline-success"
-                                onClick={() => handleOfertaAction(oferta.id, 'reenviar')}
-                                disabled={!!actionLoadingById[oferta.id]}
-                              >
-                                {actionLoadingById[oferta.id] ? '...' : 'Reenviar'}
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-outline-danger"
-                                onClick={() => handleOfertaAction(oferta.id, 'descartar')}
-                                disabled={!!actionLoadingById[oferta.id]}
-                              >
-                                {actionLoadingById[oferta.id] ? '...' : 'Descartar'}
-                              </button>
-                            </>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => handleOfertaAction(oferta.id, 'descartar')}
+                              disabled={!!actionLoadingById[oferta.id]}
+                            >
+                              {actionLoadingById[oferta.id] ? '...' : 'Descartar'}
+                            </button>
                           )}
                           {!canEdit(oferta.estado) && oferta.estado !== 'rechazada' && (
                             <span className="text-muted">-</span>
@@ -542,6 +561,11 @@ function OffersByStatusSection({ onRefreshReady, canManage }) {
           onSaved={async () => {
             setEditingOferta(null);
             setActionSuccess('Oferta actualizada correctamente.');
+            await loadOfertasByEstado(selectedEstado);
+          }}
+          onReenviado={async () => {
+            setEditingOferta(null);
+            setActionSuccess('Oferta actualizada y reenviada para revisión.');
             await loadOfertasByEstado(selectedEstado);
           }}
         />
