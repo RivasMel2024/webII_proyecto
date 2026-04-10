@@ -2,8 +2,11 @@ import express from "express";
 import {
   getTopEmpresas,
   getAllEmpresas,
+  getAllEmpresasAdmin,
   getEmpresaById,
   getOfertasByEmpresa,
+  getMiEmpresa,
+  updateMiEmpresa,
   createEmpresa,
   updateEmpresa,
   deleteEmpresa,
@@ -15,6 +18,9 @@ import { ROLES } from "../utils/roles.js";
 const router = express.Router();
 
 router.get("/top", getTopEmpresas);
+router.get("/admin/all", verifyJwt, requireRole(ROLES.ADMIN_CUPONERA), getAllEmpresasAdmin);
+router.get("/mi-empresa", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), getMiEmpresa);
+router.patch("/mi-empresa", verifyJwt, requireRole(ROLES.ADMIN_EMPRESA), updateMiEmpresa);
 router.get("/", getAllEmpresas);
 router.get("/:id", getEmpresaById);
 router.get("/:id/ofertas", getOfertasByEmpresa);

@@ -22,7 +22,8 @@ export const getTopEmpresas = async (req, res) => {
       FROM empresas e
       JOIN rubros r ON r.id = e.rubro_id
       WHERE e.codigo = ANY($1::varchar[])
-      ORDER BY 
+        AND e.activo = TRUE
+      ORDER BY
         CASE e.codigo
           WHEN 'AMA001' THEN 1
           WHEN 'CAN001' THEN 2
@@ -42,6 +43,21 @@ export const getTopEmpresas = async (req, res) => {
   }
 };
 
+export const getAllEmpresasAdmin = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT e.id, e.nombre, e.codigo, e.color_hex, e.descripcion, e.reward_pct, e.activo,
+              r.nombre AS rubro_nombre
+       FROM empresas e
+       JOIN rubros r ON r.id = e.rubro_id
+       ORDER BY e.nombre ASC`
+    );
+    return successResponse(res, result.rows, "Empresas obtenidas correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al obtener empresas", 500, error.message);
+  }
+};
+
 export const getAllEmpresas = async (req, res) => {
   try {
     const result = await pool.query(
@@ -57,6 +73,7 @@ export const getAllEmpresas = async (req, res) => {
         r.nombre AS rubro_nombre
       FROM empresas e
       JOIN rubros r ON r.id = e.rubro_id
+      WHERE e.activo = TRUE
       ORDER BY e.nombre ASC
       `
     );
@@ -124,6 +141,45 @@ export const getOfertasByEmpresa = async (req, res) => {
     return successResponse(res, result.rows, "Ofertas de la empresa obtenidas correctamente");
   } catch (error) {
     return errorResponse(res, "Error al obtener ofertas de la empresa", 500, error.message);
+  }
+};
+
+export const getMiEmpresa = async (req, res) => {
+  try {
+    const empresaId = req.user.empresaId;
+    const result = await pool.query(
+      `SELECT e.id, e.nombre, e.codigo, e.direccion, e.nombre_contacto, e.telefono, e.correo,
+              e.color_hex, e.descripcion, e.activo, r.nombre AS rubro_nombre
+       FROM empresas e
+       JOIN rubros r ON r.id = e.rubro_id
+       WHERE e.id = $1`,
+      [empresaId]
+    );
+    if (!result.rows.length) return errorResponse(res, "Empresa no encontrada", 404);
+    return successResponse(res, result.rows[0], "Empresa obtenida correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al obtener empresa", 500, error.message);
+  }
+};
+
+export const updateMiEmpresa = async (req, res) => {
+  try {
+    const empresaId = req.user.empresaId;
+    const { direccion, telefono, nombre_contacto, descripcion } = req.body;
+
+    const result = await pool.query(
+      `UPDATE empresas SET
+        direccion       = COALESCE($1, direccion),
+        telefono        = COALESCE($2, telefono),
+        nombre_contacto = COALESCE($3, nombre_contacto),
+        descripcion     = COALESCE($4, descripcion)
+       WHERE id = $5
+       RETURNING id, nombre, codigo, direccion, nombre_contacto, telefono, correo, color_hex, descripcion`,
+      [direccion || null, telefono || null, nombre_contacto || null, descripcion || null, empresaId]
+    );
+    return successResponse(res, result.rows[0], "Empresa actualizada correctamente");
+  } catch (error) {
+    return errorResponse(res, "Error al actualizar empresa", 500, error.message);
   }
 };
 

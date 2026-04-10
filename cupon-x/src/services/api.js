@@ -494,9 +494,22 @@ export const getOfertaById = async (id) => {
 
 // Obtener todas las empresas (Lista para el Admin)
 export const getAdminEmpresas = async () => {
-  const res = await authFetch(`${API_BASE_URL}/empresas`);
+  const res = await authFetch(`${API_BASE_URL}/empresas/admin/all`);
   if (!res.ok) throw new Error("Error al obtener empresas");
   return await res.json();
+};
+
+export const getMiEmpresa = async () => {
+  const res = await authFetch(`${API_BASE_URL}/empresas/mi-empresa`);
+  return resolveApiResponse(res, "Error al obtener datos de la empresa");
+};
+
+export const updateMiEmpresa = async (payload) => {
+  const res = await authFetch(`${API_BASE_URL}/empresas/mi-empresa`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+  return resolveApiResponse(res, "Error al actualizar empresa");
 };
 
 // Crear empresa

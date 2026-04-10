@@ -58,7 +58,7 @@ const NavBar = () => {
           <Nav className="align-items-center ms-auto">
             {authenticated && user && !isAuthPage ? (
               <div className="d-flex align-items-center">
-                {!isAdmin && (
+                {user.role === 'CLIENTE' && (
                   <>
                     <Link to="/mis-cupones" className="nav-icon-link me-3" title="Mis Cupones">
                       <FaHistory size={20} />
