@@ -7,6 +7,40 @@ import { sendEmail } from '../services/mailer.js';
 
 const PASSWORD_MIN = 8;
 
+const buildEmailShell = ({ bodyHtml }) => {
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f7f7f7;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f7f7;padding:30px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);max-width:600px;width:100%;">
+
+        <tr>
+          <td style="background:#c1121f;padding:28px 32px;">
+            <h1 style="margin:0;color:#fff;font-size:26px;font-weight:700;letter-spacing:0.5px;">CuponX</h1>
+            <p style="margin:4px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">Tu plataforma de cupones y descuentos</p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:32px;">${bodyHtml}</td>
+        </tr>
+
+        <tr>
+          <td style="background:#f9f9f9;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#999;">Este correo fue enviado automáticamente por CuponX. No respondas a este mensaje.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+};
+
 const buildActionEmailHtml = ({ title, intro, actionText, actionUrl, outro }) => {
   const safeTitle = String(title || '').trim();
   const safeIntro = String(intro || '').trim();
@@ -14,16 +48,31 @@ const buildActionEmailHtml = ({ title, intro, actionText, actionUrl, outro }) =>
   const safeActionUrl = String(actionUrl || '').trim();
   const safeOutro = String(outro || '').trim();
 
-  return `
-    <div style="font-family: Arial, Helvetica, sans-serif; line-height: 1.5; color: #111;">
-      ${safeTitle ? `<h2 style="margin: 0 0 12px;">${safeTitle}</h2>` : ''}
-      ${safeIntro ? `<p style="margin: 0 0 16px;">${safeIntro}</p>` : ''}
-      <p style="margin: 0 0 16px;">
-        <a href="${safeActionUrl}" style="color: #0b57d0; text-decoration: underline;">${safeActionText}</a>
+  return buildEmailShell({
+    bodyHtml: `
+      <h2 style="margin:0 0 6px;color:#003049;font-size:20px;">${safeTitle}</h2>
+      <p style="margin:0 0 24px;color:#666;font-size:14px;line-height:1.6;">
+        ${safeIntro}
       </p>
-      ${safeOutro ? `<p style="margin: 0; color: #444;">${safeOutro}</p>` : ''}
-    </div>
-  `;
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #f0dede;border-radius:8px;overflow:hidden;margin-bottom:20px;">
+        <tr style="background:#fff8f8;">
+          <td style="padding:18px 20px;">
+            <p style="margin:0 0 8px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px;">Acción requerida</p>
+            <p style="margin:0 0 14px;font-size:15px;font-weight:700;color:#003049;">${safeActionText}</p>
+            <p style="margin:0 0 18px;font-size:13px;color:#666;line-height:1.6;">Haz clic en el botón para continuar con el proceso.</p>
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center">
+                  <a href="${safeActionUrl}" style="display:inline-block;background:#c1121f;color:#fff;text-decoration:none;padding:14px 24px;border-radius:8px;font-size:14px;font-weight:700;letter-spacing:0.2px;">${safeActionText}</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      ${safeOutro ? `<div style="background:#f0f8ff;border-left:4px solid #003049;border-radius:4px;padding:14px 16px;"><p style="margin:0;font-size:13px;color:#333;line-height:1.6;">${safeOutro}</p></div>` : ''}
+    `,
+  });
 };
 
 const normalizeEmail = (email) => String(email || '').trim().toLowerCase();

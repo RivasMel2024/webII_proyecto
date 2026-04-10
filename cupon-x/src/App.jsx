@@ -19,6 +19,7 @@ import StoreGrid from './components/StoreGrid';
 import Login from './components/Login';
 import Registration from './components/Registration'; 
 import ForgotPassword from './components/ForgotPassword'; 
+import ResetPassword from './components/ResetPassword';
 import VerifyAccount from './components/VerifyAccount';
 import Profile from './components/Profile';
 import CuponCliente from './pages/CuponCliente';
@@ -63,6 +64,7 @@ function App() {
     location.pathname === '/login' || 
     location.pathname === '/register' || 
     location.pathname === '/forgot-password' ||
+    location.pathname === '/reset-password' ||
     location.pathname === '/cart' ||
     location.pathname === '/verify' ||
     location.pathname === '/history'; 
@@ -134,6 +136,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Registration />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify" element={<VerifyAccount />} />
 
             {/* Cliente */}
