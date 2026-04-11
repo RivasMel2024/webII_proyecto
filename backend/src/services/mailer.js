@@ -19,10 +19,6 @@ const parseMailbox = (raw) => {
   return name ? { name, email } : { email };
 };
 
-const formatMailbox = (mailbox) => {
-  if (!mailbox) return '';
-  return mailbox.name ? `${mailbox.name} <${mailbox.email}>` : mailbox.email;
-};
 
 const resolveGmailFrom = () => {
   return parseMailbox(process.env.GMAIL_FROM || process.env.MAIL_FROM);
@@ -69,13 +65,32 @@ const encodeBase64Url = (input) => {
     .replace(/=+$/, '');
 };
 
+const needsMimeEncoding = (value) => /[^\x00-\x7F]/.test(value);
+
+const encodeMimeWord = (value) => {
+  return `=?UTF-8?B?${Buffer.from(value, 'utf8').toString('base64')}?=`;
+};
+
+const formatDisplayName = (name) => {
+  const cleanName = String(name || '').trim().replace(/\r?\n/g, ' ');
+  if (!cleanName) return '';
+  return needsMimeEncoding(cleanName) ? encodeMimeWord(cleanName) : cleanName.replace(/"/g, '\\"');
+};
+
+const formatMailbox = (mailbox) => {
+  if (!mailbox) return '';
+  const displayName = mailbox.name ? formatDisplayName(mailbox.name) : '';
+  return displayName ? `${displayName} <${mailbox.email}>` : mailbox.email;
+};
+
 const buildGmailRawMessage = ({ from, to, subject, text, html }) => {
   const safeSubject = String(subject || '').replace(/\r?\n/g, ' ').trim();
+  const subjectHeader = needsMimeEncoding(safeSubject) ? encodeMimeWord(safeSubject) : safeSubject;
   const toHeader = to.map(formatMailbox).filter(Boolean).join(', ');
   const headers = [
     `From: ${formatMailbox(from)}`,
     `To: ${toHeader}`,
-    `Subject: ${safeSubject}`,
+    `Subject: ${subjectHeader}`,
     'MIME-Version: 1.0',
   ];
 

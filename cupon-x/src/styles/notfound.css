@@ -1,0 +1,70 @@
+.notfound {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 48px 16px;
+  background: radial-gradient(circle at top, rgba(193, 18, 31, 0.08), transparent 60%);
+}
+
+.notfound-card {
+  width: min(560px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 36px 32px;
+  text-align: center;
+  border: 1px solid rgba(0, 48, 73, 0.08);
+  box-shadow: 0 12px 35px rgba(0, 48, 73, 0.08);
+}
+
+.notfound-code {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin: 0 0 8px;
+}
+
+.notfound-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 12px;
+}
+
+.notfound-text {
+  font-size: 1rem;
+  color: #5c677d;
+  margin: 0 0 24px;
+}
+
+.notfound-path {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(193, 18, 31, 0.08);
+  color: #8b2635;
+  font-family: "Courier New", monospace;
+}
+
+.notfound-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.notfound-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notfound-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px rgba(193, 18, 31, 0.28);
+}

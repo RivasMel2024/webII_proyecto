@@ -39,6 +39,7 @@ import OfertaDetailPage from "./pages/OfertaDetailPage";
 import StoreDetailPage from "./pages/StoreDetailPage";
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEmpresaEmpleadosPage from './pages/AdminEmpresaEmpleadosPage';
+import NotFound from './pages/NotFound';
 
 // Importar función de autenticación
 import { isAuthenticated, getAuthUser, getRubros } from './services/api';
@@ -234,6 +235,8 @@ function App() {
                 </RequireRole>
               }
             />
+
+            <Route path="*" element={<NotFound />} />
 
           </Routes>
         </main>
