@@ -47,7 +47,7 @@ export default function StoreDetailPage() {
       ? new Date(o.fecha_limite_uso).toLocaleDateString('es-SV')
       : 'Sin fecha',
     fecha_limite_uso: o.fecha_limite_uso,
-    code: `${empresa?.codigo || 'CUP'}-${o.oferta_id}`,
+    code: 'Oferta disponible',
     imagen_url: o.imagen_url,
     descuento_pct: o.descuento_pct,
   });
