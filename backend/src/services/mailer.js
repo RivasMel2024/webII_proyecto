@@ -1,73 +1,213 @@
-import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
+const GMAIL_OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const GMAIL_SEND_URL = 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send';
 
-const hasSmtpConfig = () => {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const hasGmailOAuthConfig = () => Boolean(
+  process.env.GMAIL_CLIENT_ID &&
+  process.env.GMAIL_CLIENT_SECRET &&
+  process.env.GMAIL_REFRESH_TOKEN
+);
+
+const parseMailbox = (raw) => {
+  const value = String(raw || '').trim();
+  if (!value) return null;
+
+  const match = value.match(/^(.*)<([^>]+)>$/);
+  if (!match) return { email: value };
+
+  const name = match[1].trim().replace(/^"|"$/g, '');
+  const email = match[2].trim();
+  return name ? { name, email } : { email };
 };
 
-const hasResendConfig = () => {
-  return Boolean(process.env.RESEND_API_KEY);
+const formatMailbox = (mailbox) => {
+  if (!mailbox) return '';
+  return mailbox.name ? `${mailbox.name} <${mailbox.email}>` : mailbox.email;
 };
 
-export const sendEmail = async ({ to, subject, html, text }) => {
-  // Prioridad: Resend > SMTP > Fallback
-  
-  if (hasResendConfig()) {
-    try {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const result = await resend.emails.send({
-        from: process.env.MAIL_FROM || 'CuponX <onboarding@resend.dev>',
-        to,
-        subject,
-        html,
-        text,
-      });
-      
-      if (result.error) {
-        throw new Error(result.error.message);
+const resolveGmailFrom = () => {
+  return parseMailbox(process.env.GMAIL_FROM || process.env.MAIL_FROM);
+};
+
+const normalizeRecipients = (to) => {
+  if (!to) return [];
+
+  const rawList = Array.isArray(to) ? to : [to];
+  const normalized = [];
+
+  rawList.forEach((entry) => {
+    if (!entry) return;
+    if (typeof entry === 'string') {
+      entry
+        .split(',')
+        .map((email) => email.trim())
+        .filter(Boolean)
+        .forEach((email) => {
+          const mailbox = parseMailbox(email);
+          if (mailbox?.email) normalized.push(mailbox);
+        });
+      return;
+    }
+    if (typeof entry === 'object') {
+      const email = String(entry.email || '').trim();
+      const name = String(entry.name || '').trim();
+      if (email) {
+        normalized.push(name ? { email, name } : { email });
       }
-      
-      console.log('[MAIL:RESEND]', { to, subject, id: result.data?.id });
-      return { ok: true, mode: 'resend', messageId: result.data?.id };
-    } catch (error) {
-      console.error('[MAIL:RESEND:ERROR]', {
-        to,
-        subject,
-        message: error.message,
-      });
-      throw error;
+      return;
+    }
+    normalized.push({ email: String(entry).trim() });
+  });
+
+  return normalized;
+};
+
+const encodeBase64Url = (input) => {
+  return Buffer.from(input)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+};
+
+const buildGmailRawMessage = ({ from, to, subject, text, html }) => {
+  const safeSubject = String(subject || '').replace(/\r?\n/g, ' ').trim();
+  const toHeader = to.map(formatMailbox).filter(Boolean).join(', ');
+  const headers = [
+    `From: ${formatMailbox(from)}`,
+    `To: ${toHeader}`,
+    `Subject: ${safeSubject}`,
+    'MIME-Version: 1.0',
+  ];
+
+  const safeText = text ? String(text) : '';
+  const safeHtml = html ? String(html) : '';
+
+  if (safeHtml && safeText) {
+    const boundary = `----=_CuponX_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    headers.push(`Content-Type: multipart/alternative; boundary="${boundary}"`);
+    return [
+      ...headers,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/plain; charset="UTF-8"',
+      'Content-Transfer-Encoding: 7bit',
+      '',
+      safeText,
+      `--${boundary}`,
+      'Content-Type: text/html; charset="UTF-8"',
+      'Content-Transfer-Encoding: 7bit',
+      '',
+      safeHtml,
+      `--${boundary}--`,
+      '',
+    ].join('\r\n');
+  }
+
+  if (safeHtml) {
+    headers.push('Content-Type: text/html; charset="UTF-8"');
+    headers.push('Content-Transfer-Encoding: 7bit');
+    return [...headers, '', safeHtml].join('\r\n');
+  }
+
+  headers.push('Content-Type: text/plain; charset="UTF-8"');
+  headers.push('Content-Transfer-Encoding: 7bit');
+  return [...headers, '', safeText].join('\r\n');
+};
+
+const getGmailAccessToken = async () => {
+  const params = new URLSearchParams({
+    client_id: process.env.GMAIL_CLIENT_ID,
+    client_secret: process.env.GMAIL_CLIENT_SECRET,
+    refresh_token: process.env.GMAIL_REFRESH_TOKEN,
+    grant_type: 'refresh_token',
+  });
+
+  const response = await fetch(GMAIL_OAUTH_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+
+  const responseText = await response.text();
+  let responseJson = null;
+  if (responseText) {
+    try {
+      responseJson = JSON.parse(responseText);
+    } catch {
+      responseJson = null;
     }
   }
 
-  if (hasSmtpConfig()) {
-    try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        secure: Number(process.env.SMTP_PORT) === 465,
-        family: 4,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
+  if (!response.ok) {
+    const apiMessage = responseJson?.error_description || responseJson?.error || responseText;
+    throw new Error(`Gmail OAuth error (${response.status}): ${apiMessage || response.statusText}`);
+  }
 
-      const info = await transporter.sendMail({
-        from: process.env.MAIL_FROM || process.env.SMTP_USER,
-        to,
+  if (!responseJson?.access_token) {
+    throw new Error('No se recibió access_token de Gmail OAuth.');
+  }
+
+  return responseJson.access_token;
+};
+
+export const sendEmail = async ({ to, subject, html, text }) => {
+  // Prioridad: Gmail OAuth (API) > Fallback
+
+  if (hasGmailOAuthConfig()) {
+    try {
+      const from = resolveGmailFrom();
+      if (!from?.email) {
+        throw new Error('Configura GMAIL_FROM o MAIL_FROM con el correo remitente.');
+      }
+
+      const recipients = normalizeRecipients(to);
+      if (!recipients.length) {
+        throw new Error('Destinatario de correo requerido.');
+      }
+
+      const rawMessage = buildGmailRawMessage({
+        from,
+        to: recipients,
         subject,
         text,
         html,
       });
 
-      console.log('[MAIL:SMTP]', { to, subject, messageId: info.messageId });
-      return { ok: true, mode: 'smtp', messageId: info.messageId };
+      const accessToken = await getGmailAccessToken();
+      const response = await fetch(GMAIL_SEND_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ raw: encodeBase64Url(rawMessage) }),
+      });
+
+      const responseText = await response.text();
+      let responseJson = null;
+      if (responseText) {
+        try {
+          responseJson = JSON.parse(responseText);
+        } catch {
+          responseJson = null;
+        }
+      }
+
+      if (!response.ok) {
+        const apiMessage = responseJson?.error?.message || responseJson?.message || responseText;
+        throw new Error(`Gmail API error (${response.status}): ${apiMessage || response.statusText}`);
+      }
+
+      const messageId = responseJson?.id;
+      console.log('[MAIL:GMAIL]', { to, subject, messageId });
+      return { ok: true, mode: 'gmail', messageId };
     } catch (error) {
-      console.error('[MAIL:SMTP:ERROR]', {
+      console.error('[MAIL:GMAIL:ERROR]', {
         to,
         subject,
         message: error.message,
-        code: error.code,
       });
       throw error;
     }
